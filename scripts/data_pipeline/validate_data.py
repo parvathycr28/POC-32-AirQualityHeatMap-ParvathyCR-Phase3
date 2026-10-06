@@ -1,5 +1,7 @@
 from pathlib import Path
+import hashlib
 import json
+import math
 import sys
 
 import pandas as pd
@@ -8,15 +10,34 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 
 DATA_DIR = ROOT / "data"
-CANONICAL = DATA_DIR / "canonical" / "intelligence_data.csv"
+
+CANONICAL = (
+    DATA_DIR
+    / "canonical"
+    / "intelligence_data.csv"
+)
+
+PUBLISHED = (
+    DATA_DIR
+    / "published"
+    / "intelligence_data.json"
+)
+
 MANIFEST = DATA_DIR / "manifest.json"
 SCHEMA = DATA_DIR / "schema.json"
-REPORT = DATA_DIR / "quality" / "validation_report.json"
+
+REPORT = (
+    DATA_DIR
+    / "quality"
+    / "validation_report.json"
+)
 
 MAX_DATA_MB = 10
 MAX_FILE_MB = 5
 MAX_ROWS = 10_000
 MAX_COLS = 50
+
+EXPECTED_VERSION = "phase3-v1.1"
 
 MANDATORY_COLUMNS = [
     "record_id",
@@ -46,6 +67,47 @@ def add_error(errors, message):
     errors.append(message)
 
 
+def sha256_file(path):
+    digest = hashlib.sha256()
+
+    with open(path, "rb") as file:
+        for chunk in iter(
+            lambda: file.read(1024 * 1024),
+            b"",
+        ):
+            digest.update(chunk)
+
+    return digest.hexdigest()
+
+
+def reject_json_constants(value):
+    raise ValueError(
+        f"Invalid JSON constant detected: {value}"
+    )
+
+
+def clean_value(value):
+    if pd.isna(value):
+        return None
+
+    if hasattr(value, "item"):
+        value = value.item()
+
+    return value
+
+
+def canonical_records(df):
+    return [
+        {
+            key: clean_value(value)
+            for key, value in row.items()
+        }
+        for row in df.to_dict(
+            orient="records"
+        )
+    ]
+
+
 def main():
     errors = []
     checks = []
@@ -56,15 +118,20 @@ def main():
         SCHEMA,
         DATA_DIR / "source-sample" / "source_sample.csv",
         CANONICAL,
+        PUBLISHED,
+        DATA_DIR / "quality" / "sampling_report.md",
     ]
 
     for path in required_paths:
         if path.exists():
-            checks.append(f"Present: {path.relative_to(ROOT)}")
+            checks.append(
+                f"Present: {path.relative_to(ROOT)}"
+            )
         else:
             add_error(
                 errors,
-                f"Missing required path: {path.relative_to(ROOT)}",
+                f"Missing required path: "
+                f"{path.relative_to(ROOT)}",
             )
 
     total_bytes = 0
@@ -78,29 +145,35 @@ def main():
 
     total_mb = total_bytes / 1024 / 1024
 
+    checks.append(
+        f"Total /data size: {total_mb:.3f} MB"
+    )
+
     if total_mb > MAX_DATA_MB:
         add_error(
             errors,
             f"Total /data size exceeds {MAX_DATA_MB} MB",
         )
 
-    checks.append(
-        f"Total /data size: {total_mb:.3f} MB"
-    )
-
     df = None
 
     if CANONICAL.exists():
-        canonical_mb = CANONICAL.stat().st_size / 1024 / 1024
+        canonical_mb = (
+            CANONICAL.stat().st_size
+            / 1024
+            / 1024
+        )
 
         checks.append(
-            f"Canonical CSV size: {canonical_mb:.3f} MB"
+            f"Canonical CSV size: "
+            f"{canonical_mb:.3f} MB"
         )
 
         if canonical_mb > MAX_FILE_MB:
             add_error(
                 errors,
-                f"Canonical CSV exceeds {MAX_FILE_MB} MB",
+                f"Canonical CSV exceeds "
+                f"{MAX_FILE_MB} MB",
             )
 
         try:
@@ -115,28 +188,38 @@ def main():
         row_count = len(df)
         column_count = len(df.columns)
 
-        checks.append(f"Canonical rows: {row_count}")
-        checks.append(f"Canonical columns: {column_count}")
+        checks.append(
+            f"Canonical rows: {row_count}"
+        )
+
+        checks.append(
+            f"Canonical columns: {column_count}"
+        )
 
         if row_count > MAX_ROWS:
             add_error(
                 errors,
-                f"Canonical row count exceeds {MAX_ROWS}",
+                f"Canonical row count exceeds "
+                f"{MAX_ROWS}",
             )
 
         if column_count > MAX_COLS:
             add_error(
                 errors,
-                f"Canonical column count exceeds {MAX_COLS}",
+                f"Canonical column count exceeds "
+                f"{MAX_COLS}",
             )
 
         if list(df.columns) != MANDATORY_COLUMNS:
             add_error(
                 errors,
-                "Canonical columns do not exactly match the required order",
+                "Canonical columns do not exactly "
+                "match required order",
             )
         else:
-            checks.append("Canonical column order: PASS")
+            checks.append(
+                "Canonical column order: PASS"
+            )
 
         if df["record_id"].isna().any():
             add_error(
@@ -149,8 +232,10 @@ def main():
                 errors,
                 "record_id contains duplicate values",
             )
-
-        checks.append("record_id uniqueness: PASS")
+        else:
+            checks.append(
+                "record_id uniqueness: PASS"
+            )
 
         for required in [
             "record_type",
@@ -164,7 +249,18 @@ def main():
                     f"{required} contains missing values",
                 )
 
-        checks.append("Required metadata fields: PASS")
+        if set(
+            df["data_version"]
+            .astype(str)
+        ) != {EXPECTED_VERSION}:
+            add_error(
+                errors,
+                "Canonical data_version is incorrect",
+            )
+        else:
+            checks.append(
+                "Canonical data version: PASS"
+            )
 
         parsed_dates = pd.to_datetime(
             df["observed_at"],
@@ -175,10 +271,13 @@ def main():
         if parsed_dates.isna().any():
             add_error(
                 errors,
-                "observed_at contains unparseable dates",
+                "observed_at contains "
+                "unparseable dates",
             )
         else:
-            checks.append("Date parsing: PASS")
+            checks.append(
+                "Date parsing: PASS"
+            )
 
         numeric_columns = [
             "metric_value",
@@ -200,12 +299,59 @@ def main():
             if invalid.any():
                 add_error(
                     errors,
-                    f"{column} contains non-numeric values",
+                    f"{column} contains "
+                    f"non-numeric values",
                 )
 
-        checks.append("Numeric field validation: PASS")
+        latitude = pd.to_numeric(
+            df["latitude"],
+            errors="coerce",
+        )
 
-        valid_boolean_values = {"true", "false"}
+        longitude = pd.to_numeric(
+            df["longitude"],
+            errors="coerce",
+        )
+
+        metric_values = pd.to_numeric(
+            df["metric_value"],
+            errors="coerce",
+        )
+
+        if (
+            (latitude < -90)
+            | (latitude > 90)
+        ).any():
+            add_error(
+                errors,
+                "latitude contains values outside "
+                "[-90, 90]",
+            )
+
+        if (
+            (longitude < -180)
+            | (longitude > 180)
+        ).any():
+            add_error(
+                errors,
+                "longitude contains values outside "
+                "[-180, 180]",
+            )
+
+        if (metric_values < 0).any():
+            add_error(
+                errors,
+                "metric_value contains negative values",
+            )
+
+        checks.append(
+            "Numeric field and range validation: PASS"
+        )
+
+        valid_boolean_values = {
+            "true",
+            "false",
+        }
 
         boolean_values = (
             df["is_synthetic"]
@@ -214,17 +360,47 @@ def main():
             .str.lower()
         )
 
-        invalid_boolean = ~boolean_values.isin(
+        if not boolean_values.isin(
             valid_boolean_values
-        )
-
-        if invalid_boolean.any():
+        ).all():
             add_error(
                 errors,
-                "is_synthetic must contain only true or false",
+                "is_synthetic must contain "
+                "only true or false",
             )
         else:
-            checks.append("Boolean validation: PASS")
+            checks.append(
+                "Boolean validation: PASS"
+            )
+
+        allowed_pollutants = {
+            "pm2.5",
+            "pm10",
+            "no2",
+            "o3",
+        }
+
+        if not df["subcategory"].isin(
+            allowed_pollutants
+        ).all():
+            add_error(
+                errors,
+                "subcategory contains "
+                "unsupported pollutant values",
+            )
+
+        if not df["metric_name"].isin(
+            allowed_pollutants
+        ).all():
+            add_error(
+                errors,
+                "metric_name contains "
+                "unsupported pollutant values",
+            )
+
+        checks.append(
+            "Allowed pollutant values: PASS"
+        )
 
     manifest_data = None
 
@@ -236,6 +412,7 @@ def main():
                 encoding="utf-8",
             ) as file:
                 manifest_data = json.load(file)
+
         except Exception as error:
             add_error(
                 errors,
@@ -243,26 +420,20 @@ def main():
             )
 
     if manifest_data and df is not None:
+
         manifest_version = manifest_data.get(
             "dataset_version"
         )
 
-        actual_versions = set(
-            df["data_version"]
-            .dropna()
-            .astype(str)
-        )
-
-        if actual_versions != {manifest_version}:
+        if manifest_version != EXPECTED_VERSION:
             add_error(
                 errors,
-                (
-                    "Manifest dataset_version does not "
-                    "match canonical data_version"
-                ),
+                "Manifest dataset version is incorrect",
             )
         else:
-            checks.append("Manifest/data version consistency: PASS")
+            checks.append(
+                "Manifest version: PASS"
+            )
 
         expected_records = (
             manifest_data
@@ -273,11 +444,12 @@ def main():
         if expected_records != len(df):
             add_error(
                 errors,
-                "Manifest canonical record count does not match CSV",
+                "Manifest record count does not "
+                "match canonical CSV",
             )
         else:
             checks.append(
-                "Manifest record count consistency: PASS"
+                "Manifest record count: PASS"
             )
 
         expected_columns = (
@@ -289,25 +461,150 @@ def main():
         if expected_columns != len(df.columns):
             add_error(
                 errors,
-                "Manifest canonical column count does not match CSV",
+                "Manifest column count does not "
+                "match canonical CSV",
             )
         else:
             checks.append(
-                "Manifest column count consistency: PASS"
+                "Manifest column count: PASS"
             )
 
-    status = "PASS" if not errors else "FAIL"
+    published_data = None
+
+    if PUBLISHED.exists():
+
+        try:
+            with open(
+                PUBLISHED,
+                "r",
+                encoding="utf-8",
+            ) as file:
+                published_data = json.load(
+                    file,
+                    parse_constant=reject_json_constants,
+                )
+
+            checks.append(
+                "Published JSON syntax: PASS"
+            )
+
+        except Exception as error:
+            add_error(
+                errors,
+                f"Published JSON is invalid: {error}",
+            )
+
+    if published_data is not None and df is not None:
+
+        if not isinstance(
+            published_data.get("records"),
+            list,
+        ):
+            add_error(
+                errors,
+                "Published JSON records is not a list",
+            )
+        else:
+            published_records = (
+                published_data["records"]
+            )
+
+            if len(published_records) != len(df):
+                add_error(
+                    errors,
+                    "Published JSON record count does "
+                    "not match canonical CSV",
+                )
+            else:
+                checks.append(
+                    "Published record count: PASS"
+                )
+
+            if (
+                published_data.get("column_count")
+                != len(df.columns)
+            ):
+                add_error(
+                    errors,
+                    "Published JSON column count does "
+                    "not match canonical CSV",
+                )
+            else:
+                checks.append(
+                    "Published column count: PASS"
+                )
+
+            if (
+                published_data.get("data_version")
+                != EXPECTED_VERSION
+            ):
+                add_error(
+                    errors,
+                    "Published JSON data version "
+                    "is stale or incorrect",
+                )
+            else:
+                checks.append(
+                    "Published data version: PASS"
+                )
+
+            canonical_hash = sha256_file(
+                CANONICAL
+            )
+
+            published_hash = (
+                published_data.get(
+                    "canonical_sha256"
+                )
+            )
+
+            if published_hash != canonical_hash:
+                add_error(
+                    errors,
+                    "Published JSON is stale: "
+                    "canonical_sha256 does not "
+                    "match current canonical CSV",
+                )
+            else:
+                checks.append(
+                    "Published/current canonical "
+                    "hash: PASS"
+                )
+
+            expected_records = canonical_records(
+                df
+            )
+
+            if published_records != expected_records:
+                add_error(
+                    errors,
+                    "Published JSON records do not "
+                    "match the current canonical CSV",
+                )
+            else:
+                checks.append(
+                    "Published/canonical record "
+                    "content: PASS"
+                )
+
+    status = (
+        "PASS"
+        if not errors
+        else "FAIL"
+    )
 
     result = {
         "status": status,
-        "dataset": "Infocreon Aether Pulse Canonical Intelligence Dataset",
-        "data_version": (
-            manifest_data.get("dataset_version")
-            if manifest_data
-            else None
+        "dataset": (
+            "Infocreon Aether Pulse "
+            "Canonical Intelligence Dataset"
         ),
+        "data_version": EXPECTED_VERSION,
         "canonical_file": str(
             CANONICAL.relative_to(ROOT)
+        ),
+        "published_file": str(
+            PUBLISHED.relative_to(ROOT)
         ),
         "canonical_rows": (
             len(df)
@@ -318,6 +615,9 @@ def main():
             len(df.columns)
             if df is not None
             else None
+        ),
+        "published_json_valid": (
+            published_data is not None
         ),
         "total_data_size_mb": round(
             total_mb,
@@ -341,22 +641,34 @@ def main():
     )
 
     print("=" * 60)
-    print("INFOCREON PHASE 3 — CANONICAL DATA VALIDATION")
+    print(
+        "INFOCREON PHASE 3 — "
+        "CANONICAL DATA VALIDATION"
+    )
     print("=" * 60)
     print(f"Status: {status}")
-    print(f"Rows: {result['canonical_rows']}")
-    print(f"Columns: {result['canonical_columns']}")
-    print(f"Data size: {total_mb:.3f} MB")
+    print(
+        f"Rows: {result['canonical_rows']}"
+    )
+    print(
+        f"Columns: {result['canonical_columns']}"
+    )
+    print(
+        f"Data size: {total_mb:.3f} MB"
+    )
     print(f"Report: {REPORT}")
 
     if errors:
         print("\nVALIDATION ERRORS:")
+
         for error in errors:
             print(f"- {error}")
 
         sys.exit(1)
 
-    print("\nCanonical data validation passed.")
+    print(
+        "\nCanonical data validation passed."
+    )
 
 
 if __name__ == "__main__":

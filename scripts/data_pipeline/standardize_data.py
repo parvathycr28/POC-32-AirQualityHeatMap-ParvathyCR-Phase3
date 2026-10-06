@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[2]
 INPUT_FILE = ROOT / "data" / "source-sample" / "source_sample.csv"
 OUTPUT_FILE = ROOT / "data" / "canonical" / "intelligence_data.csv"
 
-DATA_VERSION = "phase3-v1.0"
+DATA_VERSION = "phase3-v1.1"
 
 
 CANONICAL_COLUMNS = [

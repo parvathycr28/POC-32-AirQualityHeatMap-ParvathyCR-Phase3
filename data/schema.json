@@ -1,127 +1,299 @@
 {
   "schema_name": "Infocreon Canonical Intelligence Data Schema",
-  "schema_version": "1.0",
-  "data_version": "phase3-v1.0",
+  "schema_version": "1.1",
+  "data_version": "phase3-v1.1",
+  "description": "Canonical 20-column schema for the Aether Pulse Phase 3 air-quality intelligence dataset.",
   "columns": [
     {
       "name": "record_id",
       "type": "string",
       "required": true,
-      "description": "Unique canonical record identifier"
+      "nullable": false,
+      "description": "Unique canonical record identifier.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Generated deterministically from canonical row order."
+      },
+      "constraints": {
+        "unique": true
+      }
     },
     {
       "name": "record_type",
       "type": "string",
       "required": true,
-      "description": "Type of intelligence record"
+      "nullable": false,
+      "description": "Type of intelligence record.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Assigned as measurement for air-quality observations."
+      },
+      "allowed_values": [
+        "measurement"
+      ]
     },
     {
       "name": "observed_at",
       "type": "datetime",
       "required": false,
-      "description": "Observation timestamp in UTC"
+      "nullable": true,
+      "description": "Observation timestamp in UTC.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "timestamp",
+        "derivation": "Parsed and normalized to UTC ISO-8601 format."
+      }
     },
     {
       "name": "entity_id",
       "type": "string",
       "required": false,
-      "description": "Normalized entity identifier"
+      "nullable": true,
+      "description": "Normalized city/entity identifier.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": "city",
+        "derivation": "Lowercase normalized city identifier."
+      }
     },
     {
       "name": "related_entity_id",
       "type": "string",
       "required": false,
-      "description": "Related entity identifier when applicable"
+      "nullable": true,
+      "description": "Related entity identifier when applicable.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Null when no related entity exists."
+      }
     },
     {
       "name": "entity_name",
       "type": "string",
       "required": false,
-      "description": "Human-readable entity name"
+      "nullable": true,
+      "description": "Human-readable city/entity name.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "city",
+        "derivation": "Trimmed source city value."
+      }
     },
     {
       "name": "category",
       "type": "string",
       "required": false,
-      "description": "Top-level intelligence category"
+      "nullable": true,
+      "description": "Top-level intelligence category.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Assigned as air_quality."
+      },
+      "allowed_values": [
+        "air_quality"
+      ]
     },
     {
       "name": "subcategory",
       "type": "string",
       "required": false,
-      "description": "More specific category"
+      "nullable": true,
+      "description": "Pollutant-specific subcategory.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "pollutant",
+        "derivation": "Normalized pollutant name."
+      },
+      "allowed_values": [
+        "pm2.5",
+        "pm10",
+        "no2",
+        "o3"
+      ]
     },
     {
       "name": "status",
       "type": "string",
       "required": false,
-      "description": "Record status"
+      "nullable": true,
+      "description": "Observation status.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Assigned as observed."
+      },
+      "allowed_values": [
+        "observed"
+      ]
     },
     {
       "name": "stage",
       "type": "string",
       "required": false,
-      "description": "Processing or observation stage"
+      "nullable": true,
+      "description": "Observation processing stage.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Assigned as observation."
+      },
+      "allowed_values": [
+        "observation"
+      ]
     },
     {
       "name": "metric_name",
       "type": "string",
       "required": false,
-      "description": "Name of measured metric"
+      "nullable": true,
+      "description": "Measured pollutant metric.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "pollutant",
+        "derivation": "Normalized pollutant name."
+      },
+      "allowed_values": [
+        "pm2.5",
+        "pm10",
+        "no2",
+        "o3"
+      ]
     },
     {
       "name": "metric_value",
       "type": "number",
       "required": false,
-      "description": "Numeric metric value"
+      "nullable": true,
+      "description": "Measured pollutant value.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "value",
+        "derivation": "Converted to numeric value."
+      },
+      "constraints": {
+        "minimum": 0
+      }
     },
     {
       "name": "metric_unit",
       "type": "string",
       "required": false,
-      "description": "Unit of metric value"
+      "nullable": true,
+      "description": "Unit of the measured pollutant value.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "unit",
+        "derivation": "Preserved from source sample."
+      },
+      "allowed_values": [
+        "µg/m³"
+      ]
     },
     {
       "name": "text_value",
       "type": "string",
       "required": false,
-      "description": "Associated textual value"
+      "nullable": true,
+      "description": "Associated country or textual context.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "country",
+        "derivation": "Preserved as textual context."
+      }
     },
     {
       "name": "latitude",
       "type": "number",
       "required": false,
-      "description": "Latitude coordinate"
+      "nullable": true,
+      "description": "Latitude coordinate in WGS84.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "latitude",
+        "derivation": "Converted to numeric WGS84 coordinate."
+      },
+      "constraints": {
+        "minimum": -90,
+        "maximum": 90
+      }
     },
     {
       "name": "longitude",
       "type": "number",
       "required": false,
-      "description": "Longitude coordinate"
+      "nullable": true,
+      "description": "Longitude coordinate in WGS84.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "longitude",
+        "derivation": "Converted to numeric WGS84 coordinate."
+      },
+      "constraints": {
+        "minimum": -180,
+        "maximum": 180
+      }
     },
     {
       "name": "source_name",
       "type": "string",
       "required": true,
-      "description": "Origin of the source record"
+      "nullable": false,
+      "description": "Origin or provenance label for the source record.",
+      "provenance": {
+        "kind": "source",
+        "source_field": "source",
+        "derivation": "Explicitly identifies the controlled synthetic OpenAQ-shaped source."
+      },
+      "allowed_values": [
+        "Synthetic OpenAQ-shaped sample"
+      ]
     },
     {
       "name": "source_record_id",
       "type": "string",
       "required": false,
-      "description": "Identifier from the source dataset"
+      "nullable": true,
+      "description": "Stable identifier assigned to the source-level observation.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Generated from city, pollutant and row sequence."
+      }
     },
     {
       "name": "is_synthetic",
       "type": "boolean",
       "required": true,
-      "description": "Whether the record is synthetic, fallback, or mock data"
+      "nullable": false,
+      "description": "Whether the record is synthetic.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "True because the controlled Phase 3 source is synthetic."
+      },
+      "allowed_values": [
+        true,
+        false
+      ]
     },
     {
       "name": "data_version",
       "type": "string",
       "required": true,
-      "description": "Canonical dataset version"
+      "nullable": false,
+      "description": "Canonical dataset version.",
+      "provenance": {
+        "kind": "derived",
+        "source_field": null,
+        "derivation": "Assigned by the Phase 3 canonical pipeline."
+      },
+      "allowed_values": [
+        "phase3-v1.1"
+      ]
     }
   ]
 }

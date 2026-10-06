@@ -1,26 +1,30 @@
 {
   "dataset_name": "Infocreon Aether Pulse Canonical Intelligence Dataset",
-  "dataset_version": "phase3-v1.0",
+  "dataset_version": "phase3-v1.1",
   "project": "PoC 32 - Aether Pulse Air Quality Heatmap",
   "phase": "Phase 3",
   "purpose": "Canonical data foundation for downstream analysis and feature engineering",
   "source": {
-    "source_name": "Fallback",
-    "source_type": "Application fallback/mock dataset",
+    "source_name": "Synthetic OpenAQ-shaped sample",
+    "source_type": "Synthetic",
     "source_status": "synthetic",
-    "original_source_context": "Air-quality dashboard fallback records"
+    "original_source_context": "Controlled reproducible air-quality sample shaped around the public OpenAQ measurement structure.",
+    "source_reference": "OpenAQ API v3 Latest and Measurements resources"
   },
   "sampling": {
-    "method": "Coverage-aware sampling by city and pollutant",
+    "method": "Coverage-aware random sampling by city and pollutant, retaining three time points per city/pollutant group",
     "random_seed": 42,
-    "input_records": 3,
-    "sample_records": 3
+    "input_records": 192,
+    "sample_records": 96,
+    "cities": 8,
+    "pollutants": 4,
+    "time_points_per_group": 3
   },
   "canonical": {
     "file": "canonical/intelligence_data.csv",
-    "records": 3,
+    "records": 96,
     "columns": 20,
-    "data_version": "phase3-v1.0"
+    "data_version": "phase3-v1.1"
   },
   "published": {
     "file": "published/intelligence_data.json",
@@ -28,6 +32,7 @@
   },
   "synthetic_data": {
     "is_synthetic": true,
-    "reason": "Current Phase 3 source is the application's fallback/mock dataset rather than a live source export"
+    "reason": "A controlled reproducible synthetic dataset is used instead of depending on a live API during canonical package generation.",
+    "seed": 42
   }
 }
