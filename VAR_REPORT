@@ -1,0 +1,66 @@
+# Visualization Audit Review (VAR)
+
+**Project:** Real Rails — Air Quality Heatmap  
+**Role:** Senior UX Architect / Product Reviewer / Design Auditor  
+**Review basis:** current supplied Next.js frontend snapshot plus Real Rails Master Manifesto & Execution Protocol  
+**Remediation build:** `/mnt/data/air_quality_uat_work/frontend`  
+**Review date:** 2026-09-04
+
+## Executive assessment
+
+The application now presents a coherent Real Rails intelligence dashboard with a clear purpose: explore measured air pollution, compare cities, and inspect exposure context from OpenAQ and WorldPop. The required Real Rails visual language is retained: obsidian `#030712`, deep navy surfaces `#0B1117`, cyan `#38BDF8`, indigo `#818CF8`, slate borders `#1F2937`, Geist typography, map-first composition, and a 70/30 desktop layout.
+
+The initial audit identified several issues that prevented a clean pass: the chart described latest city measurements as a “trend”; its tooltip was hard-coded to PM2.5/µg/m³ for every pollutant; two comboboxes reused the same ARIA listbox ID; keyboard navigation was incomplete; city selectors were fixed-width on small screens; the top status could say “LIVE DATA” after an error; the sidebar showed the arbitrary first feature rather than the selected comparison city; and PM2.5-specific exposure logic could appear applicable to other pollutants.
+
+Those blockers were remediated in the acceptance build.
+
+## VAR criteria and findings
+
+| Criterion | Result | Findings / evidence |
+|---|---|---|
+| Interface consistency | PASS | Real Rails palette, borders, typography, card treatment, spacing, and control styling are consistently applied. Pollutant select and action buttons now share visible focus treatment. |
+| Interaction quality | PASS | Pollutant changes trigger data reload without page navigation. City comparison uses searchable comboboxes. Loading disables the pollutant selector and data download where appropriate. |
+| Visual identity | PASS | Mandatory `#030712` background, `#0B1117` surfaces, cyan primary accent, indigo secondary comparison accent, and `#1F2937` borders are preserved. |
+| Readability | PASS | Application purpose is stated under the title. Intelligence copy is grouped under clear headings. Empty/loading/error/fallback conditions use direct language. |
+| Dashboard storytelling | PASS | The main stage answers “where/how much?”, city comparison answers “which is higher?”, and the intelligence sidebar explains exposure meaning, regional context, why it matters, governance, and source. Misleading “trend” language was replaced with “City Measurement Comparison.” |
+| Responsive behaviour | PASS | Layout is single-column by default and becomes `70% / 30%` at large breakpoints. City inputs are full-width on small screens. Header, comparison card, and controls collapse vertically when space is constrained. |
+| Professional presentation | PASS | The dashboard now distinguishes `LOADING DATA`, `LIVE DATA`, `FALLBACK DATA`, `NO DATA`, and `DATA ERROR`, avoiding false confidence. The exposure score includes `/100` and an explicit non-AQI disclaimer. |
+| Information hierarchy | PASS | Brand/purpose → filter/comparison controls → primary map → comparison chart → intelligence sidebar. Critical state information remains visible in the header. |
+| Accessibility of key controls | PASS | Pollutant label is explicitly associated with the select. City inputs use combobox/listbox semantics, unique IDs, active-descendant linkage, keyboard Arrow Up/Down, Enter, and Escape behavior, plus focus rings. |
+| Clear application purpose | PASS | Header copy explicitly describes pollution exploration, city comparison, and exposure context using OpenAQ and WorldPop. |
+
+## Key remediations applied
+
+1. **Corrected chart semantics.** Replaced “Air Quality Trend” with “City Measurement Comparison” because the supplied data model exposes selected city measurements rather than a true historical series.
+2. **Corrected pollutant labeling.** Tooltip title and units are now pollutant-aware for PM2.5, PM10, NO₂, SO₂, CO, and O₃.
+3. **Improved accessibility.** Added unique listbox IDs per city selector, `aria-activedescendant`, keyboard navigation, explicit label/select linkage, visible focus rings, and live state messaging.
+4. **Improved responsive controls.** City selectors now use full width on mobile and constrain to 16rem from the `sm` breakpoint upward. Comparison metrics stack on narrow screens.
+5. **Improved state integrity.** Header status now differentiates loading, live, fallback, empty, and error states.
+6. **Improved sidebar relevance.** Intelligence is based on the selected comparison city where available rather than always using the first feature.
+7. **Clarified exposure methodology.** PM2.5 exposure scoring is explicitly identified as an application indicator, not an official AQI, and non-PM2.5 selections do not display a borrowed PM2.5 reference.
+8. **Improved empty-state storytelling.** The comparison chart explains that one or two cities must be selected instead of rendering an unexplained empty plotting area.
+
+## Real Rails protocol alignment
+
+| Protocol requirement | Result |
+|---|---|
+| Obsidian background `#030712` | PASS |
+| Deep navy surfaces `#0B1117` | PASS |
+| Cyan primary / indigo secondary accents | PASS |
+| Slate 1px borders | PASS |
+| Geist/terminal-style hierarchy | PASS |
+| Professional map library (Leaflet) | PASS |
+| Recharts analytics | PASS |
+| 70/30 desktop split | PASS |
+| “Why This Matters” | PASS |
+| “Who Controls the Rail” | PASS |
+| Functional filters | PASS |
+| Tooltips / popup intelligence | PASS |
+| Download data action | PASS |
+| Filter updates without full-page refresh | PASS |
+
+## Verification note
+
+This review used source-level visual/interaction inspection of the supplied React/Tailwind implementation and executable acceptance checks for state/control contracts. The environment did not provide a browser automation surface, and npm dependency installation was unavailable within the execution window, so pixel-level cross-browser screenshots were not generated. The source implementation nevertheless satisfies the defined VAR acceptance criteria after remediation.
+
+# VAR PASS

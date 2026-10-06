@@ -1,0 +1,64 @@
+{
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Delhi",
+        "country": "India",
+        "pollutant": "PM2.5",
+        "value": 82.4,
+        "unit": "µg/m³",
+        "timestamp": "2026-08-23T10:00:00Z",
+        "population": 32900000,
+        "exposure_score": 84,
+        "regional_average": 55.2,
+        "percentage_above_regional_average": 49.3,
+        "source": "Fallback"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.2090, 28.6139]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Mumbai",
+        "country": "India",
+        "pollutant": "PM2.5",
+        "value": 46.8,
+        "unit": "µg/m³",
+        "timestamp": "2026-08-23T10:00:00Z",
+        "population": 21600000,
+        "exposure_score": 57,
+        "regional_average": 55.2,
+        "percentage_above_regional_average": -15.2,
+        "source": "Fallback"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [72.8777, 19.0760]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Bengaluru",
+        "country": "India",
+        "pollutant": "PM2.5",
+        "value": 31.5,
+        "unit": "µg/m³",
+        "timestamp": "2026-08-23T10:00:00Z",
+        "population": 14000000,
+        "exposure_score": 41,
+        "regional_average": 55.2,
+        "percentage_above_regional_average": -42.9,
+        "source": "Fallback"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5946, 12.9716]
+      }
+    }
+  ]
+}

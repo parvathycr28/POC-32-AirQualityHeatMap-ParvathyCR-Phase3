@@ -1,0 +1,87 @@
+# Functional User Acceptance Testing (UAT) Checklist
+
+**Project:** Real Rails — Air Quality Heatmap  
+**Acceptance build:** `/mnt/data/air_quality_uat_work`  
+**Execution date:** 2026-09-04  
+**Automated acceptance harness:** `run_acceptance_checks.py`  
+**Automated result:** **24 PASS / 0 FAIL**
+
+## Test scope
+
+UAT covered filters, tooltips/popups, loading states, user interactions, navigation/state transitions, responsiveness contracts, edge cases, error handling, data correctness, user workflows, frontend-to-backend communication, browser-refresh behavior, and empty/unavailable-data conditions. API behavior was executed through FastAPI `TestClient`. Frontend behavior was verified against the remediated React source and acceptance assertions because a browser automation runtime was not available in this environment.
+
+## UAT test cases
+
+| ID | Area | Test | Expected result | Evidence / actual result | Status |
+|---|---|---|---|---|---|
+| UAT-01 | Navigation / startup | Load dashboard | Dashboard mounts and requests default PM2.5 data | `useEffect` invokes `loadData()` on mount with default `pm25` | PASS |
+| UAT-02 | Browser refresh | Refresh page | Data is fetched again; stale browser cache is not used | frontend fetch uses `cache: "no-store"`; mount effect reloads | PASS |
+| UAT-03 | Filters | Change pollutant | New API request occurs without full-page navigation | pollutant is effect dependency; request path includes encoded pollutant | PASS |
+| UAT-04 | Filters | Select unsupported pollutant directly at API | API rejects input | `GET /api/air-quality?pollutant=xyz` → HTTP 400 | PASS |
+| UAT-05 | Loading | Initial / filter reload state | Map stage shows loading message and filter is guarded | loading UI present; pollutant select disabled while loading | PASS |
+| UAT-06 | Error handling | Frontend request throws | User sees explicit service-unavailable state | error path clears data and renders alert copy | PASS |
+| UAT-07 | Empty data | API returns zero features | User sees a meaningful empty state | “No air-quality observations available” state implemented | PASS |
+| UAT-08 | Fallback | OpenAQ unavailable for PM2.5 | Backend returns fallback instead of failing demo | no API key → HTTP 200, `fallback=true`, 10 features | PASS |
+| UAT-09 | Fallback labeling | Fallback is active | UI must not label synthetic data as live | header shows `FALLBACK DATA`; sidebar displays fallback notice | PASS |
+| UAT-10 | Fallback correctness | Unsupported fallback pollutant dataset | Do not relabel PM2.5 mock values as another pollutant | NO₂ with unavailable OpenAQ returns explicit empty fallback with `unit=ppm` | PASS |
+| UAT-11 | Data correctness | Live NO₂ path | Feature/API metadata uses NO₂ and ppm | mocked live adapter → `NO₂`, `ppm`, `fallback=false` | PASS |
+| UAT-12 | Data correctness | PM2.5-only regional benchmark | Other pollutants must not inherit PM2.5 exposure score/reference | live NO₂ returns `exposure_score=null`, `regional_average=null` | PASS |
+| UAT-13 | Data correctness | PM2.5 fallback enrichment | Derived score/reference fields are populated consistently | first fallback feature: score 29, reference 55.2, difference -41.3% | PASS |
+| UAT-14 | Frontend↔backend | Air-quality endpoint | Frontend uses configured API base and `/api/air-quality` | request is wired through `NEXT_PUBLIC_API_URL` with localhost fallback | PASS |
+| UAT-15 | Frontend↔backend | Population success | Endpoint returns numeric population metadata | mocked WorldPop → HTTP 200 and population `123456.7` | PASS |
+| UAT-16 | Error handling | WorldPop unavailable | Endpoint returns explicit upstream-data failure | mocked unavailable WorldPop → HTTP 502 | PASS |
+| UAT-17 | Tooltips / popups | Open map point | Popup exposes city/country, pollutant value, score, population, regional context, source | all required fields present in Leaflet popup source | PASS |
+| UAT-18 | Tooltips / chart | Hover chart point | Tooltip uses selected pollutant label/unit | hard-coded PM2.5 formatter removed; dynamic mapping implemented | PASS |
+| UAT-19 | User interaction | Search city A/B | Typing filters choices; choosing option closes list | case-insensitive filter + `handleSelect()` behavior present | PASS |
+| UAT-20 | Accessibility | Keyboard city selection | Arrow keys move active option, Enter selects, Escape closes | ArrowDown/ArrowUp/Enter/Escape handlers verified | PASS |
+| UAT-21 | Accessibility | Two city selectors | Each combobox references its own listbox | React `useId()` generates unique IDs | PASS |
+| UAT-22 | Responsiveness | Narrow viewport contract | Controls stack and city inputs fit container | `w-full sm:w-64`; comparison grid stacks; desktop split only at `lg` | PASS |
+| UAT-23 | User workflow | Compare two cities | Both values and relative difference are shown | comparison card renders city A/B values and percentage difference | PASS |
+| UAT-24 | Edge case | Comparison denominator is zero | UI avoids divide-by-zero misinformation | relative percentage becomes unavailable message rather than `0%` | PASS |
+| UAT-25 | User workflow | No city selected | Comparison chart explains next action | chart renders selection guidance | PASS |
+| UAT-26 | Download | No data / loading | Download cannot trigger invalid/empty export | button disabled for `features.length === 0 || loading` | PASS |
+| UAT-27 | Download | Data available | Download action serializes current feature set | Blob/object URL download implementation retained | PASS |
+| UAT-28 | Map edge cases | Invalid coordinates/value | Invalid points are not rendered | Leaflet layer filters non-finite/negative values and malformed coordinates | PASS |
+| UAT-29 | Map behavior | Valid features change | Map reframes to visible dataset | `fitBounds` runs on `features` change with safe max zoom | PASS |
+| UAT-30 | Service health | Backend root | Service reports healthy | `GET /` → HTTP 200 `{status: "ok"}` | PASS |
+
+## Executed automated evidence
+
+The acceptance harness executed 24 assertions and returned:
+
+```text
+TOTAL=24 PASS=24 FAIL=0
+```
+
+Key executed API observations:
+
+```text
+Backend health: HTTP 200
+Invalid pollutant: HTTP 400
+PM2.5 fallback: HTTP 200; fallback=true; features=10
+NO₂ unavailable fallback: HTTP 200; fallback=true; features=0; unit=ppm
+Mocked live NO₂: HTTP 200; NO₂ ppm; PM2.5 exposure fields absent
+Population success: HTTP 200
+Population unavailable: HTTP 502
+```
+
+## Defects found and resolved during UAT
+
+| Defect | Severity | Resolution |
+|---|---|---|
+| Backend fallback unreachable after raising HTTP 503 | Critical | Endpoint now returns fallback data on live OpenAQ failure. |
+| Backend hard-coded `PM2.5` / `µg/m³` for all pollutants | Critical | Live GeoJSON now derives pollutant name and unit from the selected pollutant configuration. |
+| PM2.5 regional reference/score reused conceptually for other pollutants | High | Exposure/reference fields are now PM2.5-only. |
+| Chart tooltip always displayed PM2.5 / µg/m³ | High | Dynamic pollutant/unit formatter added. |
+| “Trend” label implied historical time-series not present in the data | High | Renamed to latest selected-city measurement comparison. |
+| Duplicate city listbox IDs | Medium | Unique React `useId()` IDs added. |
+| City combobox keyboard interaction incomplete | Medium | Arrow Up/Down, Enter, Escape and active descendant implemented. |
+| Fixed-width city selector could overflow narrow screens | Medium | Responsive full-width mobile behavior added. |
+| Header could display LIVE DATA after errors | Medium | State label now distinguishes error/fallback/empty/live/loading. |
+| City comparison divide-by-zero produced misleading `0%` | Medium | Explicit unavailable percentage message added. |
+
+## Acceptance conclusion
+
+All required UAT areas are represented, all discovered gate-blocking defects were remediated in the acceptance build, and the automated acceptance harness reports no failures. The resulting workflow degrades safely when upstream services are unavailable and does not mislabel PM2.5 data as another pollutant.
+
+# UAT PASS
