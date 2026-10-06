@@ -2,67 +2,53 @@
 
 ## Purpose
 
-Phase 3 Post #1 establishes a reproducible canonical data foundation before exploratory data analysis or feature engineering.
+This report documents the reproducible reduction of the controlled
+synthetic air-quality source dataset into the Phase 3 canonical data
+sample.
 
-## Input
+## Source Dataset
 
-The current source dataset contains 3 available air-quality records from the Phase 2 fallback/mock dataset.
+The controlled source dataset contains:
+
+- 192 records
+- 8 cities
+- 4 pollutants
+- Multiple observation timestamps
+- PM2.5
+- PM10
+- NO2
+- O3
+
+The source data is synthetic and reproducible. It follows the
+measurement structure used by the existing air-quality application and
+is designed to provide stable input for Phase 3 data processing.
 
 ## Sampling Method
 
-Sampling is coverage-aware rather than a simple `head()` operation.
+A coverage-aware sampling method is used instead of taking the first
+rows of the source dataset.
 
-The sampling implementation groups available records by city and pollutant and selects representative records while using a fixed random seed.
+Sampling is stratified by:
+
+- City
+- Pollutant
+
+Each city/pollutant combination retains 3 observation timestamps.
+
+There are:
+
+- 8 cities
+- 4 pollutants
+- 32 city/pollutant combinations
+- 3 retained observations per combination
+
+Therefore:
+
+`8 × 4 × 3 = 96 canonical records`
 
 ## Random Seed
 
-`42`
+The sampling process uses:
 
-Using the fixed seed makes the sampling process reproducible.
-
-## Current Coverage
-
-The resulting source sample contains:
-
-- Delhi — PM2.5
-- Mumbai — PM2.5
-- Bengaluru — PM2.5
-
-## Reduction
-
-Current source size:
-
-- 3 records
-
-Current sampled size:
-
-- 3 records
-
-Because the available source contains only three records, no records are removed during the current sampling stage.
-
-## Canonical Dataset
-
-The resulting canonical dataset contains:
-
-- 3 records
-- 20 columns
-
-The canonical data is written to:
-
-`data/canonical/intelligence_data.csv`
-
-## Reproducibility
-
-The sampling logic is maintained in:
-
-`scripts/data_pipeline/sample_data.py`
-
-The fixed random seed is:
-
-`RANDOM_SEED = 42`
-
-The sampling stage can therefore be rerun deterministically against the same source input.
-
-## Phase 3 Boundary
-
-This sampling stage does not perform exploratory analysis, feature engineering, predictive modeling, or analytical transformations.
+```text
+Random seed: 42

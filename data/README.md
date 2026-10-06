@@ -1,64 +1,47 @@
-# Aether Pulse — Phase 3 Canonical Data Package
+# Canonical Data Package
 
-This directory contains the canonical data foundation for PoC 32 — Aether Pulse Air Quality Heatmap.
+This directory contains the reproducible canonical data foundation for
+PoC 32 — Aether Pulse Air Quality Heatmap, Phase 3.
 
-## Purpose
+## Dataset Overview
 
-Phase 3 establishes a reproducible canonical dataset that can be used by downstream analysis and feature-engineering work without requiring a live API call for every analysis run.
+The Phase 3 package uses a controlled, reproducible synthetic air-quality
+dataset shaped around the existing OpenAQ-style measurement structure.
 
-## Current source
+The source dataset contains:
 
-The current source package is derived from the application's fallback/mock air-quality dataset.
-
-The records are therefore marked as synthetic:
-
-```text
-is_synthetic = true
-source_name = Fallback
-# Phase 3 Canonical Data Package
-
-## Dataset Version
-
-phase3-v1.1
-
-## Source
-
-Synthetic OpenAQ-shaped sample.
-
-The dataset is deliberately reproducible and does not depend on a live API
-during canonical package generation.
-
-## Coverage
-
+- 192 source records
 - 8 cities
 - 4 pollutants
-- 6 source time points
+- Multiple observation timestamps
+- PM2.5, PM10, NO2, and O3 measurements
+
+The coverage-aware sampling stage reduces the source dataset to:
+
 - 96 sampled records
-- 20 canonical columns
+- 8 cities
+- 4 pollutants
+- 3 retained timestamps per city/pollutant combination
+- Random seed: 42
 
-## Synthetic Status
+The canonical dataset contains 20 standardized columns and uses
+data version `phase3-v1.1`.
 
-All canonical records are synthetic and are marked:
-
-is_synthetic=true
-
-## Pipeline
+## Directory Structure
 
 ```text
-extract_data.py
-       ↓
-source_sample_full.csv
-       ↓
-sample_data.py
-       ↓
-source_sample.csv
-       ↓
-standardize_data.py
-       ↓
-intelligence_data.csv
-       ↓
-validate_data.py
-       ↓
-publish_data.py
-       ↓
-intelligence_data.json
+data/
+├── README.md
+├── manifest.json
+├── schema.json
+├── source-sample/
+│   ├── source_sample_full.csv
+│   └── source_sample.csv
+├── canonical/
+│   └── intelligence_data.csv
+├── published/
+│   └── intelligence_data.json
+└── quality/
+    ├── data_profile.json
+    ├── sampling_report.md
+    └── validation_report.json
