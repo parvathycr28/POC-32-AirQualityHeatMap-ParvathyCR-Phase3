@@ -1,0 +1,33 @@
+{
+  "dataset_name": "Infocreon Aether Pulse Canonical Intelligence Dataset",
+  "dataset_version": "phase3-v1.0",
+  "project": "PoC 32 - Aether Pulse Air Quality Heatmap",
+  "phase": "Phase 3",
+  "purpose": "Canonical data foundation for downstream analysis and feature engineering",
+  "source": {
+    "source_name": "Fallback",
+    "source_type": "Application fallback/mock dataset",
+    "source_status": "synthetic",
+    "original_source_context": "Air-quality dashboard fallback records"
+  },
+  "sampling": {
+    "method": "Coverage-aware sampling by city and pollutant",
+    "random_seed": 42,
+    "input_records": 3,
+    "sample_records": 3
+  },
+  "canonical": {
+    "file": "canonical/intelligence_data.csv",
+    "records": 3,
+    "columns": 20,
+    "data_version": "phase3-v1.0"
+  },
+  "published": {
+    "file": "published/intelligence_data.json",
+    "generated_from": "canonical/intelligence_data.csv"
+  },
+  "synthetic_data": {
+    "is_synthetic": true,
+    "reason": "Current Phase 3 source is the application's fallback/mock dataset rather than a live source export"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "dataset": "Infocreon Aether Pulse Canonical Intelligence Dataset",
+  "data_version": "phase3-v1.0",
+  "canonical_file": "data\\canonical\\intelligence_data.csv",
+  "canonical_rows": 3,
+  "canonical_columns": 20,
+  "total_data_size_mb": 0.015,
+  "checks": [
+    "Present: data\\README.md",
+    "Present: data\\manifest.json",
+    "Present: data\\schema.json",
+    "Present: data\\source-sample\\source_sample.csv",
+    "Present: data\\canonical\\intelligence_data.csv",
+    "Total /data size: 0.015 MB",
+    "Canonical CSV size: 0.001 MB",
+    "Canonical rows: 3",
+    "Canonical columns: 20",
+    "Canonical column order: PASS",
+    "record_id uniqueness: PASS",
+    "Required metadata fields: PASS",
+    "Date parsing: PASS",
+    "Numeric field validation: PASS",
+    "Boolean validation: PASS",
+    "Manifest/data version consistency: PASS",
+    "Manifest record count consistency: PASS",
+    "Manifest column count consistency: PASS"
+  ],
+  "errors": []
+}

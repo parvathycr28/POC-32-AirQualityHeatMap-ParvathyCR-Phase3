@@ -1,0 +1,4 @@
+record_id,record_type,observed_at,entity_id,related_entity_id,entity_name,category,subcategory,status,stage,metric_name,metric_value,metric_unit,text_value,latitude,longitude,source_name,source_record_id,is_synthetic,data_version
+aq-0001,measurement,2026-08-23T10:00:00Z,delhi,,Delhi,air_quality,pm2.5,observed,observation,pm2.5,82.4,µg/m³,India,28.6139,77.209,Fallback,delhi-pm2.5-0000,true,phase3-v1.0
+aq-0002,measurement,2026-08-23T10:00:00Z,mumbai,,Mumbai,air_quality,pm2.5,observed,observation,pm2.5,46.8,µg/m³,India,19.076,72.8777,Fallback,mumbai-pm2.5-0001,true,phase3-v1.0
+aq-0003,measurement,2026-08-23T10:00:00Z,bengaluru,,Bengaluru,air_quality,pm2.5,observed,observation,pm2.5,31.5,µg/m³,India,12.9716,77.5946,Fallback,bengaluru-pm2.5-0002,true,phase3-v1.0

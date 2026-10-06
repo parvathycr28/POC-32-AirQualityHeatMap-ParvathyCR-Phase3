@@ -1,0 +1,217 @@
+{
+  "dataset": "Infocreon Aether Pulse Canonical Intelligence Dataset",
+  "data_version": "phase3-v1.0",
+  "source_name": [
+    "Fallback"
+  ],
+  "record_count": 3,
+  "column_count": 20,
+  "columns": {
+    "record_id": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 3
+    },
+    "record_type": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "observed_at": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "entity_id": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 3
+    },
+    "related_entity_id": {
+      "dtype": "float64",
+      "non_null_count": 0,
+      "null_count": 3,
+      "unique_count": 0
+    },
+    "entity_name": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 3
+    },
+    "category": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "subcategory": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "status": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "stage": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "metric_name": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "metric_value": {
+      "dtype": "float64",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 3
+    },
+    "metric_unit": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "text_value": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "latitude": {
+      "dtype": "float64",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 3
+    },
+    "longitude": {
+      "dtype": "float64",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 3
+    },
+    "source_name": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "source_record_id": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 3
+    },
+    "is_synthetic": {
+      "dtype": "bool",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    },
+    "data_version": {
+      "dtype": "object",
+      "non_null_count": 3,
+      "null_count": 0,
+      "unique_count": 1
+    }
+  },
+  "null_counts": {
+    "record_id": 0,
+    "record_type": 0,
+    "observed_at": 0,
+    "entity_id": 0,
+    "related_entity_id": 3,
+    "entity_name": 0,
+    "category": 0,
+    "subcategory": 0,
+    "status": 0,
+    "stage": 0,
+    "metric_name": 0,
+    "metric_value": 0,
+    "metric_unit": 0,
+    "text_value": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "source_name": 0,
+    "source_record_id": 0,
+    "is_synthetic": 0,
+    "data_version": 0
+  },
+  "unique_counts": {
+    "record_id": 3,
+    "record_type": 1,
+    "observed_at": 1,
+    "entity_id": 3,
+    "related_entity_id": 0,
+    "entity_name": 3,
+    "category": 1,
+    "subcategory": 1,
+    "status": 1,
+    "stage": 1,
+    "metric_name": 1,
+    "metric_value": 3,
+    "metric_unit": 1,
+    "text_value": 1,
+    "latitude": 3,
+    "longitude": 3,
+    "source_name": 1,
+    "source_record_id": 3,
+    "is_synthetic": 1,
+    "data_version": 1
+  },
+  "numeric_summary": {
+    "metric_value": {
+      "min": 31.5,
+      "max": 82.4,
+      "mean": 53.56666666666666,
+      "median": 46.8
+    },
+    "latitude": {
+      "min": 12.9716,
+      "max": 28.6139,
+      "mean": 20.2205,
+      "median": 19.076
+    },
+    "longitude": {
+      "min": 72.8777,
+      "max": 77.5946,
+      "mean": 75.89376666666668,
+      "median": 77.209
+    }
+  },
+  "coverage": {
+    "entities": [
+      "Bengaluru",
+      "Delhi",
+      "Mumbai"
+    ],
+    "categories": [
+      "air_quality"
+    ],
+    "subcategories": [
+      "pm2.5"
+    ],
+    "record_types": [
+      "measurement"
+    ]
+  },
+  "synthetic_status": {
+    "is_synthetic_values": [
+      "true"
+    ],
+    "all_records_synthetic": true
+  }
+}

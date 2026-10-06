@@ -1,0 +1,4 @@
+city,country,pollutant,value,unit,timestamp,population,exposure_score,regional_average,percentage_above_regional_average,source,latitude,longitude
+Delhi,India,PM2.5,82.4,µg/m³,2026-08-23T10:00:00Z,32900000,84,55.2,49.3,Fallback,28.6139,77.209
+Mumbai,India,PM2.5,46.8,µg/m³,2026-08-23T10:00:00Z,21600000,57,55.2,-15.2,Fallback,19.076,72.8777
+Bengaluru,India,PM2.5,31.5,µg/m³,2026-08-23T10:00:00Z,14000000,41,55.2,-42.9,Fallback,12.9716,77.5946
