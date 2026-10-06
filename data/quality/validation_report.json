@@ -7,7 +7,7 @@
   "canonical_rows": 96,
   "canonical_columns": 20,
   "published_json_valid": true,
-  "total_data_size_mb": 0.137,
+  "total_data_size_mb": 0.136,
   "checks": [
     "Present: data\\README.md",
     "Present: data\\manifest.json",
@@ -16,7 +16,7 @@
     "Present: data\\canonical\\intelligence_data.csv",
     "Present: data\\published\\intelligence_data.json",
     "Present: data\\quality\\sampling_report.md",
-    "Total /data size: 0.137 MB",
+    "Total /data size: 0.136 MB",
     "Canonical CSV size: 0.019 MB",
     "Canonical rows: 96",
     "Canonical columns: 20",
