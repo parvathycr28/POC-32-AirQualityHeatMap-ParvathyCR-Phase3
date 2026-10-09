@@ -1,0 +1,202 @@
+{
+  "assessment_name": "Infocreon Canonical Data Quality Assessment",
+  "generated_at_utc": "2026-10-09T11:53:29.582857+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "row_count": 96,
+  "column_count": 20,
+  "quality_dimensions": {
+    "completeness": {
+      "status": "ASSESSED",
+      "field_results": {
+        "record_id": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "record_type": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "observed_at": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "entity_id": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "related_entity_id": {
+          "missing_count": 96,
+          "missing_percent": 100.0
+        },
+        "entity_name": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "category": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "subcategory": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "status": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "stage": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "metric_name": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "metric_value": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "metric_unit": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "text_value": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "latitude": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "longitude": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "source_name": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "source_record_id": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "is_synthetic": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "data_version": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        }
+      },
+      "interpretation": "Review field-level missingness in context; some fields may be optional for particular record types."
+    },
+    "uniqueness": {
+      "status": "PASS",
+      "results": {
+        "record_id_duplicate_rows": 0,
+        "record_id_unique": true,
+        "duplicate_full_rows": 0,
+        "entity_id_unique_count": 8
+      }
+    },
+    "validity": {
+      "status": "PASS",
+      "numeric_checks": {
+        "metric_value": {
+          "parse_failures": 0,
+          "infinite_values": 0
+        },
+        "latitude": {
+          "parse_failures": 0,
+          "infinite_values": 0
+        },
+        "longitude": {
+          "parse_failures": 0,
+          "infinite_values": 0
+        }
+      },
+      "geographic_validity": {
+        "rows_with_both_coordinates": 96,
+        "rows_missing_latitude": 0,
+        "rows_missing_longitude": 0,
+        "invalid_coordinate_rows": 0
+      },
+      "timestamp_validity": {
+        "valid_timestamps": 96,
+        "invalid_or_missing_timestamps": 0,
+        "unique_timestamps": 3,
+        "unique_calendar_dates": 1
+      }
+    },
+    "consistency": {
+      "status": "PASS",
+      "results": {
+        "unexpected_pollutant_subcategories": [],
+        "pollutant_distribution": {
+          "no2": 24,
+          "o3": 24,
+          "pm10": 24,
+          "pm2.5": 24
+        },
+        "missing_data_version_count": 0,
+        "data_version_distribution": {
+          "phase3-v1.1": 96
+        },
+        "missing_source_name_count": 0,
+        "missing_source_record_id_count": 0,
+        "missing_metric_unit_count": 0,
+        "missing_metric_name_count": 0
+      }
+    },
+    "provenance": {
+      "status": "ASSESSED",
+      "results": {
+        "source_name_distribution": {
+          "Synthetic OpenAQ-shaped sample": 96
+        },
+        "synthetic_flag_distribution": {
+          "true": 96
+        },
+        "unrecognized_synthetic_flag_values": [],
+        "synthetic_flag_missing_count": 0
+      },
+      "limitation": "Source labels and synthetic flags do not independently verify external provenance."
+    },
+    "accuracy": {
+      "status": "NOT_INDEPENDENTLY_VERIFIED",
+      "limitation": "Accuracy against real-world measurements cannot be established from this CSV alone."
+    },
+    "representativeness": {
+      "status": "REQUIRES_SEPARATE_ASSESSMENT",
+      "limitation": "Coverage counts alone do not prove that the records represent real-world cities, time periods, or conditions."
+    },
+    "timeliness": {
+      "status": "LIMITED_TEMPORAL_COVERAGE",
+      "results": {
+        "valid_timestamps": 96,
+        "invalid_or_missing_timestamps": 0,
+        "unique_timestamps": 3,
+        "unique_calendar_dates": 1
+      }
+    },
+    "reproducibility": {
+      "status": "PARTIALLY_ASSESSED",
+      "note": "This assessment is script-generated from the canonical CSV. Full reproducibility also depends on versioned inputs, scripts, and documented execution."
+    }
+  },
+  "checks": {
+    "record_ids_present": true,
+    "record_ids_unique": true,
+    "no_duplicate_full_rows": true,
+    "timestamps_parseable": true,
+    "no_invalid_coordinate_ranges": true,
+    "no_infinite_numeric_values": true,
+    "no_numeric_parse_failures": true,
+    "pollutant_subcategories_expected": true,
+    "data_version_present": true,
+    "synthetic_flags_recognized": true
+  },
+  "overall_structural_status": "PASS",
+  "interpretation_warning": "A structural PASS does not prove real-world accuracy, representativeness, or readiness for every analytical track."
+}

@@ -1,0 +1,160 @@
+{
+  "assessment_name": "Infocreon Analytical Readiness Assessment",
+  "generated_at_utc": "2026-10-09T11:53:31.698365+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "data_version_distribution": {
+    "phase3-v1.1": 96
+  },
+  "record_count": 96,
+  "column_count": 20,
+  "data_archetype": {
+    "primary": "Cross-sectional synthetic multi-entity, multi-metric dataset",
+    "temporal_component": "Sparse repeated measurements",
+    "classification_reason": "The data contains city/entity and pollutant categories, with three unique timestamps but only one calendar date. It is not sufficient evidence for a conventional long-horizon time-series archetype.",
+    "record_types": [
+      "measurement"
+    ],
+    "metric_names": [
+      "no2",
+      "o3",
+      "pm10",
+      "pm2.5"
+    ],
+    "numeric_metric_value_count": 96,
+    "non_null_text_value_count": 96,
+    "all_records_marked_synthetic": true
+  },
+  "quality_gate": {
+    "overall_structural_status": "PASS",
+    "checks": {
+      "record_ids_present": true,
+      "record_ids_unique": true,
+      "no_duplicate_full_rows": true,
+      "timestamps_parseable": true,
+      "no_invalid_coordinate_ranges": true,
+      "no_infinite_numeric_values": true,
+      "no_numeric_parse_failures": true,
+      "pollutant_subcategories_expected": true,
+      "data_version_present": true,
+      "synthetic_flags_recognized": true
+    },
+    "note": "Structural checks do not independently prove accuracy, provenance, safety, or real-world representativeness."
+  },
+  "representativeness_gate": {
+    "structural_checks": {
+      "row_count_matches_expected_design": true,
+      "city_count_matches_expected": true,
+      "pollutant_count_matches_expected": true,
+      "city_pollutant_groups_balanced": true,
+      "groups_with_expected_timestamp_count": 32,
+      "expected_city_pollutant_groups": 32,
+      "all_groups_have_expected_timestamp_count": true
+    },
+    "note": "Balanced synthetic coverage is not evidence of real-world population or environmental representativeness."
+  },
+  "analytical_tracks": {
+    "A Comparative Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "8 distinct city/entity names and 4 pollutant categories are present.",
+        "The canonical records contain metric values that can support descriptive comparisons after unit and record-grain checks."
+      ],
+      "limitations": [
+        "Confirm that compared metrics use compatible units and equivalent meanings.",
+        "Synthetic values do not establish real-world city rankings."
+      ]
+    },
+    "B Trend Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "3 unique timestamps across 1 calendar date(s)."
+      ],
+      "limitations": [
+        "Only one calendar date is represented; long-term, seasonal, and year-over-year trends are not supported.",
+        "Three timestamps alone do not establish a reliable temporal pattern."
+      ]
+    },
+    "C Risk & Priority": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "Pollutant labels and numeric metric values are available for descriptive threshold-based exploration."
+      ],
+      "limitations": [
+        "A risk framework requires documented, domain-appropriate thresholds and units.",
+        "Do not present an unvalidated ranking as a real-world health-risk assessment."
+      ]
+    },
+    "D Anomaly Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "Numeric measurements exist and can be checked for unusual values descriptively."
+      ],
+      "limitations": [
+        "The dataset has limited temporal depth and is synthetic.",
+        "No anomaly model or claim of statistically validated anomalies is justified by this assessment alone."
+      ]
+    },
+    "E Segmentation Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "8 city/entity names and 4 pollutant categories allow descriptive grouping."
+      ],
+      "limitations": [
+        "Grouping by existing categories is not the same as validated clustering.",
+        "Further segmentation needs a defined analytical question and suitable comparable features."
+      ]
+    },
+    "F Predictive Intelligence": {
+      "status": "Not supported",
+      "evidence": [
+        "Only 3 unique timestamps and 1 calendar date(s) are available.",
+        "All records marked synthetic: True.",
+        "No validated target/outcome, decision-time feature specification, leakage assessment, or predictive validation plan has been established by these scripts."
+      ],
+      "limitations": [
+        "Do not build forecasting, classification, regression, clustering-as-prediction, or risk-score models under this readiness assessment.",
+        "Reconsider only if every required target, history, input availability, leakage, distribution, validation, and business-need criterion is documented."
+      ]
+    },
+    "G Simulation & Scenario Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "Descriptive what-if calculations may be possible if assumptions and parameters are explicitly defined."
+      ],
+      "limitations": [
+        "The canonical dataset alone does not establish causal relationships or validated scenario parameters.",
+        "Do not claim simulated results predict real-world outcomes."
+      ]
+    },
+    "H Text & Theme Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "96 rows contain a non-null text_value."
+      ],
+      "limitations": [
+        "Inspect the actual content and meaning of text_value before claiming useful themes.",
+        "A non-null text field alone does not establish that meaningful natural-language analysis is supported."
+      ]
+    }
+  },
+  "predictive_intelligence_gate": {
+    "decision": "REJECT FOR CURRENT PHASE",
+    "target_or_outcome_defined_and_validated": false,
+    "sufficient_temporal_history_established": false,
+    "decision_time_input_availability_documented": false,
+    "leakage_risk_assessed": false,
+    "target_distribution_assessed": false,
+    "validation_plan_documented": false,
+    "business_need_documented": false,
+    "reason": "The required evidence has not been established. Do not begin predictive modelling as part of this post."
+  },
+  "final_conclusion": "DATA READY FOR ANALYTICAL TRACK DEVELOPMENT",
+  "conclusion_reason": "The canonical dataset passes the current structural quality checks and matches its intended coverage design. Development must remain bounded by the track limitations and synthetic-data caveats.",
+  "scope_guardrails": [
+    "Use only data/canonical/intelligence_data.csv as the analytical source.",
+    "Do not create another cleaned or model-specific dataset.",
+    "Do not modify the operational frontend or dashboard.",
+    "Do not develop predictive models under this assessment.",
+    "Do not describe synthetic observations as real-world measurements."
+  ]
+}

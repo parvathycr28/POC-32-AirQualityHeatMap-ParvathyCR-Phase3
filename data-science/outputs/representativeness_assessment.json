@@ -1,0 +1,795 @@
+{
+  "assessment_name": "Canonical Dataset Representativeness Assessment",
+  "generated_at_utc": "2026-10-09T11:53:30.665370+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "row_count": 96,
+  "expected_design": {
+    "cities": 8,
+    "pollutants": 4,
+    "timestamps_per_city_pollutant": 3,
+    "expected_canonical_records": 96
+  },
+  "observed_coverage": {
+    "unique_city_names": 8,
+    "city_distribution": {
+      "Ahmedabad": 12,
+      "Bengaluru": 12,
+      "Chennai": 12,
+      "Delhi": 12,
+      "Hyderabad": 12,
+      "Kolkata": 12,
+      "Mumbai": 12,
+      "Pune": 12
+    },
+    "unique_pollutant_subcategories": 4,
+    "pollutant_distribution": {
+      "no2": 24,
+      "o3": 24,
+      "pm10": 24,
+      "pm2.5": 24
+    },
+    "unique_timestamps": 3,
+    "unique_calendar_dates": 1,
+    "timestamp_distribution": {
+      "2026-08-23T00:00:00Z": 32,
+      "2026-08-23T04:00:00Z": 32,
+      "2026-08-23T20:00:00Z": 32
+    },
+    "city_pollutant_record_counts": [
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "records": 3
+      }
+    ],
+    "city_pollutant_timestamp_counts": [
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      }
+    ]
+  },
+  "structural_checks": {
+    "row_count_matches_expected_design": true,
+    "city_count_matches_expected": true,
+    "pollutant_count_matches_expected": true,
+    "city_pollutant_groups_balanced": true,
+    "groups_with_expected_timestamp_count": 32,
+    "expected_city_pollutant_groups": 32,
+    "all_groups_have_expected_timestamp_count": true
+  },
+  "limitations": [
+    "The dataset is controlled synthetic data, not a probability sample of real-world air quality.",
+    "Balanced counts do not establish geographic, demographic, seasonal, or environmental representativeness.",
+    "Only a single calendar date was observed in the initial profile; long-term temporal coverage is limited.",
+    "City names and pollutant coverage are assessed from the canonical file, not external verification."
+  ],
+  "interpretation": "Use the structural checks to verify the intended dataset design. Do not claim real-world representativeness from balance alone."
+}

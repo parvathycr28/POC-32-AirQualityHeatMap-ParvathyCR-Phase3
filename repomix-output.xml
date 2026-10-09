@@ -85,10 +85,29 @@ data/
   manifest.json
   README.md
   schema.json
+data-science/
+  notebooks/
+    01_canonical_data_validation_and_readiness.ipynb
+  outputs/
+    analytical_readiness.json
+    canonical_profile.json
+    quality_assessment.json
+    representativeness_assessment.json
+  scripts/
+    assess_analytical_readiness.py
+    assess_data_quality.py
+    assess_representativeness.py
+    profile_canonical_data.py
+  README.md
 docs/
+  ANALYTICAL_READINESS_REPORT.md
   CANONICAL_DATA_MAPPING.md
   CANONICAL_DATA_PACKAGE_VALIDATION.md
+  CANONICAL_DATA_PROFILE.md
+  DATA_ARCHETYPE_CONFIRMATION.md
+  DATA_QUALITY_ASSESSMENT.md
   DATA_SOURCE_INVENTORY.md
+  REPRESENTATIVENESS_ASSESSMENT.md
   SAMPLING_AND_REDUCTION_REPORT.md
 frontend/
   app/
@@ -143,6 +162,3121 @@ VAR_REPORT
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="data-science/notebooks/01_canonical_data_validation_and_readiness.ipynb">
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "e0bb56c5",
+   "metadata": {},
+   "source": [
+    "# Canonical Data Validation and Analytical Readiness\n",
+    "\n",
+    "## Infocreon Phase 3 — Post #2\n",
+    "\n",
+    "This notebook validates and profiles the existing canonical dataset:\n",
+    "`data/canonical/intelligence_data.csv`.\n",
+    "\n",
+    "It reviews structural quality, coverage, dataset archetype, and analytical readiness. It does not create a new dataset, develop predictive models, or modify the operational dashboard."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b9bbde66",
+   "metadata": {},
+   "source": [
+    "## 1. Scope and Source\n",
+    "\n",
+    "The canonical CSV is the sole analytical source. Generated JSON assessments are used as evidence for reporting; they do not replace the canonical data.\n",
+    "\n",
+    "The dataset is controlled synthetic data. Structural validity does not establish real-world accuracy or representativeness."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "68ec5f00",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from pathlib import Path\n",
+    "import json\n",
+    "import pandas as pd\n",
+    "\n",
+    "ROOT = Path.cwd()\n",
+    "\n",
+    "# Allow execution when the notebook kernel starts in the repository\n",
+    "# root or in the notebooks directory.\n",
+    "if not (ROOT / \"data\" / \"canonical\" / \"intelligence_data.csv\").exists():\n",
+    "    ROOT = ROOT.parent\n",
+    "\n",
+    "DATA_FILE = ROOT / \"data\" / \"canonical\" / \"intelligence_data.csv\"\n",
+    "OUTPUT_DIR = ROOT / \"data-science\" / \"outputs\"\n",
+    "\n",
+    "assert DATA_FILE.exists(), f\"Canonical CSV not found: {DATA_FILE}\"\n",
+    "\n",
+    "df = pd.read_csv(DATA_FILE, low_memory=False)\n",
+    "\n",
+    "print(\"Source:\", DATA_FILE.relative_to(ROOT))\n",
+    "print(\"Rows:\", len(df))\n",
+    "print(\"Columns:\", len(df.columns))\n",
+    "print(\"Columns match expected count:\", len(df.columns) == 20)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a601b911",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "expected_columns = [\n",
+    "    \"record_id\", \"record_type\", \"observed_at\", \"entity_id\",\n",
+    "    \"related_entity_id\", \"entity_name\", \"category\", \"subcategory\",\n",
+    "    \"status\", \"stage\", \"metric_name\", \"metric_value\", \"metric_unit\",\n",
+    "    \"text_value\", \"latitude\", \"longitude\", \"source_name\",\n",
+    "    \"source_record_id\", \"is_synthetic\", \"data_version\",\n",
+    "]\n",
+    "\n",
+    "print(\"Missing expected columns:\",\n",
+    "      [c for c in expected_columns if c not in df.columns])\n",
+    "print(\"Unexpected columns:\",\n",
+    "      [c for c in df.columns if c not in expected_columns])\n",
+    "print(\"Column order matches:\",\n",
+    "      list(df.columns) == expected_columns)\n",
+    "\n",
+    "assert set(expected_columns).issubset(df.columns)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cb93f959",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "profile_path = OUTPUT_DIR / \"canonical_profile.json\"\n",
+    "quality_path = OUTPUT_DIR / \"quality_assessment.json\"\n",
+    "representativeness_path = OUTPUT_DIR / \"representativeness_assessment.json\"\n",
+    "readiness_path = OUTPUT_DIR / \"analytical_readiness.json\"\n",
+    "\n",
+    "required_outputs = [\n",
+    "    profile_path,\n",
+    "    quality_path,\n",
+    "    representativeness_path,\n",
+    "    readiness_path,\n",
+    "]\n",
+    "\n",
+    "for path in required_outputs:\n",
+    "    assert path.exists(), f\"Missing assessment output: {path}\"\n",
+    "\n",
+    "profile = json.loads(profile_path.read_text(encoding=\"utf-8\"))\n",
+    "quality = json.loads(quality_path.read_text(encoding=\"utf-8\"))\n",
+    "representativeness = json.loads(\n",
+    "    representativeness_path.read_text(encoding=\"utf-8\")\n",
+    ")\n",
+    "readiness = json.loads(readiness_path.read_text(encoding=\"utf-8\"))\n",
+    "\n",
+    "print(\"Profile rows:\", profile[\"row_count\"])\n",
+    "print(\"Quality status:\", quality[\"overall_structural_status\"])\n",
+    "print(\"Representativeness checks:\",\n",
+    "      representativeness[\"structural_checks\"])\n",
+    "print(\"Final conclusion:\", readiness[\"final_conclusion\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ad7f18e8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dates = pd.to_datetime(df[\"observed_at\"], errors=\"coerce\", utc=True)\n",
+    "\n",
+    "summary = {\n",
+    "    \"record_count\": len(df),\n",
+    "    \"column_count\": len(df.columns),\n",
+    "    \"unique_cities\": int(df[\"entity_name\"].nunique(dropna=True)),\n",
+    "    \"unique_pollutants\": int(df[\"subcategory\"].nunique(dropna=True)),\n",
+    "    \"unique_timestamps\": int(dates.nunique(dropna=True)),\n",
+    "    \"unique_calendar_dates\": int(\n",
+    "        dates.dropna().dt.strftime(\"%Y-%m-%d\").nunique()\n",
+    "    ),\n",
+    "    \"valid_coordinate_rows\": int(\n",
+    "        pd.to_numeric(df[\"latitude\"], errors=\"coerce\").between(-90, 90)\n",
+    "        .__and__(\n",
+    "            pd.to_numeric(df[\"longitude\"], errors=\"coerce\").between(-180, 180)\n",
+    "        ).sum()\n",
+    "    ),\n",
+    "}\n",
+    "\n",
+    "pd.Series(summary, name=\"Observed value\").to_frame()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6d74035d",
+   "metadata": {},
+   "source": [
+    "## 2. Interpretation\n",
+    "\n",
+    "The current profile shows three unique timestamps on one calendar date. This is sparse repeated measurement coverage, not evidence of long-term temporal trends.\n",
+    "\n",
+    "The dataset's eight city names and four pollutant categories support consideration of bounded descriptive comparisons. Because the data is synthetic, these comparisons must not be represented as verified real-world findings.\n",
+    "\n",
+    "## 3. Predictive Intelligence Gate\n",
+    "\n",
+    "Predictive Intelligence is rejected for this phase. A model must not be developed without a defined and validated target, sufficient history, documented decision-time inputs, leakage assessment, target-distribution analysis, a validation plan, and a genuine business need.\n",
+    "\n",
+    "## 4. Conclusion\n",
+    "\n",
+    "The current assessment conclusion is read from `analytical_readiness.json`. Any analytical work must follow the documented track limitations and use the existing canonical CSV as its source."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "name": "python",
+   "version": "3.10.11"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
+</file>
+
+<file path="data-science/outputs/analytical_readiness.json">
+{
+  "assessment_name": "Infocreon Analytical Readiness Assessment",
+  "generated_at_utc": "2026-10-09T11:42:35.604283+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "data_version_distribution": {
+    "phase3-v1.1": 96
+  },
+  "record_count": 96,
+  "column_count": 20,
+  "data_archetype": {
+    "primary": "Cross-sectional synthetic multi-entity, multi-metric dataset",
+    "temporal_component": "Sparse repeated measurements",
+    "classification_reason": "The data contains city/entity and pollutant categories, with three unique timestamps but only one calendar date. It is not sufficient evidence for a conventional long-horizon time-series archetype.",
+    "record_types": [
+      "measurement"
+    ],
+    "metric_names": [
+      "no2",
+      "o3",
+      "pm10",
+      "pm2.5"
+    ],
+    "numeric_metric_value_count": 96,
+    "non_null_text_value_count": 96,
+    "all_records_marked_synthetic": true
+  },
+  "quality_gate": {
+    "overall_structural_status": "PASS",
+    "checks": {
+      "record_ids_present": true,
+      "record_ids_unique": true,
+      "no_duplicate_full_rows": true,
+      "timestamps_parseable": true,
+      "no_invalid_coordinate_ranges": true,
+      "no_infinite_numeric_values": true,
+      "no_numeric_parse_failures": true,
+      "pollutant_subcategories_expected": true,
+      "data_version_present": true,
+      "synthetic_flags_recognized": true
+    },
+    "note": "Structural checks do not independently prove accuracy, provenance, safety, or real-world representativeness."
+  },
+  "representativeness_gate": {
+    "structural_checks": {
+      "row_count_matches_expected_design": true,
+      "city_count_matches_expected": true,
+      "pollutant_count_matches_expected": true,
+      "city_pollutant_groups_balanced": true,
+      "groups_with_expected_timestamp_count": 32,
+      "expected_city_pollutant_groups": 32,
+      "all_groups_have_expected_timestamp_count": true
+    },
+    "note": "Balanced synthetic coverage is not evidence of real-world population or environmental representativeness."
+  },
+  "analytical_tracks": {
+    "A Comparative Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "8 distinct city/entity names and 4 pollutant categories are present.",
+        "The canonical records contain metric values that can support descriptive comparisons after unit and record-grain checks."
+      ],
+      "limitations": [
+        "Confirm that compared metrics use compatible units and equivalent meanings.",
+        "Synthetic values do not establish real-world city rankings."
+      ]
+    },
+    "B Trend Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "3 unique timestamps across 1 calendar date(s)."
+      ],
+      "limitations": [
+        "Only one calendar date is represented; long-term, seasonal, and year-over-year trends are not supported.",
+        "Three timestamps alone do not establish a reliable temporal pattern."
+      ]
+    },
+    "C Risk & Priority": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "Pollutant labels and numeric metric values are available for descriptive threshold-based exploration."
+      ],
+      "limitations": [
+        "A risk framework requires documented, domain-appropriate thresholds and units.",
+        "Do not present an unvalidated ranking as a real-world health-risk assessment."
+      ]
+    },
+    "D Anomaly Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "Numeric measurements exist and can be checked for unusual values descriptively."
+      ],
+      "limitations": [
+        "The dataset has limited temporal depth and is synthetic.",
+        "No anomaly model or claim of statistically validated anomalies is justified by this assessment alone."
+      ]
+    },
+    "E Segmentation Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "8 city/entity names and 4 pollutant categories allow descriptive grouping."
+      ],
+      "limitations": [
+        "Grouping by existing categories is not the same as validated clustering.",
+        "Further segmentation needs a defined analytical question and suitable comparable features."
+      ]
+    },
+    "F Predictive Intelligence": {
+      "status": "Not supported",
+      "evidence": [
+        "Only 3 unique timestamps and 1 calendar date(s) are available.",
+        "All records marked synthetic: True.",
+        "No validated target/outcome, decision-time feature specification, leakage assessment, or predictive validation plan has been established by these scripts."
+      ],
+      "limitations": [
+        "Do not build forecasting, classification, regression, clustering-as-prediction, or risk-score models under this readiness assessment.",
+        "Reconsider only if every required target, history, input availability, leakage, distribution, validation, and business-need criterion is documented."
+      ]
+    },
+    "G Simulation & Scenario Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "Descriptive what-if calculations may be possible if assumptions and parameters are explicitly defined."
+      ],
+      "limitations": [
+        "The canonical dataset alone does not establish causal relationships or validated scenario parameters.",
+        "Do not claim simulated results predict real-world outcomes."
+      ]
+    },
+    "H Text & Theme Intelligence": {
+      "status": "Conditionally supported",
+      "evidence": [
+        "96 rows contain a non-null text_value."
+      ],
+      "limitations": [
+        "Inspect the actual content and meaning of text_value before claiming useful themes.",
+        "A non-null text field alone does not establish that meaningful natural-language analysis is supported."
+      ]
+    }
+  },
+  "predictive_intelligence_gate": {
+    "decision": "REJECT FOR CURRENT PHASE",
+    "target_or_outcome_defined_and_validated": false,
+    "sufficient_temporal_history_established": false,
+    "decision_time_input_availability_documented": false,
+    "leakage_risk_assessed": false,
+    "target_distribution_assessed": false,
+    "validation_plan_documented": false,
+    "business_need_documented": false,
+    "reason": "The required evidence has not been established. Do not begin predictive modelling as part of this post."
+  },
+  "final_conclusion": "DATA READY FOR ANALYTICAL TRACK DEVELOPMENT",
+  "conclusion_reason": "The canonical dataset passes the current structural quality checks and matches its intended coverage design. Development must remain bounded by the track limitations and synthetic-data caveats.",
+  "scope_guardrails": [
+    "Use only data/canonical/intelligence_data.csv as the analytical source.",
+    "Do not create another cleaned or model-specific dataset.",
+    "Do not modify the operational frontend or dashboard.",
+    "Do not develop predictive models under this assessment.",
+    "Do not describe synthetic observations as real-world measurements."
+  ]
+}
+</file>
+
+<file path="data-science/outputs/canonical_profile.json">
+{
+  "profile_name": "Infocreon Canonical Data Profile",
+  "generated_at_utc": "2026-10-09T11:42:32.435309+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "data_version_distribution": {
+    "phase3-v1.1": 96
+  },
+  "file_size_bytes": 19614,
+  "file_size_mb": 0.018705,
+  "row_count": 96,
+  "column_count": 20,
+  "expected_columns": [
+    "record_id",
+    "record_type",
+    "observed_at",
+    "entity_id",
+    "related_entity_id",
+    "entity_name",
+    "category",
+    "subcategory",
+    "status",
+    "stage",
+    "metric_name",
+    "metric_value",
+    "metric_unit",
+    "text_value",
+    "latitude",
+    "longitude",
+    "source_name",
+    "source_record_id",
+    "is_synthetic",
+    "data_version"
+  ],
+  "missing_expected_columns": [],
+  "unexpected_columns": [],
+  "column_order_matches_expected": true,
+  "record_type_distribution": {
+    "measurement": 96
+  },
+  "entity_count": 8,
+  "related_entity_count": 0,
+  "source_name_distribution": {
+    "Synthetic OpenAQ-shaped sample": 96
+  },
+  "synthetic_distribution": {
+    "True": 96
+  },
+  "category_distribution": {
+    "air_quality": 96
+  },
+  "subcategory_distribution": {
+    "no2": 24,
+    "o3": 24,
+    "pm10": 24,
+    "pm2.5": 24
+  },
+  "status_distribution": {
+    "observed": 96
+  },
+  "stage_distribution": {
+    "observation": 96
+  },
+  "metric_name_distribution": {
+    "no2": 24,
+    "o3": 24,
+    "pm10": 24,
+    "pm2.5": 24
+  },
+  "metric_unit_distribution": {
+    "µg/m³": 96
+  },
+  "metric_value_summary": {
+    "numeric_count": 96,
+    "finite_count": 96,
+    "invalid_non_numeric_count": 0,
+    "infinite_count": 0,
+    "min": 19.19,
+    "max": 126.22,
+    "mean": 56.31791666666667,
+    "median": 51.36,
+    "std": 22.629268514664187
+  },
+  "date_summary": {
+    "row_count": 96,
+    "valid_date_count": 96,
+    "invalid_or_missing_date_count": 0,
+    "unique_timestamps": 3,
+    "unique_calendar_dates": 1,
+    "minimum_timestamp": "2026-08-23T00:00:00+00:00",
+    "maximum_timestamp": "2026-08-23T20:00:00+00:00",
+    "calendar_dates": [
+      "2026-08-23"
+    ],
+    "rows_per_calendar_date": {
+      "2026-08-23": 96
+    }
+  },
+  "geographic_summary": {
+    "rows_with_both_coordinates": 96,
+    "valid_coordinate_rows": 96,
+    "invalid_coordinate_rows_with_both_values": 0,
+    "missing_latitude_count": 0,
+    "missing_longitude_count": 0,
+    "unique_valid_coordinate_pairs": 8
+  },
+  "field_profiles": {
+    "record_id": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 96,
+      "examples": [
+        "aq-0001",
+        "aq-0002",
+        "aq-0003",
+        "aq-0004",
+        "aq-0005"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 7.0,
+        "maximum_length": 7,
+        "case_variants": 96
+      }
+    },
+    "record_type": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "measurement"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    },
+    "observed_at": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 3,
+      "examples": [
+        "2026-08-23T00:00:00Z",
+        "2026-08-23T04:00:00Z",
+        "2026-08-23T20:00:00Z"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 20.0,
+        "maximum_length": 20,
+        "case_variants": 3
+      }
+    },
+    "entity_id": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        "ahmedabad",
+        "bengaluru",
+        "chennai",
+        "delhi",
+        "hyderabad"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 7.0,
+        "maximum_length": 9,
+        "case_variants": 8
+      }
+    },
+    "related_entity_id": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 0,
+      "null_count": 96,
+      "null_percent": 100.0,
+      "unique_non_null_values": 0,
+      "examples": [],
+      "numeric_summary": {
+        "min": null,
+        "max": null,
+        "mean": null,
+        "median": null,
+        "std": null,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      },
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 0,
+        "maximum_length": 0,
+        "case_variants": 0
+      }
+    },
+    "entity_name": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        "Ahmedabad",
+        "Bengaluru",
+        "Chennai",
+        "Delhi",
+        "Hyderabad"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 7.0,
+        "maximum_length": 9,
+        "case_variants": 8
+      }
+    },
+    "category": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "air_quality"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    },
+    "subcategory": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 4,
+      "examples": [
+        "no2",
+        "o3",
+        "pm10",
+        "pm2.5"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 3.5,
+        "maximum_length": 5,
+        "case_variants": 4
+      }
+    },
+    "status": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "observed"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 8.0,
+        "maximum_length": 8,
+        "case_variants": 1
+      }
+    },
+    "stage": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "observation"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    },
+    "metric_name": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 4,
+      "examples": [
+        "no2",
+        "o3",
+        "pm10",
+        "pm2.5"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 3.5,
+        "maximum_length": 5,
+        "case_variants": 4
+      }
+    },
+    "metric_value": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 96,
+      "examples": [
+        44.12,
+        39.33,
+        41.11,
+        72.44,
+        69.92
+      ],
+      "numeric_summary": {
+        "min": 19.19,
+        "max": 126.22,
+        "mean": 56.31791666666667,
+        "median": 51.36,
+        "std": 22.629268514664187,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "metric_unit": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "µg/m³"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 5.0,
+        "maximum_length": 5,
+        "case_variants": 1
+      }
+    },
+    "text_value": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "India"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 5.0,
+        "maximum_length": 5,
+        "case_variants": 1
+      }
+    },
+    "latitude": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        23.0225,
+        12.9716,
+        13.0827,
+        28.6139,
+        17.385
+      ],
+      "numeric_summary": {
+        "min": 12.9716,
+        "max": 28.6139,
+        "mean": 19.4055875,
+        "median": 18.7982,
+        "std": 4.953532754908094,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "longitude": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        72.5714,
+        77.5946,
+        80.2707,
+        77.209,
+        78.4867
+      ],
+      "numeric_summary": {
+        "min": 72.5714,
+        "max": 88.3639,
+        "mean": 77.65383750000001,
+        "median": 77.40180000000001,
+        "std": 4.840739887928183,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "source_name": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "Synthetic OpenAQ-shaped sample"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 30.0,
+        "maximum_length": 30,
+        "case_variants": 1
+      }
+    },
+    "source_record_id": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 96,
+      "examples": [
+        "ahmedabad-no2-0000",
+        "ahmedabad-no2-0001",
+        "ahmedabad-no2-0002",
+        "ahmedabad-o3-0003",
+        "ahmedabad-o3-0004"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 16.5,
+        "maximum_length": 20,
+        "case_variants": 96
+      }
+    },
+    "is_synthetic": {
+      "dtype": "bool",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        true
+      ],
+      "numeric_summary": {
+        "min": true,
+        "max": true,
+        "mean": 1.0,
+        "median": 1.0,
+        "std": 0.0,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "data_version": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "phase3-v1.1"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    }
+  },
+  "notes": [
+    "Profile describes the existing canonical CSV only.",
+    "A date column alone does not establish time-series readiness.",
+    "Profile statistics do not independently prove real-world accuracy.",
+    "Synthetic records must not be represented as real-world observations."
+  ]
+}
+</file>
+
+<file path="data-science/outputs/quality_assessment.json">
+{
+  "assessment_name": "Infocreon Canonical Data Quality Assessment",
+  "generated_at_utc": "2026-10-09T11:42:33.515274+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "row_count": 96,
+  "column_count": 20,
+  "quality_dimensions": {
+    "completeness": {
+      "status": "ASSESSED",
+      "field_results": {
+        "record_id": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "record_type": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "observed_at": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "entity_id": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "related_entity_id": {
+          "missing_count": 96,
+          "missing_percent": 100.0
+        },
+        "entity_name": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "category": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "subcategory": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "status": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "stage": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "metric_name": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "metric_value": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "metric_unit": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "text_value": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "latitude": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "longitude": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "source_name": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "source_record_id": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "is_synthetic": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        },
+        "data_version": {
+          "missing_count": 0,
+          "missing_percent": 0.0
+        }
+      },
+      "interpretation": "Review field-level missingness in context; some fields may be optional for particular record types."
+    },
+    "uniqueness": {
+      "status": "PASS",
+      "results": {
+        "record_id_duplicate_rows": 0,
+        "record_id_unique": true,
+        "duplicate_full_rows": 0,
+        "entity_id_unique_count": 8
+      }
+    },
+    "validity": {
+      "status": "PASS",
+      "numeric_checks": {
+        "metric_value": {
+          "parse_failures": 0,
+          "infinite_values": 0
+        },
+        "latitude": {
+          "parse_failures": 0,
+          "infinite_values": 0
+        },
+        "longitude": {
+          "parse_failures": 0,
+          "infinite_values": 0
+        }
+      },
+      "geographic_validity": {
+        "rows_with_both_coordinates": 96,
+        "rows_missing_latitude": 0,
+        "rows_missing_longitude": 0,
+        "invalid_coordinate_rows": 0
+      },
+      "timestamp_validity": {
+        "valid_timestamps": 96,
+        "invalid_or_missing_timestamps": 0,
+        "unique_timestamps": 3,
+        "unique_calendar_dates": 1
+      }
+    },
+    "consistency": {
+      "status": "PASS",
+      "results": {
+        "unexpected_pollutant_subcategories": [],
+        "pollutant_distribution": {
+          "no2": 24,
+          "o3": 24,
+          "pm10": 24,
+          "pm2.5": 24
+        },
+        "missing_data_version_count": 0,
+        "data_version_distribution": {
+          "phase3-v1.1": 96
+        },
+        "missing_source_name_count": 0,
+        "missing_source_record_id_count": 0,
+        "missing_metric_unit_count": 0,
+        "missing_metric_name_count": 0
+      }
+    },
+    "provenance": {
+      "status": "ASSESSED",
+      "results": {
+        "source_name_distribution": {
+          "Synthetic OpenAQ-shaped sample": 96
+        },
+        "synthetic_flag_distribution": {
+          "true": 96
+        },
+        "unrecognized_synthetic_flag_values": [],
+        "synthetic_flag_missing_count": 0
+      },
+      "limitation": "Source labels and synthetic flags do not independently verify external provenance."
+    },
+    "accuracy": {
+      "status": "NOT_INDEPENDENTLY_VERIFIED",
+      "limitation": "Accuracy against real-world measurements cannot be established from this CSV alone."
+    },
+    "representativeness": {
+      "status": "REQUIRES_SEPARATE_ASSESSMENT",
+      "limitation": "Coverage counts alone do not prove that the records represent real-world cities, time periods, or conditions."
+    },
+    "timeliness": {
+      "status": "LIMITED_TEMPORAL_COVERAGE",
+      "results": {
+        "valid_timestamps": 96,
+        "invalid_or_missing_timestamps": 0,
+        "unique_timestamps": 3,
+        "unique_calendar_dates": 1
+      }
+    },
+    "reproducibility": {
+      "status": "PARTIALLY_ASSESSED",
+      "note": "This assessment is script-generated from the canonical CSV. Full reproducibility also depends on versioned inputs, scripts, and documented execution."
+    }
+  },
+  "checks": {
+    "record_ids_present": true,
+    "record_ids_unique": true,
+    "no_duplicate_full_rows": true,
+    "timestamps_parseable": true,
+    "no_invalid_coordinate_ranges": true,
+    "no_infinite_numeric_values": true,
+    "no_numeric_parse_failures": true,
+    "pollutant_subcategories_expected": true,
+    "data_version_present": true,
+    "synthetic_flags_recognized": true
+  },
+  "overall_structural_status": "PASS",
+  "interpretation_warning": "A structural PASS does not prove real-world accuracy, representativeness, or readiness for every analytical track."
+}
+</file>
+
+<file path="data-science/outputs/representativeness_assessment.json">
+{
+  "assessment_name": "Canonical Dataset Representativeness Assessment",
+  "generated_at_utc": "2026-10-09T11:42:34.483621+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "row_count": 96,
+  "expected_design": {
+    "cities": 8,
+    "pollutants": 4,
+    "timestamps_per_city_pollutant": 3,
+    "expected_canonical_records": 96
+  },
+  "observed_coverage": {
+    "unique_city_names": 8,
+    "city_distribution": {
+      "Ahmedabad": 12,
+      "Bengaluru": 12,
+      "Chennai": 12,
+      "Delhi": 12,
+      "Hyderabad": 12,
+      "Kolkata": 12,
+      "Mumbai": 12,
+      "Pune": 12
+    },
+    "unique_pollutant_subcategories": 4,
+    "pollutant_distribution": {
+      "no2": 24,
+      "o3": 24,
+      "pm10": 24,
+      "pm2.5": 24
+    },
+    "unique_timestamps": 3,
+    "unique_calendar_dates": 1,
+    "timestamp_distribution": {
+      "2026-08-23T00:00:00Z": 32,
+      "2026-08-23T04:00:00Z": 32,
+      "2026-08-23T20:00:00Z": 32
+    },
+    "city_pollutant_record_counts": [
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "records": 3
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "records": 3
+      }
+    ],
+    "city_pollutant_timestamp_counts": [
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Ahmedabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Bengaluru",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Chennai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Delhi",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Hyderabad",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Kolkata",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Mumbai",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "no2",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "o3",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm10",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T00:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T04:00:00Z",
+        "records": 1
+      },
+      {
+        "city": "Pune",
+        "pollutant": "pm2.5",
+        "timestamp": "2026-08-23T20:00:00Z",
+        "records": 1
+      }
+    ]
+  },
+  "structural_checks": {
+    "row_count_matches_expected_design": true,
+    "city_count_matches_expected": true,
+    "pollutant_count_matches_expected": true,
+    "city_pollutant_groups_balanced": true,
+    "groups_with_expected_timestamp_count": 32,
+    "expected_city_pollutant_groups": 32,
+    "all_groups_have_expected_timestamp_count": true
+  },
+  "limitations": [
+    "The dataset is controlled synthetic data, not a probability sample of real-world air quality.",
+    "Balanced counts do not establish geographic, demographic, seasonal, or environmental representativeness.",
+    "Only a single calendar date was observed in the initial profile; long-term temporal coverage is limited.",
+    "City names and pollutant coverage are assessed from the canonical file, not external verification."
+  ],
+  "interpretation": "Use the structural checks to verify the intended dataset design. Do not claim real-world representativeness from balance alone."
+}
+</file>
+
+<file path="data-science/scripts/assess_analytical_readiness.py">
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA_FILE = ROOT / "data" / "canonical" / "intelligence_data.csv"
+PROFILE_FILE = ROOT / "data-science" / "outputs" / "canonical_profile.json"
+QUALITY_FILE = ROOT / "data-science" / "outputs" / "quality_assessment.json"
+REPRESENTATIVENESS_FILE = (
+    ROOT / "data-science" / "outputs" / "representativeness_assessment.json"
+)
+OUTPUT_FILE = ROOT / "data-science" / "outputs" / "analytical_readiness.json"
+
+
+def load_json(path):
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Required assessment is missing: {path}\n"
+            "Run the profile, quality, and representativeness scripts first."
+        )
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def main():
+    if not DATA_FILE.exists():
+        raise FileNotFoundError(f"Canonical dataset not found: {DATA_FILE}")
+
+    profile = load_json(PROFILE_FILE)
+    quality = load_json(QUALITY_FILE)
+    representativeness = load_json(REPRESENTATIVENESS_FILE)
+    df = pd.read_csv(DATA_FILE, low_memory=False)
+
+    dates = pd.to_datetime(df["observed_at"], errors="coerce", utc=True)
+    unique_timestamps = int(dates.nunique(dropna=True))
+    unique_dates = int(dates.dropna().dt.strftime("%Y-%m-%d").nunique())
+    unique_cities = int(df["entity_name"].nunique(dropna=True))
+    unique_pollutants = int(df["subcategory"].nunique(dropna=True))
+    record_types = sorted(df["record_type"].dropna().astype(str).unique().tolist())
+    metric_names = sorted(df["metric_name"].dropna().astype(str).unique().tolist())
+    text_non_null = int(df["text_value"].notna().sum())
+    numeric_values = pd.to_numeric(df["metric_value"], errors="coerce")
+    numeric_count = int(numeric_values.notna().sum())
+
+    synthetic = (
+        df["is_synthetic"].astype("string").str.strip().str.lower()
+    )
+    all_synthetic = bool(
+        len(synthetic) > 0
+        and synthetic.notna().all()
+        and synthetic.isin(["true", "1", "yes"]).all()
+    )
+
+    # Track judgements are based on observed schema and coverage.
+    # They are readiness judgements, not model-performance claims.
+    tracks = {
+        "A Comparative Intelligence": {
+            "status": "Conditionally supported",
+            "evidence": [
+                f"{unique_cities} distinct city/entity names and {unique_pollutants} pollutant categories are present.",
+                "The canonical records contain metric values that can support descriptive comparisons after unit and record-grain checks.",
+            ],
+            "limitations": [
+                "Confirm that compared metrics use compatible units and equivalent meanings.",
+                "Synthetic values do not establish real-world city rankings.",
+            ],
+        },
+        "B Trend Intelligence": {
+            "status": (
+                "Conditionally supported"
+                if unique_timestamps >= 2
+                else "Not supported"
+            ),
+            "evidence": [
+                f"{unique_timestamps} unique timestamps across {unique_dates} calendar date(s).",
+            ],
+            "limitations": [
+                "Only one calendar date is represented; long-term, seasonal, and year-over-year trends are not supported.",
+                "Three timestamps alone do not establish a reliable temporal pattern.",
+            ],
+        },
+        "C Risk & Priority": {
+            "status": "Conditionally supported",
+            "evidence": [
+                "Pollutant labels and numeric metric values are available for descriptive threshold-based exploration.",
+            ],
+            "limitations": [
+                "A risk framework requires documented, domain-appropriate thresholds and units.",
+                "Do not present an unvalidated ranking as a real-world health-risk assessment.",
+            ],
+        },
+        "D Anomaly Intelligence": {
+            "status": "Conditionally supported",
+            "evidence": [
+                "Numeric measurements exist and can be checked for unusual values descriptively.",
+            ],
+            "limitations": [
+                "The dataset has limited temporal depth and is synthetic.",
+                "No anomaly model or claim of statistically validated anomalies is justified by this assessment alone.",
+            ],
+        },
+        "E Segmentation Intelligence": {
+            "status": (
+                "Conditionally supported"
+                if unique_cities > 1 and unique_pollutants > 1
+                else "Not supported"
+            ),
+            "evidence": [
+                f"{unique_cities} city/entity names and {unique_pollutants} pollutant categories allow descriptive grouping.",
+            ],
+            "limitations": [
+                "Grouping by existing categories is not the same as validated clustering.",
+                "Further segmentation needs a defined analytical question and suitable comparable features.",
+            ],
+        },
+        "F Predictive Intelligence": {
+            "status": "Not supported",
+            "evidence": [
+                f"Only {unique_timestamps} unique timestamps and {unique_dates} calendar date(s) are available.",
+                f"All records marked synthetic: {all_synthetic}.",
+                "No validated target/outcome, decision-time feature specification, leakage assessment, or predictive validation plan has been established by these scripts.",
+            ],
+            "limitations": [
+                "Do not build forecasting, classification, regression, clustering-as-prediction, or risk-score models under this readiness assessment.",
+                "Reconsider only if every required target, history, input availability, leakage, distribution, validation, and business-need criterion is documented.",
+            ],
+        },
+        "G Simulation & Scenario Intelligence": {
+            "status": "Conditionally supported",
+            "evidence": [
+                "Descriptive what-if calculations may be possible if assumptions and parameters are explicitly defined.",
+            ],
+            "limitations": [
+                "The canonical dataset alone does not establish causal relationships or validated scenario parameters.",
+                "Do not claim simulated results predict real-world outcomes.",
+            ],
+        },
+        "H Text & Theme Intelligence": {
+            "status": (
+                "Conditionally supported"
+                if text_non_null > 0
+                else "Not supported"
+            ),
+            "evidence": [
+                f"{text_non_null} rows contain a non-null text_value.",
+            ],
+            "limitations": [
+                "Inspect the actual content and meaning of text_value before claiming useful themes.",
+                "A non-null text field alone does not establish that meaningful natural-language analysis is supported.",
+            ],
+        },
+    }
+
+    quality_checks = quality.get("checks", {})
+    quality_structural_status = quality.get("overall_structural_status", "UNKNOWN")
+    coverage_checks = representativeness.get("structural_checks", {})
+
+    archetype = {
+        "primary": "Cross-sectional synthetic multi-entity, multi-metric dataset",
+        "temporal_component": "Sparse repeated measurements",
+        "classification_reason": (
+            "The data contains city/entity and pollutant categories, with three "
+            "unique timestamps but only one calendar date. It is not sufficient "
+            "evidence for a conventional long-horizon time-series archetype."
+        ),
+        "record_types": record_types,
+        "metric_names": metric_names,
+        "numeric_metric_value_count": numeric_count,
+        "non_null_text_value_count": text_non_null,
+        "all_records_marked_synthetic": all_synthetic,
+    }
+
+    # Readiness refers to proceeding with bounded analytical-track work,
+    # not authorization to develop predictive models or claim real-world accuracy.
+    if quality_structural_status != "PASS":
+        final_conclusion = "CANONICAL DATA CHANGES REQUIRED"
+        conclusion_reason = (
+            "The current structural quality assessment requires review before "
+            "analytical-track development."
+        )
+    elif not all(coverage_checks.values()):
+        final_conclusion = "CANONICAL DATA CHANGES REQUIRED"
+        conclusion_reason = (
+            "The intended canonical sampling design did not pass all structural "
+            "representativeness checks."
+        )
+    else:
+        final_conclusion = "DATA READY FOR ANALYTICAL TRACK DEVELOPMENT"
+        conclusion_reason = (
+            "The canonical dataset passes the current structural quality checks "
+            "and matches its intended coverage design. Development must remain "
+            "bounded by the track limitations and synthetic-data caveats."
+        )
+
+    result = {
+        "assessment_name": "Infocreon Analytical Readiness Assessment",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "source_file": "data/canonical/intelligence_data.csv",
+        "data_version_distribution": profile.get("data_version_distribution", {}),
+        "record_count": int(len(df)),
+        "column_count": int(len(df.columns)),
+        "data_archetype": archetype,
+        "quality_gate": {
+            "overall_structural_status": quality_structural_status,
+            "checks": quality_checks,
+            "note": (
+                "Structural checks do not independently prove accuracy, "
+                "provenance, safety, or real-world representativeness."
+            ),
+        },
+        "representativeness_gate": {
+            "structural_checks": coverage_checks,
+            "note": (
+                "Balanced synthetic coverage is not evidence of real-world "
+                "population or environmental representativeness."
+            ),
+        },
+        "analytical_tracks": tracks,
+        "predictive_intelligence_gate": {
+            "decision": "REJECT FOR CURRENT PHASE",
+            "target_or_outcome_defined_and_validated": False,
+            "sufficient_temporal_history_established": False,
+            "decision_time_input_availability_documented": False,
+            "leakage_risk_assessed": False,
+            "target_distribution_assessed": False,
+            "validation_plan_documented": False,
+            "business_need_documented": False,
+            "reason": (
+                "The required evidence has not been established. Do not begin "
+                "predictive modelling as part of this post."
+            ),
+        },
+        "final_conclusion": final_conclusion,
+        "conclusion_reason": conclusion_reason,
+        "scope_guardrails": [
+            "Use only data/canonical/intelligence_data.csv as the analytical source.",
+            "Do not create another cleaned or model-specific dataset.",
+            "Do not modify the operational frontend or dashboard.",
+            "Do not develop predictive models under this assessment.",
+            "Do not describe synthetic observations as real-world measurements.",
+        ],
+    }
+
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_FILE.write_text(
+        json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+    print("=" * 60)
+    print("INFOCREON PHASE 3 — ANALYTICAL READINESS")
+    print("=" * 60)
+    print(f"Archetype: {archetype['primary']}")
+    print(f"Temporal component: {archetype['temporal_component']}")
+    print(f"Unique timestamps: {unique_timestamps}")
+    print(f"Unique calendar dates: {unique_dates}")
+    print(f"Quality gate: {quality_structural_status}")
+    print("Predictive Intelligence: REJECT FOR CURRENT PHASE")
+    print(f"Final conclusion: {final_conclusion}")
+    print(f"Output: {OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    main()
+</file>
+
+<file path="data-science/scripts/assess_data_quality.py">
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA_FILE = ROOT / "data" / "canonical" / "intelligence_data.csv"
+OUTPUT_FILE = ROOT / "data-science" / "outputs" / "quality_assessment.json"
+
+
+def main():
+    if not DATA_FILE.exists():
+        raise FileNotFoundError(f"Canonical dataset not found: {DATA_FILE}")
+
+    df = pd.read_csv(DATA_FILE, low_memory=False)
+    row_count = len(df)
+
+    def count_true(series):
+        return int(series.fillna(False).sum())
+
+    def missing_count(column):
+        return int(df[column].isna().sum())
+
+    # Completeness
+    completeness = {
+        column: {
+            "missing_count": missing_count(column),
+            "missing_percent": round(
+                missing_count(column) / row_count * 100, 2
+            ) if row_count else 0,
+        }
+        for column in df.columns
+    }
+
+    # Uniqueness
+    record_id_duplicates = int(
+        df["record_id"].duplicated(keep=False).sum()
+    )
+    duplicate_full_rows = int(df.duplicated().sum())
+
+    uniqueness = {
+        "record_id_duplicate_rows": record_id_duplicates,
+        "record_id_unique": bool(
+            df["record_id"].notna().all()
+            and df["record_id"].is_unique
+        ),
+        "duplicate_full_rows": duplicate_full_rows,
+        "entity_id_unique_count": int(df["entity_id"].nunique(dropna=True)),
+    }
+
+    # Numeric validity
+    numeric_checks = {}
+    for column in ["metric_value", "latitude", "longitude"]:
+        numeric = pd.to_numeric(df[column], errors="coerce")
+        infinite_count = int(np.isinf(numeric.dropna()).sum())
+        parse_failures = int(
+            (df[column].notna() & numeric.isna()).sum()
+        )
+        numeric_checks[column] = {
+            "parse_failures": parse_failures,
+            "infinite_values": infinite_count,
+        }
+
+    latitude = pd.to_numeric(df["latitude"], errors="coerce")
+    longitude = pd.to_numeric(df["longitude"], errors="coerce")
+    both_coordinates = latitude.notna() & longitude.notna()
+
+    invalid_coordinates = both_coordinates & (
+        ~latitude.between(-90, 90)
+        | ~longitude.between(-180, 180)
+    )
+
+    geographic_validity = {
+        "rows_with_both_coordinates": int(both_coordinates.sum()),
+        "rows_missing_latitude": int(latitude.isna().sum()),
+        "rows_missing_longitude": int(longitude.isna().sum()),
+        "invalid_coordinate_rows": int(invalid_coordinates.sum()),
+    }
+
+    # Timestamp validity
+    timestamps = pd.to_datetime(df["observed_at"], errors="coerce", utc=True)
+    timestamp_validity = {
+        "valid_timestamps": int(timestamps.notna().sum()),
+        "invalid_or_missing_timestamps": int(timestamps.isna().sum()),
+        "unique_timestamps": int(timestamps.nunique(dropna=True)),
+        "unique_calendar_dates": int(
+            timestamps.dropna().dt.strftime("%Y-%m-%d").nunique()
+        ),
+    }
+
+    # Controlled values and cross-field consistency
+    allowed_pollutants = {"pm2.5", "pm10", "no2", "o3"}
+    observed_pollutants = (
+        df["subcategory"].dropna().astype(str).str.strip().str.lower()
+    )
+    unexpected_pollutants = sorted(
+        set(observed_pollutants.unique()) - allowed_pollutants
+    )
+
+    pollutant_counts = {
+        str(k): int(v)
+        for k, v in observed_pollutants.value_counts().items()
+    }
+
+    consistency = {
+        "unexpected_pollutant_subcategories": unexpected_pollutants,
+        "pollutant_distribution": pollutant_counts,
+        "missing_data_version_count": missing_count("data_version"),
+        "data_version_distribution": {
+            str(k): int(v)
+            for k, v in df["data_version"].value_counts(dropna=False).items()
+        },
+        "missing_source_name_count": missing_count("source_name"),
+        "missing_source_record_id_count": missing_count("source_record_id"),
+        "missing_metric_unit_count": missing_count("metric_unit"),
+        "missing_metric_name_count": missing_count("metric_name"),
+    }
+
+    synthetic_values = (
+        df["is_synthetic"].astype("string").str.strip().str.lower()
+    )
+    recognized_boolean_values = {
+        "true", "false", "1", "0", "yes", "no"
+    }
+    unexpected_boolean_values = sorted(
+        set(synthetic_values.dropna().unique())
+        - recognized_boolean_values
+    )
+
+    provenance = {
+        "source_name_distribution": {
+            str(k): int(v)
+            for k, v in df["source_name"].value_counts(dropna=False).items()
+        },
+        "synthetic_flag_distribution": {
+            str(k): int(v)
+            for k, v in synthetic_values.value_counts(dropna=False).items()
+        },
+        "unrecognized_synthetic_flag_values": unexpected_boolean_values,
+        "synthetic_flag_missing_count": int(synthetic_values.isna().sum()),
+    }
+
+    # This measures missingness and basic structural issues.
+    # It cannot independently prove real-world accuracy or representativeness.
+    checks = {
+        "record_ids_present": bool(df["record_id"].notna().all()),
+        "record_ids_unique": uniqueness["record_id_unique"],
+        "no_duplicate_full_rows": duplicate_full_rows == 0,
+        "timestamps_parseable": timestamp_validity[
+            "invalid_or_missing_timestamps"
+        ] == 0,
+        "no_invalid_coordinate_ranges": geographic_validity[
+            "invalid_coordinate_rows"
+        ] == 0,
+        "no_infinite_numeric_values": all(
+            item["infinite_values"] == 0
+            for item in numeric_checks.values()
+        ),
+        "no_numeric_parse_failures": all(
+            item["parse_failures"] == 0
+            for item in numeric_checks.values()
+        ),
+        "pollutant_subcategories_expected": len(unexpected_pollutants) == 0,
+        "data_version_present": consistency["missing_data_version_count"] == 0,
+        "synthetic_flags_recognized": len(unexpected_boolean_values) == 0,
+    }
+
+    result = {
+        "assessment_name": "Infocreon Canonical Data Quality Assessment",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "source_file": "data/canonical/intelligence_data.csv",
+        "row_count": int(row_count),
+        "column_count": int(len(df.columns)),
+        "quality_dimensions": {
+            "completeness": {
+                "status": "ASSESSED",
+                "field_results": completeness,
+                "interpretation": (
+                    "Review field-level missingness in context; "
+                    "some fields may be optional for particular record types."
+                ),
+            },
+            "uniqueness": {
+                "status": "PASS" if checks["record_ids_unique"]
+                and checks["no_duplicate_full_rows"] else "REVIEW",
+                "results": uniqueness,
+            },
+            "validity": {
+                "status": "PASS" if all([
+                    checks["timestamps_parseable"],
+                    checks["no_invalid_coordinate_ranges"],
+                    checks["no_infinite_numeric_values"],
+                    checks["no_numeric_parse_failures"],
+                    checks["pollutant_subcategories_expected"],
+                ]) else "REVIEW",
+                "numeric_checks": numeric_checks,
+                "geographic_validity": geographic_validity,
+                "timestamp_validity": timestamp_validity,
+            },
+            "consistency": {
+                "status": "PASS" if checks["pollutant_subcategories_expected"]
+                and checks["data_version_present"] else "REVIEW",
+                "results": consistency,
+            },
+            "provenance": {
+                "status": "ASSESSED",
+                "results": provenance,
+                "limitation": (
+                    "Source labels and synthetic flags do not independently "
+                    "verify external provenance."
+                ),
+            },
+            "accuracy": {
+                "status": "NOT_INDEPENDENTLY_VERIFIED",
+                "limitation": (
+                    "Accuracy against real-world measurements cannot be "
+                    "established from this CSV alone."
+                ),
+            },
+            "representativeness": {
+                "status": "REQUIRES_SEPARATE_ASSESSMENT",
+                "limitation": (
+                    "Coverage counts alone do not prove that the records "
+                    "represent real-world cities, time periods, or conditions."
+                ),
+            },
+            "timeliness": {
+                "status": "LIMITED_TEMPORAL_COVERAGE"
+                if timestamp_validity["unique_calendar_dates"] <= 1
+                else "ASSESSED",
+                "results": timestamp_validity,
+            },
+            "reproducibility": {
+                "status": "PARTIALLY_ASSESSED",
+                "note": (
+                    "This assessment is script-generated from the canonical "
+                    "CSV. Full reproducibility also depends on versioned "
+                    "inputs, scripts, and documented execution."
+                ),
+            },
+        },
+        "checks": checks,
+        "overall_structural_status": (
+            "PASS" if all(checks.values()) else "REVIEW"
+        ),
+        "interpretation_warning": (
+            "A structural PASS does not prove real-world accuracy, "
+            "representativeness, or readiness for every analytical track."
+        ),
+    }
+
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_FILE.write_text(
+        json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+    print("=" * 60)
+    print("INFOCREON PHASE 3 — DATA QUALITY ASSESSMENT")
+    print("=" * 60)
+    print(f"Rows assessed: {row_count}")
+    print(f"Unique record IDs: {uniqueness['record_id_unique']}")
+    print(f"Duplicate full rows: {duplicate_full_rows}")
+    print(f"Invalid coordinate rows: {geographic_validity['invalid_coordinate_rows']}")
+    print(f"Unexpected pollutant values: {unexpected_pollutants}")
+    print(f"Structural status: {result['overall_structural_status']}")
+    print(f"Output: {OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    main()
+</file>
+
+<file path="data-science/scripts/assess_representativeness.py">
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA_FILE = ROOT / "data" / "canonical" / "intelligence_data.csv"
+OUTPUT_FILE = (
+    ROOT / "data-science" / "outputs" / "representativeness_assessment.json"
+)
+
+
+def distribution(series):
+    counts = series.fillna("<NULL>").astype(str).value_counts(dropna=False)
+    return {str(key): int(value) for key, value in counts.items()}
+
+
+def main():
+    if not DATA_FILE.exists():
+        raise FileNotFoundError(f"Canonical dataset not found: {DATA_FILE}")
+
+    df = pd.read_csv(DATA_FILE, low_memory=False)
+    dates = pd.to_datetime(df["observed_at"], errors="coerce", utc=True)
+
+    cities = df["entity_name"].fillna("<NULL>").astype(str).str.strip()
+    pollutants = df["subcategory"].fillna("<NULL>").astype(str).str.strip().str.lower()
+    timestamps = dates.dt.strftime("%Y-%m-%dT%H:%M:%SZ").fillna("<INVALID>")
+
+    city_counts = distribution(cities)
+    pollutant_counts = distribution(pollutants)
+    timestamp_counts = distribution(timestamps)
+
+    city_pollutant = pd.DataFrame({
+        "city": cities,
+        "pollutant": pollutants,
+    }).value_counts().rename("records").reset_index()
+
+    city_pollutant_timestamp = pd.DataFrame({
+        "city": cities,
+        "pollutant": pollutants,
+        "timestamp": timestamps,
+    }).value_counts().rename("records").reset_index()
+
+    expected_cities = 8
+    expected_pollutants = 4
+    expected_timestamps_per_group = 3
+
+    actual_cities = int(cities[cities != "<NULL>"].nunique())
+    actual_pollutants = int(pollutants[pollutants != "<NULL>"].nunique())
+    actual_timestamps = int(dates.nunique(dropna=True))
+
+    # These are structural coverage checks, not evidence of population-level
+    # representativeness or real-world sampling quality.
+    per_city_pollutant_counts = city_pollutant["records"].tolist()
+    city_pollutant_balanced = (
+        bool(per_city_pollutant_counts)
+        and len(set(per_city_pollutant_counts)) == 1
+    )
+
+    timestamp_counts_per_group = city_pollutant_timestamp.groupby(
+        ["city", "pollutant"]
+    )["timestamp"].nunique()
+
+    groups_with_expected_timestamp_count = int(
+        (timestamp_counts_per_group == expected_timestamps_per_group).sum()
+    )
+
+    expected_group_count = expected_cities * expected_pollutants
+
+    result = {
+        "assessment_name": "Canonical Dataset Representativeness Assessment",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "source_file": "data/canonical/intelligence_data.csv",
+        "row_count": int(len(df)),
+        "expected_design": {
+            "cities": expected_cities,
+            "pollutants": expected_pollutants,
+            "timestamps_per_city_pollutant": expected_timestamps_per_group,
+            "expected_canonical_records": (
+                expected_cities
+                * expected_pollutants
+                * expected_timestamps_per_group
+            ),
+        },
+        "observed_coverage": {
+            "unique_city_names": actual_cities,
+            "city_distribution": city_counts,
+            "unique_pollutant_subcategories": actual_pollutants,
+            "pollutant_distribution": pollutant_counts,
+            "unique_timestamps": actual_timestamps,
+            "unique_calendar_dates": int(
+                dates.dropna().dt.strftime("%Y-%m-%d").nunique()
+            ),
+            "timestamp_distribution": timestamp_counts,
+            "city_pollutant_record_counts": city_pollutant.to_dict(
+                orient="records"
+            ),
+            "city_pollutant_timestamp_counts": city_pollutant_timestamp.to_dict(
+                orient="records"
+            ),
+        },
+        "structural_checks": {
+            "row_count_matches_expected_design": (
+                len(df) == expected_cities
+                * expected_pollutants
+                * expected_timestamps_per_group
+            ),
+            "city_count_matches_expected": actual_cities == expected_cities,
+            "pollutant_count_matches_expected": (
+                actual_pollutants == expected_pollutants
+            ),
+            "city_pollutant_groups_balanced": city_pollutant_balanced,
+            "groups_with_expected_timestamp_count": (
+                groups_with_expected_timestamp_count
+            ),
+            "expected_city_pollutant_groups": expected_group_count,
+            "all_groups_have_expected_timestamp_count": (
+                groups_with_expected_timestamp_count == expected_group_count
+            ),
+        },
+        "limitations": [
+            "The dataset is controlled synthetic data, not a probability sample of real-world air quality.",
+            "Balanced counts do not establish geographic, demographic, seasonal, or environmental representativeness.",
+            "Only a single calendar date was observed in the initial profile; long-term temporal coverage is limited.",
+            "City names and pollutant coverage are assessed from the canonical file, not external verification.",
+        ],
+        "interpretation": (
+            "Use the structural checks to verify the intended dataset design. "
+            "Do not claim real-world representativeness from balance alone."
+        ),
+    }
+
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_FILE.write_text(
+        json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+    print("=" * 60)
+    print("INFOCREON PHASE 3 — REPRESENTATIVENESS ASSESSMENT")
+    print("=" * 60)
+    print(f"Rows: {len(df)}")
+    print(f"Unique cities: {actual_cities}")
+    print(f"Unique pollutants: {actual_pollutants}")
+    print(f"Unique timestamps: {actual_timestamps}")
+    print(f"City-pollutant groups with expected timestamps: "
+          f"{groups_with_expected_timestamp_count}/{expected_group_count}")
+    print(f"Output: {OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    main()
+</file>
+
+<file path="data-science/scripts/profile_canonical_data.py">
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+
+import numpy as np
+import pandas as pd
+
+
+# Resolve the repository root from this script's location.
+ROOT = Path(__file__).resolve().parents[2]
+DATA_FILE = ROOT / "data" / "canonical" / "intelligence_data.csv"
+OUTPUT_DIR = ROOT / "data-science" / "outputs"
+OUTPUT_FILE = OUTPUT_DIR / "canonical_profile.json"
+
+EXPECTED_COLUMNS = [
+    "record_id", "record_type", "observed_at", "entity_id",
+    "related_entity_id", "entity_name", "category", "subcategory",
+    "status", "stage", "metric_name", "metric_value", "metric_unit",
+    "text_value", "latitude", "longitude", "source_name",
+    "source_record_id", "is_synthetic", "data_version",
+]
+
+TEXT_COLUMNS = [
+    "record_id", "record_type", "observed_at", "entity_id",
+    "related_entity_id", "entity_name", "category", "subcategory",
+    "status", "stage", "metric_name", "metric_unit", "text_value",
+    "source_name", "source_record_id", "data_version",
+]
+
+
+def json_safe(value):
+    """Convert NumPy/Pandas values into JSON-safe Python values."""
+    if value is None:
+        return None
+    if isinstance(value, dict):
+        return {str(k): json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(v) for v in value]
+    if isinstance(value, (np.integer,)):
+        return int(value)
+    if isinstance(value, (np.floating, float)):
+        return float(value) if np.isfinite(value) else None
+    if isinstance(value, (np.bool_, bool)):
+        return bool(value)
+    if pd.isna(value):
+        return None
+    if isinstance(value, (pd.Timestamp, datetime)):
+        return value.isoformat()
+    return value
+
+
+def value_counts(series):
+    counts = series.astype("string").fillna("<NULL>").value_counts(dropna=False)
+    return {str(k): int(v) for k, v in counts.items()}
+
+
+def field_profile(df, column):
+    series = df[column]
+    non_null = series.dropna()
+    examples = [json_safe(v) for v in non_null.drop_duplicates().head(5).tolist()]
+
+    result = {
+        "dtype": str(series.dtype),
+        "row_count": int(len(series)),
+        "non_null_count": int(series.notna().sum()),
+        "null_count": int(series.isna().sum()),
+        "null_percent": round(float(series.isna().mean() * 100), 2),
+        "unique_non_null_values": int(series.nunique(dropna=True)),
+        "examples": examples,
+    }
+
+    if pd.api.types.is_numeric_dtype(series):
+        numeric = pd.to_numeric(series, errors="coerce")
+        finite = numeric[np.isfinite(numeric)]
+        result["numeric_summary"] = {
+            "min": json_safe(finite.min()) if len(finite) else None,
+            "max": json_safe(finite.max()) if len(finite) else None,
+            "mean": json_safe(finite.mean()) if len(finite) else None,
+            "median": json_safe(finite.median()) if len(finite) else None,
+            "std": json_safe(finite.std()) if len(finite) else None,
+            "infinite_count": int(np.isinf(numeric.dropna()).sum()),
+            "non_numeric_non_null_count": int(
+                (series.notna() & numeric.isna()).sum()
+            ),
+        }
+
+    if column in TEXT_COLUMNS:
+        text = series.dropna().astype(str)
+        lengths = text.str.len()
+        result["text_summary"] = {
+            "empty_string_count": int((text == "").sum()),
+            "whitespace_only_count": int(text.str.strip().eq("").sum()),
+            "average_length": round(float(lengths.mean()), 2) if len(lengths) else 0,
+            "maximum_length": int(lengths.max()) if len(lengths) else 0,
+            "case_variants": int(text.str.lower().nunique()),
+        }
+
+    return result
+
+
+def main():
+    if not DATA_FILE.exists():
+        raise FileNotFoundError(f"Canonical dataset not found: {DATA_FILE}")
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    df = pd.read_csv(DATA_FILE, low_memory=False)
+
+    missing_columns = [c for c in EXPECTED_COLUMNS if c not in df.columns]
+    unexpected_columns = [c for c in df.columns if c not in EXPECTED_COLUMNS]
+
+    date_values = pd.to_datetime(df["observed_at"], errors="coerce", utc=True)
+    valid_dates = date_values.dropna()
+    date_strings = valid_dates.dt.strftime("%Y-%m-%d")
+    unique_dates = sorted(date_strings.unique().tolist())
+
+    numeric_fields = {}
+    for column in ["metric_value", "latitude", "longitude"]:
+        numeric = pd.to_numeric(df[column], errors="coerce")
+        finite = numeric[np.isfinite(numeric)]
+        numeric_fields[column] = {
+            "parse_failures_on_non_null": int(
+                (df[column].notna() & numeric.isna()).sum()
+            ),
+            "infinite_count": int(np.isinf(numeric.dropna()).sum()),
+            "min": json_safe(finite.min()) if len(finite) else None,
+            "max": json_safe(finite.max()) if len(finite) else None,
+        }
+
+    lat = pd.to_numeric(df["latitude"], errors="coerce")
+    lon = pd.to_numeric(df["longitude"], errors="coerce")
+    both_present = lat.notna() & lon.notna()
+    valid_coordinates = (
+        both_present
+        & lat.between(-90, 90)
+        & lon.between(-180, 180)
+    )
+
+    metric_numeric = pd.to_numeric(df["metric_value"], errors="coerce")
+    finite_metrics = metric_numeric[np.isfinite(metric_numeric)]
+
+    if "data_version" in df.columns:
+        versions = value_counts(df["data_version"])
+    else:
+        versions = {}
+
+    profile = {
+        "profile_name": "Infocreon Canonical Data Profile",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "source_file": "data/canonical/intelligence_data.csv",
+        "data_version_distribution": versions,
+        "file_size_bytes": DATA_FILE.stat().st_size,
+        "file_size_mb": round(DATA_FILE.stat().st_size / (1024 * 1024), 6),
+        "row_count": int(len(df)),
+        "column_count": int(len(df.columns)),
+        "expected_columns": EXPECTED_COLUMNS,
+        "missing_expected_columns": missing_columns,
+        "unexpected_columns": unexpected_columns,
+        "column_order_matches_expected": list(df.columns) == EXPECTED_COLUMNS,
+        "record_type_distribution": value_counts(df["record_type"]),
+        "entity_count": int(df["entity_id"].nunique(dropna=True)),
+        "related_entity_count": int(
+            df["related_entity_id"].nunique(dropna=True)
+        ),
+        "source_name_distribution": value_counts(df["source_name"]),
+        "synthetic_distribution": value_counts(df["is_synthetic"]),
+        "category_distribution": value_counts(df["category"]),
+        "subcategory_distribution": value_counts(df["subcategory"]),
+        "status_distribution": value_counts(df["status"]),
+        "stage_distribution": value_counts(df["stage"]),
+        "metric_name_distribution": value_counts(df["metric_name"]),
+        "metric_unit_distribution": value_counts(df["metric_unit"]),
+        "metric_value_summary": {
+            "numeric_count": int(metric_numeric.notna().sum()),
+            "finite_count": int(len(finite_metrics)),
+            "invalid_non_numeric_count": int(
+                (df["metric_value"].notna() & metric_numeric.isna()).sum()
+            ),
+            "infinite_count": int(
+                np.isinf(metric_numeric.dropna()).sum()
+            ),
+            "min": json_safe(finite_metrics.min()) if len(finite_metrics) else None,
+            "max": json_safe(finite_metrics.max()) if len(finite_metrics) else None,
+            "mean": json_safe(finite_metrics.mean()) if len(finite_metrics) else None,
+            "median": json_safe(finite_metrics.median()) if len(finite_metrics) else None,
+            "std": json_safe(finite_metrics.std()) if len(finite_metrics) else None,
+        },
+        "date_summary": {
+            "row_count": int(len(df)),
+            "valid_date_count": int(date_values.notna().sum()),
+            "invalid_or_missing_date_count": int(date_values.isna().sum()),
+            "unique_timestamps": int(valid_dates.nunique()),
+            "unique_calendar_dates": int(len(unique_dates)),
+            "minimum_timestamp": valid_dates.min().isoformat() if len(valid_dates) else None,
+            "maximum_timestamp": valid_dates.max().isoformat() if len(valid_dates) else None,
+            "calendar_dates": unique_dates,
+            "rows_per_calendar_date": {
+                str(k): int(v) for k, v in date_strings.value_counts().sort_index().items()
+            },
+        },
+        "geographic_summary": {
+            "rows_with_both_coordinates": int(both_present.sum()),
+            "valid_coordinate_rows": int(valid_coordinates.sum()),
+            "invalid_coordinate_rows_with_both_values": int(
+                (both_present & ~valid_coordinates).sum()
+            ),
+            "missing_latitude_count": int(lat.isna().sum()),
+            "missing_longitude_count": int(lon.isna().sum()),
+            "unique_valid_coordinate_pairs": int(
+                pd.DataFrame({
+                    "latitude": lat[valid_coordinates],
+                    "longitude": lon[valid_coordinates],
+                }).drop_duplicates().shape[0]
+            ),
+        },
+        "field_profiles": {
+            column: field_profile(df, column) for column in df.columns
+        },
+        "notes": [
+            "Profile describes the existing canonical CSV only.",
+            "A date column alone does not establish time-series readiness.",
+            "Profile statistics do not independently prove real-world accuracy.",
+            "Synthetic records must not be represented as real-world observations.",
+        ],
+    }
+
+    OUTPUT_FILE.write_text(
+        json.dumps(json_safe(profile), indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    print("=" * 60)
+    print("INFOCREON PHASE 3 — CANONICAL DATA PROFILE")
+    print("=" * 60)
+    print(f"Rows: {profile['row_count']}")
+    print(f"Columns: {profile['column_count']}")
+    print(f"File size: {profile['file_size_mb']} MB")
+    print(f"Unique timestamps: {profile['date_summary']['unique_timestamps']}")
+    print(f"Unique calendar dates: {profile['date_summary']['unique_calendar_dates']}")
+    print(f"Valid coordinate rows: {profile['geographic_summary']['valid_coordinate_rows']}")
+    print(f"Missing expected columns: {missing_columns}")
+    print(f"Profile saved to: {OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    main()
+</file>
+
+<file path="data-science/README.md">
+# Phase 3 — Canonical Data Validation and Analytical Readiness
+
+## Purpose
+
+This workspace implements Post #2 validation, profiling, representativeness assessment, dataset-archetype confirmation, and analytical-readiness assessment.
+
+## Source of Truth
+
+All analytical scripts read the existing canonical dataset:
+
+`data/canonical/intelligence_data.csv`
+
+Do not create a separate cleaned, final, analysis, or model-specific dataset. The operational frontend and backend are outside this workspace's scope.
+
+## Scripts
+
+Run the following commands from the repository root:
+
+```bash
+python data-science/scripts/profile_canonical_data.py
+python data-science/scripts/assess_data_quality.py
+python data-science/scripts/assess_representativeness.py
+python data-science/scripts/assess_analytical_readiness.py
+```
+
+Run the scripts in this order because the readiness assessment reads the preceding JSON outputs.
+
+## Outputs
+
+The `outputs/` directory contains:
+
+* `canonical_profile.json`
+* `quality_assessment.json`
+* `representativeness_assessment.json`
+* `analytical_readiness.json`
+
+These files are generated evidence, not manually entered results. Regenerate them after relevant source or script changes.
+
+## Notebook
+
+`notebooks/01_canonical_data_validation_and_readiness.ipynb` brings together the profile, quality checks, coverage evidence, and readiness conclusion.
+
+Open it in VS Code or Jupyter and run the cells from top to bottom. The Python kernel needs Pandas and NumPy.
+
+## Dataset Characteristics
+
+The current canonical package is designed for 96 records covering eight cities, four pollutant categories, and three retained timestamps per city–pollutant group. The data is synthetic, and the three timestamps fall on one calendar date.
+
+## Analytical Guardrails
+
+* Do not present synthetic observations as verified real-world measurements.
+* Do not claim long-term trends or seasonal patterns from the current temporal coverage.
+* Predictive Intelligence is not supported for the current phase.
+* Review the five reports in `docs/` before selecting an analytical track.
+* A structural quality PASS does not prove accuracy or real-world representativeness.
+
+## Reproducibility
+
+Run the four scripts from the repository root to regenerate the JSON outputs. Keep the scripts, outputs, notebook, and documentation consistent with the canonical data version.
+</file>
+
+<file path="docs/ANALYTICAL_READINESS_REPORT.md">
+# Analytical Readiness Report
+
+## 1. Purpose
+
+This report consolidates the canonical data profile, quality assessment, representativeness assessment, and analytical track decisions for Phase 3 Post #2.
+
+## 2. Readiness Evidence
+
+The current assessment reports 96 records, 20 columns, eight cities, four pollutant categories, and three unique timestamps on one calendar date. The structural quality gate passed, and the representativeness checks match the intended city–pollutant–timestamp design.
+
+The data is synthetic. Structural validation does not establish real-world accuracy, authenticity, or representativeness.
+
+## 3. Analytical Track Decisions
+
+| Track                                 | Status                  | Basis and limitation                                                                                                                         |
+| ------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| A. Comparative Intelligence           | Conditionally supported | Descriptive comparisons may be possible after checking metric meaning and unit compatibility.                                                |
+| B. Trend Intelligence                 | Conditionally supported | Only three timestamps on one calendar date; no long-term or seasonal trend claims.                                                           |
+| C. Risk & Priority                    | Conditionally supported | Requires documented thresholds, compatible units, and appropriate interpretation.                                                            |
+| D. Anomaly Intelligence               | Conditionally supported | Descriptive checks may be explored; validated anomaly detection is not established.                                                          |
+| E. Segmentation Intelligence          | Conditionally supported | Existing categories allow grouping; validated clustering is not established.                                                                 |
+| F. Predictive Intelligence            | Not supported           | Required target, history, decision-time inputs, leakage review, target distribution, validation plan, and business need are not established. |
+| G. Simulation & Scenario Intelligence | Conditionally supported | Requires explicit assumptions; no causal or real-world predictive claims.                                                                    |
+| H. Text & Theme Intelligence          | Conditionally supported | Inspect actual text content before deciding whether meaningful text analysis is justified.                                                   |
+
+## 4. Predictive Intelligence Gate
+
+Predictive Intelligence is rejected for the current phase. No forecasting, classification, regression, predictive clustering, or risk-score model should be developed under this readiness assessment.
+
+Reconsideration requires documented evidence of a valid target or outcome, sufficient historical data, inputs available at decision time, leakage-risk assessment, target-distribution analysis, a validation plan, and a genuine business need.
+
+## 5. Scope Guardrails
+
+* Use only `data/canonical/intelligence_data.csv` as the analytical source.
+* Do not create a second cleaned or model-specific dataset.
+* Do not change the operational dashboard as part of this work.
+* Do not present synthetic data as verified real-world observations.
+* Do not claim analytical validity beyond the evidence and track limitations.
+
+## 6. Final Conclusion
+
+**DATA READY FOR ANALYTICAL TRACK DEVELOPMENT**
+
+This conclusion authorizes appropriately scoped analytical track development, subject to the limitations in this report. It does not mean all eight tracks are fully supported, and it does not authorize predictive modelling.
+
+## 7. Reproducibility
+
+Run the scripts from the repository root:
+
+```bash
+python data-science/scripts/profile_canonical_data.py
+python data-science/scripts/assess_data_quality.py
+python data-science/scripts/assess_representativeness.py
+python data-science/scripts/assess_analytical_readiness.py
+```
+
+The corresponding machine-readable evidence is stored in `data-science/outputs/`.
+</file>
+
+<file path="docs/CANONICAL_DATA_PROFILE.md">
+# Canonical Data Profile
+
+## 1. Purpose
+
+This report documents the structure and observed characteristics of the Phase 3 canonical dataset. The sole analytical source is `data/canonical/intelligence_data.csv`.
+
+## 2. Dataset Overview
+
+| Attribute                        | Observed result                           |
+| -------------------------------- | ----------------------------------------- |
+| Canonical records                | 96                                        |
+| Columns                          | 20                                        |
+| Canonical CSV size               | 19,614 bytes (approximately 0.018705 MiB) |
+| Data version                     | `phase3-v1.1`                             |
+| Unique city/entity names         | 8                                         |
+| Pollutant categories             | 4                                         |
+| Unique timestamps                | 3                                         |
+| Unique calendar dates            | 1                                         |
+| Rows with valid coordinate pairs | 96                                        |
+
+The canonical dataset contains 96 records across eight cities, four pollutant categories, and three unique timestamps. All records belong to the `phase3-v1.1` data version according to the generated profile.
+
+## 3. Schema and Record Structure
+
+The dataset contains 20 columns covering record identity, record type, observation time, entity relationships, descriptive categories, metric values and units, optional text, geographic coordinates, source information, synthetic-data flags, and data version.
+
+The profiling script confirmed that all expected columns are present and that the column order matches the expected canonical schema. Detailed field-level null counts, distinct-value counts, examples, and numeric summaries are available in `data-science/outputs/canonical_profile.json`.
+
+## 4. Temporal Coverage
+
+The dataset contains three unique timestamps but only one unique calendar date. It therefore provides sparse repeated measurements rather than substantial historical coverage.
+
+This temporal structure does not support claims of long-term trends, seasonality, or year-over-year change. The existence of an observation-time field alone does not establish suitability for conventional time-series analysis.
+
+## 5. Geographic Coverage
+
+All 96 records have valid latitude and longitude values within the accepted coordinate ranges. This establishes structural coordinate validity, not independent verification of the real-world locations or the representativeness of the observations.
+
+## 6. Data Nature and Limitations
+
+The dataset is a controlled synthetic dataset. Its structure is designed to support reproducible analytical-readiness assessment, but synthetic values must not be presented as verified real-world air-quality observations.
+
+The dataset's limited temporal depth, synthetic nature, and finite geographic coverage must be considered when choosing analytical tracks.
+
+## 7. Reproducibility
+
+Regenerate the profile from the repository root using:
+
+```bash
+python data-science/scripts/profile_canonical_data.py
+```
+
+The generated output is `data-science/outputs/canonical_profile.json`.
+
+## 8. Conclusion
+
+The canonical dataset has the expected 96-row, 20-column structure and includes multiple entities, pollutant categories, and repeated timestamps. It is suitable for assessing bounded descriptive analytical work, subject to the quality, representativeness, and track-specific limitations documented in the accompanying reports.
+</file>
+
+<file path="docs/DATA_ARCHETYPE_CONFIRMATION.md">
+# Data Archetype Confirmation
+
+## 1. Confirmed Archetype
+
+**Primary archetype:** Cross-sectional synthetic multi-entity, multi-metric dataset.
+
+**Temporal component:** Sparse repeated measurements.
+
+## 2. Evidence
+
+The canonical dataset contains 96 records, eight city/entity names, four pollutant categories, and three unique timestamps. All three timestamps occur on one calendar date.
+
+These characteristics support a cross-sectional, multi-entity interpretation with limited repeated temporal measurements. They do not establish a conventional long-horizon time series.
+
+## 3. Analytical Implications
+
+The dataset may support bounded descriptive comparisons, category-based summaries, and exploratory checks of numeric measurements. Trend interpretation must remain limited because the temporal coverage spans only one calendar date.
+
+Simulation requires explicitly documented assumptions. Text/theme analysis requires inspection of the actual text content. Predictive modelling is not supported by the current evidence.
+
+## 4. Data Nature
+
+The dataset is controlled synthetic data. Results must not be described as verified real-world air-quality findings.
+
+## 5. Conclusion
+
+The confirmed archetype is a cross-sectional synthetic multi-entity, multi-metric dataset with sparse repeated measurements. Reconsider the archetype only if the canonical data structure or its documented purpose changes.
+</file>
+
+<file path="docs/DATA_QUALITY_ASSESSMENT.md">
+# Data Quality Assessment
+
+## 1. Purpose
+
+This assessment evaluates structural quality indicators in `data/canonical/intelligence_data.csv`. It does not independently prove real-world accuracy or source authenticity.
+
+## 2. Results
+
+The automated quality assessment evaluated 96 records. It reported unique record IDs, zero duplicate full rows, zero invalid coordinate rows, no unexpected pollutant subcategories, and an overall structural status of `PASS`.
+
+Field-level missingness, numeric validity, timestamp validity, data-version consistency, source information, and synthetic-data flags are recorded in `data-science/outputs/quality_assessment.json`.
+
+## 3. Quality Dimensions
+
+* **Completeness:** Missing values are reported per field. Missingness must be interpreted in context because some fields may be optional for particular record types.
+* **Uniqueness:** Record-ID uniqueness and duplicate full rows are checked.
+* **Validity:** Numeric parsing, infinite values, timestamp parsing, coordinate ranges, and pollutant labels are assessed.
+* **Consistency:** Data-version and pollutant-label consistency are checked.
+* **Provenance:** Source labels and synthetic flags are profiled, but do not independently verify external provenance.
+* **Accuracy:** Real-world accuracy is not independently verified.
+* **Representativeness:** Assessed separately; balanced synthetic coverage is not proof of real-world representativeness.
+* **Timeliness:** The three timestamps fall on one calendar date, limiting temporal coverage.
+* **Reproducibility:** The assessment is generated by a versioned script against the canonical CSV.
+
+## 4. Limitations
+
+A structural `PASS` means the implemented checks passed; it does not mean every field is complete, every value is accurate, or every analytical track is suitable. Review field-level results in the generated JSON before relying on individual metrics.
+
+## 5. Reproduction
+
+```bash
+python data-science/scripts/assess_data_quality.py
+```
+
+Output: `data-science/outputs/quality_assessment.json`.
+</file>
+
+<file path="docs/REPRESENTATIVENESS_ASSESSMENT.md">
+# Representativeness Assessment
+
+## 1. Purpose
+
+This report evaluates whether the canonical dataset matches its intended structural sampling design. It does not claim that synthetic records represent actual city populations or environmental conditions.
+
+## 2. Observed Coverage
+
+The assessment found 96 records, eight distinct city names, four pollutant categories, and three unique timestamps. All 32 city–pollutant groups have the expected timestamp coverage.
+
+The intended design is eight cities × four pollutants × three timestamps, yielding 96 canonical records.
+
+## 3. Interpretation
+
+The observed counts match the intended structural design. This supports consistent coverage across the designed city–pollutant groups.
+
+However, balanced counts do not establish geographic, demographic, seasonal, or environmental representativeness. The observations are synthetic, and the three timestamps fall on one calendar date.
+
+## 4. Implications
+
+* Descriptive comparisons across existing city and pollutant groups may be considered with appropriate caveats.
+* Long-term trend and seasonal claims are not supported by the current temporal coverage.
+* The dataset must not be used to claim verified real-world city rankings or pollution conditions.
+* No additional sampling or dataset expansion is implied by this assessment alone.
+
+## 5. Reproduction
+
+```bash
+python data-science/scripts/assess_representativeness.py
+```
+
+Output: `data-science/outputs/representativeness_assessment.json`.
+</file>
 
 <file path="architecture/ARCHITECTURE.md">
 # Aether Pulse — Architecture
@@ -3249,63 +6383,6 @@ No restricted or private source data is used in the current canonical package.
 The Phase 2 application retains its existing OpenAQ integration. Phase 3 canonicalization does not replace or modify that application integration.
 
 The canonical dataset provides a stable versioned data foundation for downstream Phase 3 analysis.
-</file>
-
-<file path="docs/SAMPLING_AND_REDUCTION_REPORT.md">
-# Sampling and Reduction Report
-
-## Purpose
-
-This report documents the reproducible reduction of the controlled
-synthetic air-quality source dataset into the Phase 3 canonical data
-sample.
-
-## Source Dataset
-
-The controlled source dataset contains:
-
-- 192 records
-- 8 cities
-- 4 pollutants
-- Multiple observation timestamps
-- PM2.5
-- PM10
-- NO2
-- O3
-
-The source data is synthetic and reproducible. It follows the
-measurement structure used by the existing air-quality application and
-is designed to provide stable input for Phase 3 data processing.
-
-## Sampling Method
-
-A coverage-aware sampling method is used instead of taking the first
-rows of the source dataset.
-
-Sampling is stratified by:
-
-- City
-- Pollutant
-
-Each city/pollutant combination retains 3 observation timestamps.
-
-There are:
-
-- 8 cities
-- 4 pollutants
-- 32 city/pollutant combinations
-- 3 retained observations per combination
-
-Therefore:
-
-`8 × 4 × 3 = 96 canonical records`
-
-## Random Seed
-
-The sampling process uses:
-
-```text
-Random seed: 42
 </file>
 
 <file path="frontend/app/components/air-quality-dashboard.tsx">
@@ -9373,50 +12450,6 @@ aq-0096,measurement,2026-08-23T20:00:00Z,pune,,Pune,air_quality,pm2.5,observed,o
 }
 </file>
 
-<file path="data/quality/validation_report.json">
-{
-  "status": "PASS",
-  "dataset": "Infocreon Aether Pulse Canonical Intelligence Dataset",
-  "data_version": "phase3-v1.1",
-  "canonical_file": "data\\canonical\\intelligence_data.csv",
-  "published_file": "data\\published\\intelligence_data.json",
-  "canonical_rows": 96,
-  "canonical_columns": 20,
-  "published_json_valid": true,
-  "total_data_size_mb": 0.136,
-  "checks": [
-    "Present: data\\README.md",
-    "Present: data\\manifest.json",
-    "Present: data\\schema.json",
-    "Present: data\\source-sample\\source_sample.csv",
-    "Present: data\\canonical\\intelligence_data.csv",
-    "Present: data\\published\\intelligence_data.json",
-    "Present: data\\quality\\sampling_report.md",
-    "Total /data size: 0.136 MB",
-    "Canonical CSV size: 0.019 MB",
-    "Canonical rows: 96",
-    "Canonical columns: 20",
-    "Canonical column order: PASS",
-    "record_id uniqueness: PASS",
-    "Canonical data version: PASS",
-    "Date parsing: PASS",
-    "Numeric field and range validation: PASS",
-    "Boolean validation: PASS",
-    "Allowed pollutant values: PASS",
-    "Manifest version: PASS",
-    "Manifest record count: PASS",
-    "Manifest column count: PASS",
-    "Published JSON syntax: PASS",
-    "Published record count: PASS",
-    "Published column count: PASS",
-    "Published data version: PASS",
-    "Published/current canonical hash: PASS",
-    "Published/canonical record content: PASS"
-  ],
-  "errors": []
-}
-</file>
-
 <file path="data/source-sample/source_sample.csv">
 city,country,pollutant,value,unit,timestamp,population,exposure_score,regional_average,percentage_above_regional_average,source,latitude,longitude
 Ahmedabad,India,NO2,44.12,µg/m³,2026-08-23T00:00:00Z,8500000,86.5,35.7,23.59,Synthetic OpenAQ-shaped sample,23.0225,72.5714
@@ -9556,56 +12589,6 @@ Pune,India,PM2.5,31.11,µg/m³,2026-08-23T20:00:00Z,7400000,49.4,44.1,-29.46,Syn
     "seed": 42
   }
 }
-</file>
-
-<file path="data/README.md">
-# Canonical Data Package
-
-This directory contains the reproducible canonical data foundation for
-PoC 32 — Aether Pulse Air Quality Heatmap, Phase 3.
-
-## Dataset Overview
-
-The Phase 3 package uses a controlled, reproducible synthetic air-quality
-dataset shaped around the existing OpenAQ-style measurement structure.
-
-The source dataset contains:
-
-- 192 source records
-- 8 cities
-- 4 pollutants
-- Multiple observation timestamps
-- PM2.5, PM10, NO2, and O3 measurements
-
-The coverage-aware sampling stage reduces the source dataset to:
-
-- 96 sampled records
-- 8 cities
-- 4 pollutants
-- 3 retained timestamps per city/pollutant combination
-- Random seed: 42
-
-The canonical dataset contains 20 standardized columns and uses
-data version `phase3-v1.1`.
-
-## Directory Structure
-
-```text
-data/
-├── README.md
-├── manifest.json
-├── schema.json
-├── source-sample/
-│   ├── source_sample_full.csv
-│   └── source_sample.csv
-├── canonical/
-│   └── intelligence_data.csv
-├── published/
-│   └── intelligence_data.json
-└── quality/
-    ├── data_profile.json
-    ├── sampling_report.md
-    └── validation_report.json
 </file>
 
 <file path="data/schema.json">
@@ -9908,6 +12891,63 @@ data/
     }
   ]
 }
+</file>
+
+<file path="docs/SAMPLING_AND_REDUCTION_REPORT.md">
+# Sampling and Reduction Report
+
+## Purpose
+
+This report documents the reproducible reduction of the controlled
+synthetic air-quality source dataset into the Phase 3 canonical data
+sample.
+
+## Source Dataset
+
+The controlled source dataset contains:
+
+- 192 records
+- 8 cities
+- 4 pollutants
+- Multiple observation timestamps
+- PM2.5
+- PM10
+- NO2
+- O3
+
+The source data is synthetic and reproducible. It follows the
+measurement structure used by the existing air-quality application and
+is designed to provide stable input for Phase 3 data processing.
+
+## Sampling Method
+
+A coverage-aware sampling method is used instead of taking the first
+rows of the source dataset.
+
+Sampling is stratified by:
+
+- City
+- Pollutant
+
+Each city/pollutant combination retains 3 observation timestamps.
+
+There are:
+
+- 8 cities
+- 4 pollutants
+- 32 city/pollutant combinations
+- 3 retained observations per combination
+
+Therefore:
+
+`8 × 4 × 3 = 96 canonical records`
+
+## Random Seed
+
+The sampling process uses:
+
+```text
+Random seed: 42
 </file>
 
 <file path="frontend/repomix-output.xml">
@@ -14718,6 +17758,100 @@ def main():
 
 if __name__ == "__main__":
     main()
+</file>
+
+<file path="data/quality/validation_report.json">
+{
+  "status": "PASS",
+  "dataset": "Infocreon Aether Pulse Canonical Intelligence Dataset",
+  "data_version": "phase3-v1.1",
+  "canonical_file": "data\\canonical\\intelligence_data.csv",
+  "published_file": "data\\published\\intelligence_data.json",
+  "canonical_rows": 96,
+  "canonical_columns": 20,
+  "published_json_valid": true,
+  "total_data_size_mb": 0.136,
+  "checks": [
+    "Present: data\\README.md",
+    "Present: data\\manifest.json",
+    "Present: data\\schema.json",
+    "Present: data\\source-sample\\source_sample.csv",
+    "Present: data\\canonical\\intelligence_data.csv",
+    "Present: data\\published\\intelligence_data.json",
+    "Present: data\\quality\\sampling_report.md",
+    "Total /data size: 0.136 MB",
+    "Canonical CSV size: 0.019 MB",
+    "Canonical rows: 96",
+    "Canonical columns: 20",
+    "Canonical column order: PASS",
+    "record_id uniqueness: PASS",
+    "Canonical data version: PASS",
+    "Date parsing: PASS",
+    "Numeric field and range validation: PASS",
+    "Boolean validation: PASS",
+    "Allowed pollutant values: PASS",
+    "Manifest version: PASS",
+    "Manifest record count: PASS",
+    "Manifest column count: PASS",
+    "Published JSON syntax: PASS",
+    "Published record count: PASS",
+    "Published column count: PASS",
+    "Published data version: PASS",
+    "Published/current canonical hash: PASS",
+    "Published/canonical record content: PASS"
+  ],
+  "errors": []
+}
+</file>
+
+<file path="data/README.md">
+# Canonical Data Package
+
+This directory contains the reproducible canonical data foundation for
+PoC 32 — Aether Pulse Air Quality Heatmap, Phase 3.
+
+## Dataset Overview
+
+The Phase 3 package uses a controlled, reproducible synthetic air-quality
+dataset shaped around the existing OpenAQ-style measurement structure.
+
+The source dataset contains:
+
+- 192 source records
+- 8 cities
+- 4 pollutants
+- Multiple observation timestamps
+- PM2.5, PM10, NO2, and O3 measurements
+
+The coverage-aware sampling stage reduces the source dataset to:
+
+- 96 sampled records
+- 8 cities
+- 4 pollutants
+- 3 retained timestamps per city/pollutant combination
+- Random seed: 42
+
+The canonical dataset contains 20 standardized columns and uses
+data version `phase3-v1.1`.
+
+## Directory Structure
+
+```text
+data/
+├── README.md
+├── manifest.json
+├── schema.json
+├── source-sample/
+│   ├── source_sample_full.csv
+│   └── source_sample.csv
+├── canonical/
+│   └── intelligence_data.csv
+├── published/
+│   └── intelligence_data.json
+└── quality/
+    ├── data_profile.json
+    ├── sampling_report.md
+    └── validation_report.json
 </file>
 
 </files>

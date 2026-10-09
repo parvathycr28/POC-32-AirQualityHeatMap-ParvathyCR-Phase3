@@ -1,0 +1,525 @@
+{
+  "profile_name": "Infocreon Canonical Data Profile",
+  "generated_at_utc": "2026-10-09T11:53:28.464644+00:00",
+  "source_file": "data/canonical/intelligence_data.csv",
+  "data_version_distribution": {
+    "phase3-v1.1": 96
+  },
+  "file_size_bytes": 19614,
+  "file_size_mb": 0.018705,
+  "row_count": 96,
+  "column_count": 20,
+  "expected_columns": [
+    "record_id",
+    "record_type",
+    "observed_at",
+    "entity_id",
+    "related_entity_id",
+    "entity_name",
+    "category",
+    "subcategory",
+    "status",
+    "stage",
+    "metric_name",
+    "metric_value",
+    "metric_unit",
+    "text_value",
+    "latitude",
+    "longitude",
+    "source_name",
+    "source_record_id",
+    "is_synthetic",
+    "data_version"
+  ],
+  "missing_expected_columns": [],
+  "unexpected_columns": [],
+  "column_order_matches_expected": true,
+  "record_type_distribution": {
+    "measurement": 96
+  },
+  "entity_count": 8,
+  "related_entity_count": 0,
+  "source_name_distribution": {
+    "Synthetic OpenAQ-shaped sample": 96
+  },
+  "synthetic_distribution": {
+    "True": 96
+  },
+  "category_distribution": {
+    "air_quality": 96
+  },
+  "subcategory_distribution": {
+    "no2": 24,
+    "o3": 24,
+    "pm10": 24,
+    "pm2.5": 24
+  },
+  "status_distribution": {
+    "observed": 96
+  },
+  "stage_distribution": {
+    "observation": 96
+  },
+  "metric_name_distribution": {
+    "no2": 24,
+    "o3": 24,
+    "pm10": 24,
+    "pm2.5": 24
+  },
+  "metric_unit_distribution": {
+    "µg/m³": 96
+  },
+  "metric_value_summary": {
+    "numeric_count": 96,
+    "finite_count": 96,
+    "invalid_non_numeric_count": 0,
+    "infinite_count": 0,
+    "min": 19.19,
+    "max": 126.22,
+    "mean": 56.31791666666667,
+    "median": 51.36,
+    "std": 22.629268514664187
+  },
+  "date_summary": {
+    "row_count": 96,
+    "valid_date_count": 96,
+    "invalid_or_missing_date_count": 0,
+    "unique_timestamps": 3,
+    "unique_calendar_dates": 1,
+    "minimum_timestamp": "2026-08-23T00:00:00+00:00",
+    "maximum_timestamp": "2026-08-23T20:00:00+00:00",
+    "calendar_dates": [
+      "2026-08-23"
+    ],
+    "rows_per_calendar_date": {
+      "2026-08-23": 96
+    }
+  },
+  "geographic_summary": {
+    "rows_with_both_coordinates": 96,
+    "valid_coordinate_rows": 96,
+    "invalid_coordinate_rows_with_both_values": 0,
+    "missing_latitude_count": 0,
+    "missing_longitude_count": 0,
+    "unique_valid_coordinate_pairs": 8
+  },
+  "field_profiles": {
+    "record_id": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 96,
+      "examples": [
+        "aq-0001",
+        "aq-0002",
+        "aq-0003",
+        "aq-0004",
+        "aq-0005"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 7.0,
+        "maximum_length": 7,
+        "case_variants": 96
+      }
+    },
+    "record_type": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "measurement"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    },
+    "observed_at": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 3,
+      "examples": [
+        "2026-08-23T00:00:00Z",
+        "2026-08-23T04:00:00Z",
+        "2026-08-23T20:00:00Z"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 20.0,
+        "maximum_length": 20,
+        "case_variants": 3
+      }
+    },
+    "entity_id": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        "ahmedabad",
+        "bengaluru",
+        "chennai",
+        "delhi",
+        "hyderabad"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 7.0,
+        "maximum_length": 9,
+        "case_variants": 8
+      }
+    },
+    "related_entity_id": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 0,
+      "null_count": 96,
+      "null_percent": 100.0,
+      "unique_non_null_values": 0,
+      "examples": [],
+      "numeric_summary": {
+        "min": null,
+        "max": null,
+        "mean": null,
+        "median": null,
+        "std": null,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      },
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 0,
+        "maximum_length": 0,
+        "case_variants": 0
+      }
+    },
+    "entity_name": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        "Ahmedabad",
+        "Bengaluru",
+        "Chennai",
+        "Delhi",
+        "Hyderabad"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 7.0,
+        "maximum_length": 9,
+        "case_variants": 8
+      }
+    },
+    "category": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "air_quality"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    },
+    "subcategory": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 4,
+      "examples": [
+        "no2",
+        "o3",
+        "pm10",
+        "pm2.5"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 3.5,
+        "maximum_length": 5,
+        "case_variants": 4
+      }
+    },
+    "status": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "observed"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 8.0,
+        "maximum_length": 8,
+        "case_variants": 1
+      }
+    },
+    "stage": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "observation"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    },
+    "metric_name": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 4,
+      "examples": [
+        "no2",
+        "o3",
+        "pm10",
+        "pm2.5"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 3.5,
+        "maximum_length": 5,
+        "case_variants": 4
+      }
+    },
+    "metric_value": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 96,
+      "examples": [
+        44.12,
+        39.33,
+        41.11,
+        72.44,
+        69.92
+      ],
+      "numeric_summary": {
+        "min": 19.19,
+        "max": 126.22,
+        "mean": 56.31791666666667,
+        "median": 51.36,
+        "std": 22.629268514664187,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "metric_unit": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "µg/m³"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 5.0,
+        "maximum_length": 5,
+        "case_variants": 1
+      }
+    },
+    "text_value": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "India"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 5.0,
+        "maximum_length": 5,
+        "case_variants": 1
+      }
+    },
+    "latitude": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        23.0225,
+        12.9716,
+        13.0827,
+        28.6139,
+        17.385
+      ],
+      "numeric_summary": {
+        "min": 12.9716,
+        "max": 28.6139,
+        "mean": 19.4055875,
+        "median": 18.7982,
+        "std": 4.953532754908094,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "longitude": {
+      "dtype": "float64",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 8,
+      "examples": [
+        72.5714,
+        77.5946,
+        80.2707,
+        77.209,
+        78.4867
+      ],
+      "numeric_summary": {
+        "min": 72.5714,
+        "max": 88.3639,
+        "mean": 77.65383750000001,
+        "median": 77.40180000000001,
+        "std": 4.840739887928183,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "source_name": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "Synthetic OpenAQ-shaped sample"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 30.0,
+        "maximum_length": 30,
+        "case_variants": 1
+      }
+    },
+    "source_record_id": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 96,
+      "examples": [
+        "ahmedabad-no2-0000",
+        "ahmedabad-no2-0001",
+        "ahmedabad-no2-0002",
+        "ahmedabad-o3-0003",
+        "ahmedabad-o3-0004"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 16.5,
+        "maximum_length": 20,
+        "case_variants": 96
+      }
+    },
+    "is_synthetic": {
+      "dtype": "bool",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        true
+      ],
+      "numeric_summary": {
+        "min": true,
+        "max": true,
+        "mean": 1.0,
+        "median": 1.0,
+        "std": 0.0,
+        "infinite_count": 0,
+        "non_numeric_non_null_count": 0
+      }
+    },
+    "data_version": {
+      "dtype": "str",
+      "row_count": 96,
+      "non_null_count": 96,
+      "null_count": 0,
+      "null_percent": 0.0,
+      "unique_non_null_values": 1,
+      "examples": [
+        "phase3-v1.1"
+      ],
+      "text_summary": {
+        "empty_string_count": 0,
+        "whitespace_only_count": 0,
+        "average_length": 11.0,
+        "maximum_length": 11,
+        "case_variants": 1
+      }
+    }
+  },
+  "notes": [
+    "Profile describes the existing canonical CSV only.",
+    "A date column alone does not establish time-series readiness.",
+    "Profile statistics do not independently prove real-world accuracy.",
+    "Synthetic records must not be represented as real-world observations."
+  ]
+}
