@@ -51,7 +51,7 @@ Current records use:
 
 The current canonical dataset version is:
 
-`phase3-v1.0`
+`phase3-v1.1`
 
 ## Canonical Column Order
 

@@ -14,14 +14,14 @@ The data is synthetic. Structural validation does not establish real-world accur
 
 | Track                                 | Status                  | Basis and limitation                                                                                                                         |
 | ------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| A. Comparative Intelligence           | Conditionally supported | Descriptive comparisons may be possible after checking metric meaning and unit compatibility.                                                |
+| A. Comparative Intelligence           | Supported | Descriptive comparisons may be possible after checking metric meaning and unit compatibility.                                                |
 | B. Trend Intelligence                 | Conditionally supported | Only three timestamps on one calendar date; no long-term or seasonal trend claims.                                                           |
 | C. Risk & Priority                    | Conditionally supported | Requires documented thresholds, compatible units, and appropriate interpretation.                                                            |
 | D. Anomaly Intelligence               | Conditionally supported | Descriptive checks may be explored; validated anomaly detection is not established.                                                          |
 | E. Segmentation Intelligence          | Conditionally supported | Existing categories allow grouping; validated clustering is not established.                                                                 |
 | F. Predictive Intelligence            | Not supported           | Required target, history, decision-time inputs, leakage review, target distribution, validation plan, and business need are not established. |
-| G. Simulation & Scenario Intelligence | Conditionally supported | Requires explicit assumptions; no causal or real-world predictive claims.                                                                    |
-| H. Text & Theme Intelligence          | Conditionally supported | Inspect actual text content before deciding whether meaningful text analysis is justified.                                                   |
+| G. Simulation & Scenario Intelligence | Not supported | Requires explicit assumptions; no causal or real-world predictive claims.                                                                    |
+| H. Text & Theme Intelligence          | Not supported | Inspect actual text content before deciding whether meaningful text analysis is justified.                                                   |
 
 ## 4. Predictive Intelligence Gate
 
