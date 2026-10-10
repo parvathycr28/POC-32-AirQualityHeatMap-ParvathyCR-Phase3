@@ -1,0 +1,57 @@
+{
+  "project_id": "POC-32",
+  "project_title": "Infocreon Aether Pulse Air Quality Heatmap",
+  "approved_track": "Track A — Comparative Intelligence",
+  "primary_analytical_question": "Within each pollutant, how do sampled city measurements compare with each other and with that pollutant's overall mean?",
+  "decision_to_be_supported": "Explore descriptive differences among synthetic city-pollutant groups; no operational or public-health decision is supported.",
+  "data_version": "phase3-v1.1",
+  "method_version": "track-a-comparative-v1.0.0",
+  "result_count": 32,
+  "key_findings": [
+    {
+      "pollutant": "no2",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 52.89333333333334,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 23.116666666666664,
+      "pollutant_baseline_mean": 36.2075,
+      "finding_scope": "Synthetic descriptive comparison only"
+    },
+    {
+      "pollutant": "o3",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 90.46666666666665,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 42.026666666666664,
+      "pollutant_baseline_mean": 62.29708333333334,
+      "finding_scope": "Synthetic descriptive comparison only"
+    },
+    {
+      "pollutant": "pm10",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 118.64333333333333,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 56.20666666666667,
+      "pollutant_baseline_mean": 81.86291666666666,
+      "finding_scope": "Synthetic descriptive comparison only"
+    },
+    {
+      "pollutant": "pm2.5",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 65.41666666666667,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 29.42,
+      "pollutant_baseline_mean": 44.90416666666667,
+      "finding_scope": "Synthetic descriptive comparison only"
+    }
+  ],
+  "priority_items": [],
+  "validation_result": "PASS",
+  "important_limitations": [
+    "All observations are synthetic.",
+    "Only three timestamps across one calendar date are represented in the Post #2 evidence.",
+    "Rankings are descriptive and do not establish real-world air-quality conditions or health risk.",
+    "The pollutant-wide mean is a baseline, not a regulatory threshold."
+  ],
+  "generated_at": "2026-10-10T10:42:47.884560+00:00"
+}

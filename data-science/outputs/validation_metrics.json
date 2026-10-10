@@ -1,0 +1,32 @@
+{
+  "data_version": "phase3-v1.1",
+  "method_version": "track-a-comparative-v1.0.0",
+  "input_rows": 96,
+  "input_columns": 20,
+  "expected_group_count": 32,
+  "actual_result_count": 32,
+  "maximum_absolute_mean_error": 0.0,
+  "maximum_absolute_baseline_gap_error": 0.0,
+  "group_size_errors": [],
+  "ranking_errors": [],
+  "checks": {
+    "canonical_rows_96": true,
+    "canonical_columns_20": true,
+    "expected_data_version": true,
+    "all_records_synthetic": true,
+    "unique_record_ids": true,
+    "expected_group_count": true,
+    "independent_means_match": true,
+    "independent_baseline_gaps_match": true,
+    "group_sizes_match": true,
+    "result_version_consistent": true,
+    "method_version_present": true,
+    "summary_result_count_matches": true,
+    "summary_track_is_track_a": true,
+    "ranking_order_and_ties": true
+  },
+  "failed_checks": [],
+  "issues": [],
+  "timestamp_sensitivity_cases": 12,
+  "validation_result": "PASS"
+}

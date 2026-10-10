@@ -1,59 +1,67 @@
-# Phase 3 — Canonical Data Validation and Analytical Readiness
+# Phase 3 Analytical Track Development
+
+## Project
+- Project ID: POC-32
+- Project title: Infocreon Aether Pulse Air Quality Heatmap
+- Selected track: Track A — Comparative Intelligence
+- Data version: `phase3-v1.1`
+- Method version: `track-a-comparative-v1.0.0`
 
 ## Purpose
+This directory contains the analytical validation, comparative intelligence implementation, reproducible execution scripts, outputs, and supporting evidence for Phase 3.
 
-This workspace implements Post #2 validation, profiling, representativeness assessment, dataset-archetype confirmation, and analytical-readiness assessment.
+The selected track compares sampled city measurements within each pollutant and compares city-pollutant means with the corresponding pollutant-wide mean.
 
-## Source of Truth
+All canonical observations are synthetic. The outputs do not establish real-world air quality, regulatory compliance, health risk, causation, or predictive performance.
 
-All analytical scripts read the existing canonical dataset:
+## Canonical input
+The only analytical input is:
 
 `data/canonical/intelligence_data.csv`
 
-Do not create a separate cleaned, final, analysis, or model-specific dataset. The operational frontend and backend are outside this workspace's scope.
+Do not create a second cleaned analytical dataset or silently alter the canonical input. Changes to the canonical schema or data version require corresponding updates to validation and documentation.
 
 ## Scripts
+Run these commands from the repository root with the project's Python environment activated.
 
-Run the following commands from the repository root:
-
+### Execute Track A
 ```bash
-python data-science/scripts/profile_canonical_data.py
-python data-science/scripts/assess_data_quality.py
-python data-science/scripts/assess_representativeness.py
-python data-science/scripts/assess_analytical_readiness.py
+python data-science/scripts/run_analytical_track.py
 ```
 
-Run the scripts in this order because the readiness assessment reads the preceding JSON outputs.
+### Validate the outputs
+```bash
+python data-science/scripts/validate_analytical_track.py
+```
 
-## Outputs
+### Verify export metadata and counts
+```bash
+python data-science/scripts/export_intelligence_results.py
+```
 
-The `outputs/` directory contains:
+Run them in this order. The validation script should run after the analysis script so the validation metrics and weak-case review reflect the latest generated results.
 
-* `canonical_profile.json`
-* `quality_assessment.json`
-* `representativeness_assessment.json`
-* `analytical_readiness.json`
+## Generated outputs
+- `outputs/intelligence_results.json` — group-level descriptive comparisons.
+- `outputs/intelligence_summary.json` — summary, key findings, versions, and limitations.
+- `outputs/validation_metrics.json` — validation checks and numerical comparison errors.
+- `outputs/weak_case_review.json` — sensitivity cases and interpretation limitations.
 
-These files are generated evidence, not manually entered results. Regenerate them after relevant source or script changes.
+The current expected input contains 96 rows and 20 columns, yielding 32 city-pollutant result groups. Confirm these expectations against the canonical dataset and the validation output when the input changes.
 
-## Notebook
+## Validation and interpretation
+A validation `PASS` means the implemented checks passed for that execution. It is not independent formal approval and does not establish real-world validity.
 
-`notebooks/01_canonical_data_validation_and_readiness.ipynb` brings together the profile, quality checks, coverage evidence, and readiness conclusion.
+The weak-case review includes leave-one-timestamp-out comparisons. Ranking changes, especially for NO2 and PM2.5, should be retained and considered during interpretation.
 
-Open it in VS Code or Jupyter and run the cells from top to bottom. The Python kernel needs Pandas and NumPy.
-
-## Dataset Characteristics
-
-The current canonical package is designed for 96 records covering eight cities, four pollutant categories, and three retained timestamps per city–pollutant group. The data is synthetic, and the three timestamps fall on one calendar date.
-
-## Analytical Guardrails
-
-* Do not present synthetic observations as verified real-world measurements.
-* Do not claim long-term trends or seasonal patterns from the current temporal coverage.
-* Predictive Intelligence is not supported for the current phase.
-* Review the five reports in `docs/` before selecting an analytical track.
-* A structural quality PASS does not prove accuracy or real-world representativeness.
+## Supporting documents
+See the project-level `docs/` directory:
+- `ANALYTICAL_TRACK_EXECUTION_PLAN.md`
+- `ANALYTICAL_INPUT_CONTRACT.md`
+- `ANALYTICAL_METHOD_REPORT.md`
+- `ANALYTICAL_VALIDATION_REPORT.md`
+- `WEAK_CASE_AND_LIMITATION_REVIEW.md`
+- `INTELLIGENCE_OUTPUT_CONTRACT.md`
 
 ## Reproducibility
-
-Run the four scripts from the repository root to regenerate the JSON outputs. Keep the scripts, outputs, notebook, and documentation consistent with the canonical data version.
+Record the data version, method version, execution results, and validation status for each run. Review unexpected changes before accepting regenerated outputs. Do not present synthetic descriptive findings as real-world measurements.

@@ -1,0 +1,106 @@
+{
+  "data_version": "phase3-v1.1",
+  "method_version": "track-a-comparative-v1.0.0",
+  "review_type": "Descriptive weak-case and limitation review",
+  "cases": [
+    {
+      "case": "Synthetic provenance",
+      "finding": "All records are synthetic; rankings are not real-world rankings.",
+      "severity": "critical_interpretation_limit"
+    },
+    {
+      "case": "Limited temporal coverage",
+      "finding": "Only three timestamps across one calendar date are described in Post #2 evidence.",
+      "severity": "high"
+    },
+    {
+      "case": "Ranking sensitivity",
+      "finding": "Leave-one-timestamp-out rankings are recorded below for review.",
+      "severity": "review_required"
+    },
+    {
+      "case": "Baseline interpretation",
+      "finding": "The pollutant-wide mean is descriptive and is not a regulatory threshold.",
+      "severity": "interpretation_limit"
+    }
+  ],
+  "timestamp_sensitivity": [
+    {
+      "omitted_timestamp": "2026-08-23 00:00:00+00:00",
+      "pollutant": "no2",
+      "ranking_changed": true,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 00:00:00+00:00",
+      "pollutant": "o3",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 00:00:00+00:00",
+      "pollutant": "pm10",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 00:00:00+00:00",
+      "pollutant": "pm2.5",
+      "ranking_changed": true,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 04:00:00+00:00",
+      "pollutant": "no2",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 04:00:00+00:00",
+      "pollutant": "o3",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 04:00:00+00:00",
+      "pollutant": "pm10",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 04:00:00+00:00",
+      "pollutant": "pm2.5",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 20:00:00+00:00",
+      "pollutant": "no2",
+      "ranking_changed": true,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 20:00:00+00:00",
+      "pollutant": "o3",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 20:00:00+00:00",
+      "pollutant": "pm10",
+      "ranking_changed": false,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    },
+    {
+      "omitted_timestamp": "2026-08-23 20:00:00+00:00",
+      "pollutant": "pm2.5",
+      "ranking_changed": true,
+      "interpretation": "Sensitivity warning; not a model-validation score."
+    }
+  ],
+  "known_limitations": [
+    "No inference about verified real-world air quality.",
+    "No causal, health-risk, regulatory, or predictive claims.",
+    "Small synthetic sample with limited temporal depth."
+  ]
+}
