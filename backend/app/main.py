@@ -8,7 +8,7 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.services.intelligence import get_intelligence_results
 load_dotenv()
 
 app = FastAPI(title="Air Quality Intelligence API")
@@ -1161,3 +1161,7 @@ async def population(
         "year": WORLDPOP_YEAR,
         "resolution": WORLDPOP_RESOLUTION,
     }
+@app.get("/api/intelligence/results")
+async def intelligence_results():
+    """Return the approved comparative intelligence results."""
+    return get_intelligence_results()
