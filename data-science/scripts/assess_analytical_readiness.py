@@ -57,7 +57,7 @@ def main():
     # They are readiness judgements, not model-performance claims.
     tracks = {
         "A Comparative Intelligence": {
-            "status": "Conditionally supported",
+            "status": "Supported",
             "evidence": [
                 f"{unique_cities} distinct city/entity names and {unique_pollutants} pollutant categories are present.",
                 "The canonical records contain metric values that can support descriptive comparisons after unit and record-grain checks.",
@@ -128,7 +128,7 @@ def main():
             ],
         },
         "G Simulation & Scenario Intelligence": {
-            "status": "Conditionally supported",
+            "status": "Not supported",
             "evidence": [
                 "Descriptive what-if calculations may be possible if assumptions and parameters are explicitly defined.",
             ],
@@ -139,7 +139,7 @@ def main():
         },
         "H Text & Theme Intelligence": {
             "status": (
-                "Conditionally supported"
+                "Not supported"
                 if text_non_null > 0
                 else "Not supported"
             ),

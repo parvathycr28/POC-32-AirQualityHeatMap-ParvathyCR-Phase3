@@ -54,7 +54,7 @@
   },
   "analytical_tracks": {
     "A Comparative Intelligence": {
-      "status": "Conditionally supported",
+      "status": "Supported",
       "evidence": [
         "8 distinct city/entity names and 4 pollutant categories are present.",
         "The canonical records contain metric values that can support descriptive comparisons after unit and record-grain checks."
@@ -117,7 +117,7 @@
       ]
     },
     "G Simulation & Scenario Intelligence": {
-      "status": "Conditionally supported",
+      "status": "Not supported",
       "evidence": [
         "Descriptive what-if calculations may be possible if assumptions and parameters are explicitly defined."
       ],
@@ -127,7 +127,7 @@
       ]
     },
     "H Text & Theme Intelligence": {
-      "status": "Conditionally supported",
+      "status": "Not supported",
       "evidence": [
         "96 rows contain a non-null text_value."
       ],
