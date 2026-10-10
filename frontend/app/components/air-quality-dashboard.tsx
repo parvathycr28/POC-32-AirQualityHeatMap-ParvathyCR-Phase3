@@ -187,9 +187,19 @@ export default function AirQualityDashboard() {
     [pollutant],
   );
 
-  useEffect(() => {
-    void loadData();
-  }, [loadData, refreshKey]);
+    useEffect(() => {
+  let active = true;
+
+  const run = async () => {
+    if (active) await loadData();
+  };
+
+  void run();
+
+  return () => {
+    active = false;
+  };
+}, [loadData, refreshKey]);
 
   /*
    * =========================================================

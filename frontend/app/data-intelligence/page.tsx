@@ -43,7 +43,11 @@ type IntelligenceResponse = {
   results: IntelligenceResult[];
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = (
+  process.env.NEXT_PUBLIC_INTELLIGENCE_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  ""
+).replace(/\/$/, "");
 
 const pollutantNames: Record<string, string> = {
   no2: "NO₂",
@@ -126,7 +130,10 @@ export default function DataIntelligencePage() {
     return () => controller.abort();
   }, []);
 
-  const allResults = data?.results ?? [];
+  const allResults = useMemo(
+  () => data?.results ?? [],
+  [data]
+);
 
   const cities = useMemo(
     () =>
