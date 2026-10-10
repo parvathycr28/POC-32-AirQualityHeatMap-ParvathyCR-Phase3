@@ -97,14 +97,21 @@ def build_results(df: pd.DataFrame) -> tuple[list[dict], dict]:
     group_keys = ["entity_id", "entity_name", "subcategory", "metric_unit"]
 
     grouped = (
-        df.groupby(group_keys, dropna=False)["metric_value"]
+        df.groupby(
+        ["entity_id", "entity_name", "subcategory", "metric_unit"],
+        dropna=False,
+    )
+        
         .agg(
-            observation_count="count",
-            mean_value="mean",
-            median_value="median",
-            minimum_value="min",
-            maximum_value="max",
+            observation_count=("metric_value", "count"),
+            mean_value=("metric_value", "mean"),
+            median_value=("metric_value", "median"),
+            minimum_value=("metric_value", "min"),
+            maximum_value=("metric_value", "max"),
+            period_start=("observed_at", "min"),
+            period_end=("observed_at", "max"),
         )
+
         .reset_index()
     )
 
@@ -140,42 +147,96 @@ def build_results(df: pd.DataFrame) -> tuple[list[dict], dict]:
     generated_at = pd.Timestamp.now(tz="UTC").isoformat()
     results = []
 
-    for row in grouped.to_dict(orient="records"):
-        results.append(
-            {
-                "entity_id": str(row["entity_id"]),
-                "entity_name": str(row["entity_name"]),
-                "pollutant": str(row["subcategory"]),
-                "metric_unit": str(row["metric_unit"]),
-                "observation_count": int(row["observation_count"]),
-                "mean_value": float(row["mean_value"]),
-                "median_value": float(row["median_value"]),
-                "minimum_value": float(row["minimum_value"]),
-                "maximum_value": float(row["maximum_value"]),
-                "pollutant_baseline_mean": float(
-                    row["pollutant_baseline_mean"]
-                ),
-                "difference_from_baseline": float(
-                    row["difference_from_baseline"]
-                ),
-                "relative_difference": (
-                    None
-                    if pd.isna(row["relative_difference"])
-                    else float(row["relative_difference"])
-                ),
-                "rank_within_pollutant": int(
-                    row["rank_within_pollutant"]
-                ),
-                "data_version": EXPECTED_VERSION,
-                "method_version": METHOD_VERSION,
-                "generated_at": generated_at,
-                "is_synthetic": True,
-                "interpretation": (
-                    "Descriptive comparison of synthetic observations; "
-                    "not a verified real-world city ranking."
-                ),
-            }
+   
+    for index, row in enumerate(grouped.to_dict(orient="records"), start=1):
+        mean_value = float(row["mean_value"])
+        baseline_value = float(row["pollutant_baseline_mean"])
+        gap = float(row["difference_from_baseline"])
+        rank = int(row["rank_within_pollutant"])
+        pollutant = str(row["subcategory"])
+        entity_id = str(row["entity_id"])
+        entity_name = str(row["entity_name"])
+        unit = str(row["metric_unit"])
+
+        category = (
+            "above_baseline" if gap > 1e-12
+            else "below_baseline" if gap < -1e-12
+            else "at_baseline"
         )
+
+        limitation = (
+            "Synthetic descriptive comparison only; not a verified real-world "
+            "air-quality measurement, regulatory assessment, health-risk "
+            "assessment, or prediction."
+        )
+
+        results.append({
+         # Mandatory standard Intelligence Output Contract fields
+            "result_id": f"RES-{index:04d}",
+            "result_type": "ranking",
+            "record_id": None,
+            "entity_id": entity_id,
+            "group_key": f"{entity_id}::{pollutant}::{unit}",
+            "period_start": pd.Timestamp(row["period_start"]).isoformat(),
+            "period_end": pd.Timestamp(row["period_end"]).isoformat(),
+            "metric_name": f"{pollutant}_mean",
+            "result_value": mean_value,
+            "result_unit": unit,
+            "result_category": category,
+            "priority_rank": rank,
+            "finding": (
+                f"{entity_name} ranks {rank} for {pollutant} by sampled mean; "
+                f"its mean is {gap:.6g} {unit} relative to the pollutant-wide "
+                "sample mean baseline."
+            ),
+            "evidence": [
+                {
+                    "factor": "observation_count",
+                    "value": int(row["observation_count"]),
+                },
+                {"factor": "mean_value", "value": mean_value},
+                {"factor": "median_value", "value": float(row["median_value"])},
+                {"factor": "minimum_value", "value": float(row["minimum_value"])},
+                {"factor": "maximum_value", "value": float(row["maximum_value"])},
+                {"factor": "pollutant_baseline_mean", "value": baseline_value},
+                {"factor": "difference_from_baseline", "value": gap},
+                {
+                    "factor": "relative_difference",
+                    "value": (
+                        None
+                        if pd.isna(row["relative_difference"])
+                        else float(row["relative_difference"])
+                    ),
+                },
+                {"factor": "is_synthetic", "value": True},
+            ],
+            "method_version": METHOD_VERSION,
+            "data_version": EXPECTED_VERSION,
+            "generated_at": generated_at,
+            "quality_status": "conditional",
+            "limitation": limitation,
+
+            # Preserve existing Track A-specific fields for compatibility
+            "entity_name": entity_name,
+            "pollutant": pollutant,
+            "metric_unit": unit,
+            "observation_count": int(row["observation_count"]),
+            "mean_value": mean_value,
+            "median_value": float(row["median_value"]),
+            "minimum_value": float(row["minimum_value"]),
+            "maximum_value": float(row["maximum_value"]),
+            "pollutant_baseline_mean": baseline_value,
+            "difference_from_baseline": gap,
+            "relative_difference": (
+                None
+                if pd.isna(row["relative_difference"])
+                else float(row["relative_difference"])
+            ),
+            "rank_within_pollutant": rank,
+            "is_synthetic": True,
+            "interpretation": limitation,
+        })
+
 
     summary = {
         "project_id": "POC-32",

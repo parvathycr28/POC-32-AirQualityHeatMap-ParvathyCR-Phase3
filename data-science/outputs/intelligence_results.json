@@ -1,6 +1,61 @@
 [
   {
+    "result_id": "RES-0001",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "delhi",
+    "group_key": "delhi::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 52.89333333333334,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 1,
+    "finding": "Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 52.89333333333334
+      },
+      {
+        "factor": "median_value",
+        "value": 55.92
+      },
+      {
+        "factor": "minimum_value",
+        "value": 46.7
+      },
+      {
+        "factor": "maximum_value",
+        "value": 56.06
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 16.685833333333335
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.460839144744413
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -13,14 +68,66 @@
     "difference_from_baseline": 16.685833333333335,
     "relative_difference": 0.460839144744413,
     "rank_within_pollutant": 1,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0002",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "ahmedabad",
+    "group_key": "ahmedabad::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 41.52,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 2,
+    "finding": "Ahmedabad ranks 2 for no2 by sampled mean; its mean is 5.3125 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 41.52
+      },
+      {
+        "factor": "median_value",
+        "value": 41.11
+      },
+      {
+        "factor": "minimum_value",
+        "value": 39.33
+      },
+      {
+        "factor": "maximum_value",
+        "value": 44.12
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 5.3125
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.14672374508043912
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -33,14 +140,66 @@
     "difference_from_baseline": 5.3125,
     "relative_difference": 0.14672374508043912,
     "rank_within_pollutant": 2,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0003",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "kolkata",
+    "group_key": "kolkata::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 40.20666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 3,
+    "finding": "Kolkata ranks 3 for no2 by sampled mean; its mean is 3.99917 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 40.20666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 39.76
+      },
+      {
+        "factor": "minimum_value",
+        "value": 38.06
+      },
+      {
+        "factor": "maximum_value",
+        "value": 42.8
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 3.9991666666666674
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.11045133374761215
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -53,14 +212,66 @@
     "difference_from_baseline": 3.9991666666666674,
     "relative_difference": 0.11045133374761215,
     "rank_within_pollutant": 3,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0004",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "mumbai",
+    "group_key": "mumbai::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 40.10666666666666,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 4,
+    "finding": "Mumbai ranks 4 for no2 by sampled mean; its mean is 3.89917 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 40.10666666666666
+      },
+      {
+        "factor": "median_value",
+        "value": 38.4
+      },
+      {
+        "factor": "minimum_value",
+        "value": 35.53
+      },
+      {
+        "factor": "maximum_value",
+        "value": 46.39
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 3.899166666666659
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.107689475016686
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -73,14 +284,66 @@
     "difference_from_baseline": 3.899166666666659,
     "relative_difference": 0.107689475016686,
     "rank_within_pollutant": 4,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0005",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "hyderabad",
+    "group_key": "hyderabad::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 34.339999999999996,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 5,
+    "finding": "Hyderabad ranks 5 for no2 by sampled mean; its mean is -1.8675 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 34.339999999999996
+      },
+      {
+        "factor": "median_value",
+        "value": 34.3
+      },
+      {
+        "factor": "minimum_value",
+        "value": 31.72
+      },
+      {
+        "factor": "maximum_value",
+        "value": 37.0
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -1.8675000000000068
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.051577711800041615
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -93,14 +356,66 @@
     "difference_from_baseline": -1.8675000000000068,
     "relative_difference": -0.051577711800041615,
     "rank_within_pollutant": 5,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0006",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "chennai",
+    "group_key": "chennai::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 28.926666666666666,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 6,
+    "finding": "Chennai ranks 6 for no2 by sampled mean; its mean is -7.28083 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 28.926666666666666
+      },
+      {
+        "factor": "median_value",
+        "value": 27.28
+      },
+      {
+        "factor": "minimum_value",
+        "value": 24.72
+      },
+      {
+        "factor": "maximum_value",
+        "value": 34.78
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -7.280833333333337
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.20108633110083096
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -113,14 +428,66 @@
     "difference_from_baseline": -7.280833333333337,
     "relative_difference": -0.20108633110083096,
     "rank_within_pollutant": 6,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0007",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "pune",
+    "group_key": "pune::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 28.55,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 7,
+    "finding": "Pune ranks 7 for no2 by sampled mean; its mean is -7.6575 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 28.55
+      },
+      {
+        "factor": "median_value",
+        "value": 26.92
+      },
+      {
+        "factor": "minimum_value",
+        "value": 24.42
+      },
+      {
+        "factor": "maximum_value",
+        "value": 34.31
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -7.657500000000002
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.21148933232065184
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -133,14 +500,66 @@
     "difference_from_baseline": -7.657500000000002,
     "relative_difference": -0.21148933232065184,
     "rank_within_pollutant": 7,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0008",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "bengaluru",
+    "group_key": "bengaluru::no2::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "no2_mean",
+    "result_value": 23.116666666666664,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 8,
+    "finding": "Bengaluru ranks 8 for no2 by sampled mean; its mean is -13.0908 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 23.116666666666664
+      },
+      {
+        "factor": "median_value",
+        "value": 21.52
+      },
+      {
+        "factor": "minimum_value",
+        "value": 19.19
+      },
+      {
+        "factor": "maximum_value",
+        "value": 28.64
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 36.2075
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -13.09083333333334
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.36155032336762655
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
     "pollutant": "no2",
     "metric_unit": "µg/m³",
@@ -153,14 +572,66 @@
     "difference_from_baseline": -13.09083333333334,
     "relative_difference": -0.36155032336762655,
     "rank_within_pollutant": 8,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0009",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "delhi",
+    "group_key": "delhi::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 90.46666666666665,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 1,
+    "finding": "Delhi ranks 1 for o3 by sampled mean; its mean is 28.1696 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 90.46666666666665
+      },
+      {
+        "factor": "median_value",
+        "value": 91.41
+      },
+      {
+        "factor": "minimum_value",
+        "value": 83.9
+      },
+      {
+        "factor": "maximum_value",
+        "value": 96.09
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 28.169583333333314
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.4521814156628517
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -173,14 +644,66 @@
     "difference_from_baseline": 28.169583333333314,
     "relative_difference": 0.4521814156628517,
     "rank_within_pollutant": 1,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0010",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "ahmedabad",
+    "group_key": "ahmedabad::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 70.12666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 2,
+    "finding": "Ahmedabad ranks 2 for o3 by sampled mean; its mean is 7.82958 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 70.12666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 69.92
+      },
+      {
+        "factor": "minimum_value",
+        "value": 68.02
+      },
+      {
+        "factor": "maximum_value",
+        "value": 72.44
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 7.829583333333325
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.12568137887675304
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -193,14 +716,66 @@
     "difference_from_baseline": 7.829583333333325,
     "relative_difference": 0.12568137887675304,
     "rank_within_pollutant": 2,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0011",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "kolkata",
+    "group_key": "kolkata::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 69.29666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 3,
+    "finding": "Kolkata ranks 3 for o3 by sampled mean; its mean is 6.99958 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 69.29666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 69.17
+      },
+      {
+        "factor": "minimum_value",
+        "value": 67.12
+      },
+      {
+        "factor": "maximum_value",
+        "value": 71.6
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 6.999583333333327
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.11235812270504894
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -213,14 +788,66 @@
     "difference_from_baseline": 6.999583333333327,
     "relative_difference": 0.11235812270504894,
     "rank_within_pollutant": 3,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0012",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "mumbai",
+    "group_key": "mumbai::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 66.77,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 4,
+    "finding": "Mumbai ranks 4 for o3 by sampled mean; its mean is 4.47292 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 66.77
+      },
+      {
+        "factor": "median_value",
+        "value": 64.8
+      },
+      {
+        "factor": "minimum_value",
+        "value": 60.61
+      },
+      {
+        "factor": "maximum_value",
+        "value": 74.9
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 4.472916666666656
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.07179977660805396
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -233,14 +860,66 @@
     "difference_from_baseline": 4.472916666666656,
     "relative_difference": 0.07179977660805396,
     "rank_within_pollutant": 4,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0013",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "hyderabad",
+    "group_key": "hyderabad::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 58.580000000000005,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 5,
+    "finding": "Hyderabad ranks 5 for o3 by sampled mean; its mean is -3.71708 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 58.580000000000005
+      },
+      {
+        "factor": "median_value",
+        "value": 57.64
+      },
+      {
+        "factor": "minimum_value",
+        "value": 57.1
+      },
+      {
+        "factor": "maximum_value",
+        "value": 61.0
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -3.717083333333335
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.05966705236333966
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -253,14 +932,66 @@
     "difference_from_baseline": -3.717083333333335,
     "relative_difference": -0.05966705236333966,
     "rank_within_pollutant": 5,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0014",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "chennai",
+    "group_key": "chennai::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 51.22666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 6,
+    "finding": "Chennai ranks 6 for o3 by sampled mean; its mean is -11.0704 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 51.22666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 49.36
+      },
+      {
+        "factor": "minimum_value",
+        "value": 45.69
+      },
+      {
+        "factor": "maximum_value",
+        "value": 58.63
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -11.070416666666674
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.17770361105723256
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -273,14 +1004,66 @@
     "difference_from_baseline": -11.070416666666674,
     "relative_difference": -0.17770361105723256,
     "rank_within_pollutant": 6,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0015",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "pune",
+    "group_key": "pune::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 49.88333333333333,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 7,
+    "finding": "Pune ranks 7 for o3 by sampled mean; its mean is -12.4138 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 49.88333333333333
+      },
+      {
+        "factor": "median_value",
+        "value": 48.04
+      },
+      {
+        "factor": "minimum_value",
+        "value": 44.49
+      },
+      {
+        "factor": "maximum_value",
+        "value": 57.12
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -12.413750000000007
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.19926695337529188
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -293,14 +1076,66 @@
     "difference_from_baseline": -12.413750000000007,
     "relative_difference": -0.19926695337529188,
     "rank_within_pollutant": 7,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0016",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "bengaluru",
+    "group_key": "bengaluru::o3::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "o3_mean",
+    "result_value": 42.026666666666664,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 8,
+    "finding": "Bengaluru ranks 8 for o3 by sampled mean; its mean is -20.2704 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 42.026666666666664
+      },
+      {
+        "factor": "median_value",
+        "value": 40.24
+      },
+      {
+        "factor": "minimum_value",
+        "value": 36.98
+      },
+      {
+        "factor": "maximum_value",
+        "value": 48.86
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 62.29708333333334
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -20.270416666666677
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.32538307705684466
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
     "pollutant": "o3",
     "metric_unit": "µg/m³",
@@ -313,14 +1148,66 @@
     "difference_from_baseline": -20.270416666666677,
     "relative_difference": -0.32538307705684466,
     "rank_within_pollutant": 8,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0017",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "delhi",
+    "group_key": "delhi::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 118.64333333333333,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 1,
+    "finding": "Delhi ranks 1 for pm10 by sampled mean; its mean is 36.7804 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 118.64333333333333
+      },
+      {
+        "factor": "median_value",
+        "value": 117.91
+      },
+      {
+        "factor": "minimum_value",
+        "value": 111.8
+      },
+      {
+        "factor": "maximum_value",
+        "value": 126.22
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 36.78041666666667
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.44929277094329445
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -333,14 +1220,66 @@
     "difference_from_baseline": 36.78041666666667,
     "relative_difference": 0.44929277094329445,
     "rank_within_pollutant": 1,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0018",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "ahmedabad",
+    "group_key": "ahmedabad::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 91.57666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 2,
+    "finding": "Ahmedabad ranks 2 for pm10 by sampled mean; its mean is 9.71375 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 91.57666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 92.85
+      },
+      {
+        "factor": "minimum_value",
+        "value": 88.2
+      },
+      {
+        "factor": "maximum_value",
+        "value": 93.68
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 9.713750000000005
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.1186587333499601
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -353,14 +1292,66 @@
     "difference_from_baseline": 9.713750000000005,
     "relative_difference": 0.1186587333499601,
     "rank_within_pollutant": 2,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0019",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "kolkata",
+    "group_key": "kolkata::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 91.11333333333334,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 3,
+    "finding": "Kolkata ranks 3 for pm10 by sampled mean; its mean is 9.25042 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 91.11333333333334
+      },
+      {
+        "factor": "median_value",
+        "value": 92.5
+      },
+      {
+        "factor": "minimum_value",
+        "value": 87.64
+      },
+      {
+        "factor": "maximum_value",
+        "value": 93.2
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 9.25041666666668
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.11299886497243886
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -373,14 +1364,66 @@
     "difference_from_baseline": 9.25041666666668,
     "relative_difference": 0.11299886497243886,
     "rank_within_pollutant": 3,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0020",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "mumbai",
+    "group_key": "mumbai::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 86.77,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 4,
+    "finding": "Mumbai ranks 4 for pm10 by sampled mean; its mean is 4.90708 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 86.77
+      },
+      {
+        "factor": "median_value",
+        "value": 84.6
+      },
+      {
+        "factor": "minimum_value",
+        "value": 79.42
+      },
+      {
+        "factor": "maximum_value",
+        "value": 96.29
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 4.907083333333333
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.0599426887428679
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -393,14 +1436,66 @@
     "difference_from_baseline": 4.907083333333333,
     "relative_difference": 0.0599426887428679,
     "rank_within_pollutant": 4,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0021",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "hyderabad",
+    "group_key": "hyderabad::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 76.76,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 5,
+    "finding": "Hyderabad ranks 5 for pm10 by sampled mean; its mean is -5.10292 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 76.76
+      },
+      {
+        "factor": "median_value",
+        "value": 77.08
+      },
+      {
+        "factor": "minimum_value",
+        "value": 74.2
+      },
+      {
+        "factor": "maximum_value",
+        "value": 79.0
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -5.102916666666658
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.06233489929811514
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -413,14 +1508,66 @@
     "difference_from_baseline": -5.102916666666658,
     "relative_difference": -0.06233489929811514,
     "rank_within_pollutant": 5,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0022",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "chennai",
+    "group_key": "chennai::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 67.95,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 6,
+    "finding": "Chennai ranks 6 for pm10 by sampled mean; its mean is -13.9129 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 67.95
+      },
+      {
+        "factor": "median_value",
+        "value": 65.92
+      },
+      {
+        "factor": "minimum_value",
+        "value": 61.42
+      },
+      {
+        "factor": "maximum_value",
+        "value": 76.51
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -13.91291666666666
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.16995383542609335
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -433,14 +1580,66 @@
     "difference_from_baseline": -13.91291666666666,
     "relative_difference": -0.16995383542609335,
     "rank_within_pollutant": 6,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0023",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "pune",
+    "group_key": "pune::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 65.88333333333334,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 7,
+    "finding": "Pune ranks 7 for pm10 by sampled mean; its mean is -15.9796 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 65.88333333333334
+      },
+      {
+        "factor": "median_value",
+        "value": 63.88
+      },
+      {
+        "factor": "minimum_value",
+        "value": 59.54
+      },
+      {
+        "factor": "maximum_value",
+        "value": 74.23
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -15.979583333333323
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.19519929149849075
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -453,14 +1652,66 @@
     "difference_from_baseline": -15.979583333333323,
     "relative_difference": -0.19519929149849075,
     "rank_within_pollutant": 7,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0024",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "bengaluru",
+    "group_key": "bengaluru::pm10::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm10_mean",
+    "result_value": 56.20666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 8,
+    "finding": "Bengaluru ranks 8 for pm10 by sampled mean; its mean is -25.6562 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 56.20666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 54.28
+      },
+      {
+        "factor": "minimum_value",
+        "value": 50.32
+      },
+      {
+        "factor": "maximum_value",
+        "value": 64.02
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 81.86291666666666
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -25.656249999999993
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.31340503178586143
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
     "pollutant": "pm10",
     "metric_unit": "µg/m³",
@@ -473,14 +1724,66 @@
     "difference_from_baseline": -25.656249999999993,
     "relative_difference": -0.31340503178586143,
     "rank_within_pollutant": 8,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0025",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "delhi",
+    "group_key": "delhi::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 65.41666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 1,
+    "finding": "Delhi ranks 1 for pm2.5 by sampled mean; its mean is 20.5125 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 65.41666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 67.84
+      },
+      {
+        "factor": "minimum_value",
+        "value": 59.1
+      },
+      {
+        "factor": "maximum_value",
+        "value": 69.31
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 20.512500000000003
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.45680616126937
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -493,14 +1796,66 @@
     "difference_from_baseline": 20.512500000000003,
     "relative_difference": 0.45680616126937,
     "rank_within_pollutant": 1,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0026",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "ahmedabad",
+    "group_key": "ahmedabad::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 51.053333333333335,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 2,
+    "finding": "Ahmedabad ranks 2 for pm2.5 by sampled mean; its mean is 6.14917 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 51.053333333333335
+      },
+      {
+        "factor": "median_value",
+        "value": 50.08
+      },
+      {
+        "factor": "minimum_value",
+        "value": 49.52
+      },
+      {
+        "factor": "maximum_value",
+        "value": 53.56
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 6.149166666666666
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.13693977915932076
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -513,14 +1868,66 @@
     "difference_from_baseline": 6.149166666666666,
     "relative_difference": 0.13693977915932076,
     "rank_within_pollutant": 2,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0027",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "kolkata",
+    "group_key": "kolkata::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 49.903333333333336,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 3,
+    "finding": "Kolkata ranks 3 for pm2.5 by sampled mean; its mean is 4.99917 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 49.903333333333336
+      },
+      {
+        "factor": "median_value",
+        "value": 48.88
+      },
+      {
+        "factor": "minimum_value",
+        "value": 48.43
+      },
+      {
+        "factor": "maximum_value",
+        "value": 52.4
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 4.999166666666667
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.1113296835854134
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -533,14 +1940,66 @@
     "difference_from_baseline": 4.999166666666667,
     "relative_difference": 0.1113296835854134,
     "rank_within_pollutant": 3,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0028",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "mumbai",
+    "group_key": "mumbai::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 48.99666666666667,
+    "result_unit": "µg/m³",
+    "result_category": "above_baseline",
+    "priority_rank": 4,
+    "finding": "Mumbai ranks 4 for pm2.5 by sampled mean; its mean is 4.0925 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 48.99666666666667
+      },
+      {
+        "factor": "median_value",
+        "value": 47.2
+      },
+      {
+        "factor": "minimum_value",
+        "value": 43.89
+      },
+      {
+        "factor": "maximum_value",
+        "value": 55.9
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": 4.092500000000001
+      },
+      {
+        "factor": "relative_difference",
+        "value": 0.09113853577062264
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -553,14 +2012,66 @@
     "difference_from_baseline": 4.092500000000001,
     "relative_difference": 0.09113853577062264,
     "rank_within_pollutant": 4,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0029",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "hyderabad",
+    "group_key": "hyderabad::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 42.419999999999995,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 5,
+    "finding": "Hyderabad ranks 5 for pm2.5 by sampled mean; its mean is -2.48417 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 42.419999999999995
+      },
+      {
+        "factor": "median_value",
+        "value": 41.9
+      },
+      {
+        "factor": "minimum_value",
+        "value": 40.36
+      },
+      {
+        "factor": "maximum_value",
+        "value": 45.0
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -2.484166666666674
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.05532151804769432
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -573,14 +2084,66 @@
     "difference_from_baseline": -2.484166666666674,
     "relative_difference": -0.05532151804769432,
     "rank_within_pollutant": 5,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0030",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "chennai",
+    "group_key": "chennai::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 36.36,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 6,
+    "finding": "Chennai ranks 6 for pm2.5 by sampled mean; its mean is -8.54417 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 36.36
+      },
+      {
+        "factor": "median_value",
+        "value": 34.64
+      },
+      {
+        "factor": "minimum_value",
+        "value": 31.71
+      },
+      {
+        "factor": "maximum_value",
+        "value": 42.73
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -8.54416666666667
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.19027558689802362
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -593,14 +2156,66 @@
     "difference_from_baseline": -8.54416666666667,
     "relative_difference": -0.19027558689802362,
     "rank_within_pollutant": 6,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0031",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "pune",
+    "group_key": "pune::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 35.663333333333334,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 7,
+    "finding": "Pune ranks 7 for pm2.5 by sampled mean; its mean is -9.24083 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 35.663333333333334
+      },
+      {
+        "factor": "median_value",
+        "value": 33.96
+      },
+      {
+        "factor": "minimum_value",
+        "value": 31.11
+      },
+      {
+        "factor": "maximum_value",
+        "value": 41.92
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -9.240833333333335
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.2057901085645356
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -613,14 +2228,66 @@
     "difference_from_baseline": -9.240833333333335,
     "relative_difference": -0.2057901085645356,
     "rank_within_pollutant": 7,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   },
   {
+    "result_id": "RES-0032",
+    "result_type": "ranking",
+    "record_id": null,
     "entity_id": "bengaluru",
+    "group_key": "bengaluru::pm2.5::µg/m³",
+    "period_start": "2026-08-23T00:00:00+00:00",
+    "period_end": "2026-08-23T20:00:00+00:00",
+    "metric_name": "pm2.5_mean",
+    "result_value": 29.42,
+    "result_unit": "µg/m³",
+    "result_category": "below_baseline",
+    "priority_rank": 8,
+    "finding": "Bengaluru ranks 8 for pm2.5 by sampled mean; its mean is -15.4842 µg/m³ relative to the pollutant-wide sample mean baseline.",
+    "evidence": [
+      {
+        "factor": "observation_count",
+        "value": 3
+      },
+      {
+        "factor": "mean_value",
+        "value": 29.42
+      },
+      {
+        "factor": "median_value",
+        "value": 27.76
+      },
+      {
+        "factor": "minimum_value",
+        "value": 25.12
+      },
+      {
+        "factor": "maximum_value",
+        "value": 35.38
+      },
+      {
+        "factor": "pollutant_baseline_mean",
+        "value": 44.90416666666667
+      },
+      {
+        "factor": "difference_from_baseline",
+        "value": -15.484166666666667
+      },
+      {
+        "factor": "relative_difference",
+        "value": -0.3448269462744734
+      },
+      {
+        "factor": "is_synthetic",
+        "value": true
+      }
+    ],
+    "method_version": "track-a-comparative-v1.0.0",
+    "data_version": "phase3-v1.1",
+    "generated_at": "2026-10-10T15:45:49.752540+00:00",
+    "quality_status": "conditional",
+    "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
     "pollutant": "pm2.5",
     "metric_unit": "µg/m³",
@@ -633,10 +2300,7 @@
     "difference_from_baseline": -15.484166666666667,
     "relative_difference": -0.3448269462744734,
     "rank_within_pollutant": 8,
-    "data_version": "phase3-v1.1",
-    "method_version": "track-a-comparative-v1.0.0",
-    "generated_at": "2026-10-10T10:42:47.884560+00:00",
     "is_synthetic": true,
-    "interpretation": "Descriptive comparison of synthetic observations; not a verified real-world city ranking."
+    "interpretation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
   }
 ]

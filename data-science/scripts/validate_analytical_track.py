@@ -46,6 +46,94 @@ def main() -> None:
     )
     expected_group_count = len(expected_groups)
     checks["expected_group_count"] = len(results) == expected_group_count
+    
+    # Mandatory standard Intelligence Output Contract checks.
+    required_fields = {
+        "result_id",
+        "result_type",
+        "group_key",
+        "metric_name",
+        "result_value",
+        "priority_rank",
+        "finding",
+        "evidence",
+        "method_version",
+        "data_version",
+        "generated_at",
+        "quality_status",
+        "limitation",
+    }
+
+    checks["contract_fields_present"] = all(
+        required_fields.issubset(result.keys()) for result in results
+    )
+
+    result_ids = [result.get("result_id") for result in results]
+    checks["contract_result_ids_unique"] = (
+        all(isinstance(value, str) and value.strip() for value in result_ids)
+        and len(set(result_ids)) == len(result_ids)
+    )
+
+    checks["contract_result_types_valid"] = all(
+        result.get("result_type") == "ranking" for result in results
+    )
+
+    checks["contract_group_keys_present"] = all(
+        isinstance(result.get("group_key"), str)
+        and bool(result["group_key"].strip())
+        for result in results
+    )
+
+    
+    checks["contract_values_match_track_metrics"] = all(
+        "result_value" in result
+        and "mean_value" in result
+        and "priority_rank" in result
+        and "rank_within_pollutant" in result
+        and math.isclose(
+            float(result["result_value"]),
+            float(result["mean_value"]),
+            rel_tol=0.0,
+            abs_tol=1e-9,
+        )
+        and int(result["priority_rank"])
+        == int(result["rank_within_pollutant"])
+        for result in results
+    )
+
+
+    checks["contract_evidence_nonempty"] = all(
+        isinstance(result.get("evidence"), list)
+        and len(result["evidence"]) > 0
+        for result in results
+    )
+
+    checks["contract_quality_status_valid"] = all(
+        result.get("quality_status")
+        in {"validated", "conditional", "rejected"}
+        for result in results
+    )
+
+    checks["contract_limitation_present"] = all(
+        isinstance(result.get("limitation"), str)
+        and bool(result["limitation"].strip())
+        for result in results
+    )
+
+    checks["contract_generated_at_valid"] = all(
+        isinstance(result.get("generated_at"), str)
+        and result["generated_at"].endswith("+00:00")
+        for result in results
+    )
+
+    checks["contract_record_and_entity_fields_valid"] = all(
+        result.get("record_id") is None
+        and isinstance(result.get("entity_id"), str)
+        and isinstance(result.get("metric_name"), str)
+        and isinstance(result.get("result_unit"), str)
+        and isinstance(result.get("finding"), str)
+        for result in results
+    )
 
     result_by_key = {
         (r["entity_id"], r["pollutant"], r["metric_unit"]): r
@@ -127,9 +215,16 @@ def main() -> None:
             r["entity_id"] for r in ordered
         ]:
             ranking_errors.append(pollutant)
+
         if [r["rank_within_pollutant"] for r in subset] != list(
             range(1, len(subset) + 1)
         ):
+            ranking_errors.append(f"{pollutant}: rank sequence")
+
+        if [r["priority_rank"] for r in subset] != list(
+            range(1, len(subset) + 1)
+        ):
+            ranking_errors.append(f"{pollutant}: priority rank sequence")
             ranking_errors.append(f"{pollutant}: rank sequence")
 
     checks["ranking_order_and_ties"] = not ranking_errors
