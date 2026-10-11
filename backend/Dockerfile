@@ -1,3 +1,4 @@
+
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -12,7 +13,10 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY backend/app ./app
 COPY backend/data ./data
+COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
 
-EXPOSE 8001
+ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
+
+EXPOSE 8000 8001
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]

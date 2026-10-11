@@ -3,11 +3,11 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: infocreon-airquality-backend
+    container_name: infocreon-airquality-phase3-backend
     env_file:
       - ./backend/.env
     ports:
-      - "8001:8001"
+      - "8003:8001"
     restart: unless-stopped
 
   frontend:
@@ -15,10 +15,26 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8001
-    container_name: infocreon-airquality-frontend
+        NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
+        NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
+        NEXT_PUBLIC_API_URL: "http://localhost:8003"
+    environment:
+      NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
+      NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
     ports:
-      - "3000:3000"
+      - "3002:3000"
     depends_on:
       - backend
+    restart: unless-stopped
+  
+  data-intelligence-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: infocreon-data-intelligence-backend
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      INTELLIGENCE_RESULTS_FILE: /app/data-science/outputs/intelligence_results.json
+    ports:
+      - "8000:8000"
     restart: unless-stopped

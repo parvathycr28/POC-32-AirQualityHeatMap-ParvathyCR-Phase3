@@ -43,11 +43,10 @@ type IntelligenceResponse = {
   results: IntelligenceResult[];
 };
 
-const API_BASE = (
-  process.env.NEXT_PUBLIC_INTELLIGENCE_API_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  ""
-).replace(/\/$/, "");
+
+const DATA_INTELLIGENCE_API_BASE =
+  process.env.NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL ??
+  "http://localhost:8000";
 
 const pollutantNames: Record<string, string> = {
   no2: "NO₂",
@@ -84,13 +83,11 @@ export default function DataIntelligencePage() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `${API_BASE}/api/intelligence/results`,
-          {
-            signal: controller.signal,
-            cache: "no-store",
-          }
-        );
+        
+  const response = await fetch(
+    `${DATA_INTELLIGENCE_API_BASE}/api/intelligence/results`,
+    { cache: "no-store" }
+  );
 
         if (!response.ok) {
           throw new Error(`The API returned HTTP ${response.status}.`);

@@ -1,6 +1,7 @@
 
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any
 
@@ -9,11 +10,11 @@ from fastapi import HTTPException
 
 # intelligence.py is located at <repo>/backend/app/services/
 REPO_ROOT = Path(__file__).resolve().parents[3]
-RESULTS_FILE = (
-    REPO_ROOT
-    / "data-science"
-    / "outputs"
-    / "intelligence_results.json"
+RESULTS_FILE = Path(
+    os.getenv(
+        "INTELLIGENCE_RESULTS_FILE",
+        str(REPO_ROOT / "data-science" / "outputs" / "intelligence_results.json"),
+    )
 )
 
 REQUIRED_FIELDS = {
