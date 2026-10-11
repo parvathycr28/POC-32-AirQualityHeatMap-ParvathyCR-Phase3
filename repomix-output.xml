@@ -106,6 +106,7 @@ data-science/
     assess_data_quality.py
     assess_representativeness.py
     export_intelligence_results.py
+    generate_intelligence_summary.py
     profile_canonical_data.py
     run_analytical_track.py
     validate_analytical_track.py
@@ -185,6 +186,7 @@ selenium-test/
   test_poc.py
 .gitignore
 docker-compose.yml
+Dockerfile.intelligence
 README.md
 UAT_CHECKLIST
 VAR_REPORT
@@ -192,308 +194,6 @@ VAR_REPORT
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="docs/DATA_INTELLIGENCE_PAGE_PLAN.md">
-# Data Intelligence Page Plan
-
-## 1. Objective
-
-Provide a dedicated page for displaying the approved Phase 3 comparative intelligence results while preserving the existing Air Quality dashboard.
-
-## 2. Page route
-
-* **Route:** `/data-intelligence`
-* **Frontend file:** `frontend/app/data-intelligence/page.tsx`
-* **Frontend:** Next.js with TypeScript
-* **Data source:** Data Intelligence API at `/api/intelligence/results`
-
-## 3. Page content
-
-The page should provide:
-
-* A clear Data Intelligence page heading.
-* A notice identifying the dataset as synthetic and its quality status as conditional.
-* A result count and relevant dataset/method version information when available.
-* Comparative intelligence results with their metric values and units.
-* Evidence, findings, limitations, and priority ranks where supplied by the API.
-* Filters for pollutant, city, and text search.
-* Loading and error states, including a Retry action.
-
-## 4. Data handling
-
-The frontend fetches results using `NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL` and validates that the response contains a `results` array.
-
-The page should display the returned API data rather than inventing or hardcoding analytical findings. Optional fields should be handled safely when they are absent.
-
-## 5. User experience
-
-The page should make the synthetic-data status and analytical limitations easy to understand. Filtering should help users explore results without implying that a higher priority rank proves a city or pollutant is unsafe.
-
-Loading, empty, and error states should be understandable, and the Retry action should allow the user to attempt the request again.
-
-## 6. Existing dashboard protection
-
-The existing Air Quality dashboard, map, population data, and API requests must remain functional. The Data Intelligence page should remain a separate route and use its own API configuration.
-
-## 7. Acceptance criteria
-
-* The `/data-intelligence` route loads.
-* Results are fetched from the configured endpoint.
-* The result count and returned records are displayed correctly.
-* Pollutant, city, and text-search filters work.
-* Loading and error states are handled.
-* Synthetic-data and conditional-quality notices remain visible.
-* The existing Air Quality dashboard continues to work.
-</file>
-
-<file path="docs/DATA_INTELLIGENCE_UAT.md">
-## 3. Test cases
-
-| ID     | Test                            | Expected result                                            | Actual result                                                                                              | Status |
-| ------ | ------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
-| UAT-01 | Open the Data Intelligence page | Page loads without a fatal error                           | Page opened successfully                                                                                   | PASS   |
-| UAT-02 | Request the intelligence API    | Valid response containing a results array                  | API returned a successful response                                                                         | PASS   |
-| UAT-03 | Check result count              | Displayed count matches returned records                   | Displayed count matched the API response                                                                   | PASS   |
-| UAT-04 | Filter by pollutant             | Results match the selected pollutant                       | Filter behaved as expected                                                                                 | PASS   |
-| UAT-05 | Filter by city                  | Results match the selected city                            | Filter behaved as expected                                                                                 | PASS   |
-| UAT-06 | Search results                  | Search narrows results correctly                           | Search behaved as expected                                                                                 | PASS   |
-| UAT-07 | Check loading behavior          | Loading state appears while the request is pending         | Loading state behaved as expected during testing | PASS |
-| UAT-08 | Check API error behavior        | Error message and Retry action work                        | Error state and Retry recovery worked during testing                                                       | PASS   |
-| UAT-09 | Check data-quality notice       | Synthetic-data and conditional-quality notices are visible | Warning was visible and understandable                                                                     | PASS   |
-| UAT-10 | Open the existing dashboard     | Dashboard loads                                            | Dashboard opened successfully                                                                              | PASS   |
-| UAT-11 | Check the existing map and data | Map and existing data requests work                        | Map and air-quality data loaded successfully after the API configuration correction                        | PASS   |
-
-## 4. Execution notes
-
-The Data Intelligence API, result count, pollutant filter, city filter, search, data-quality warning, and error/Retry behavior passed the reported checks. The Air Quality dashboard, map, and data retrieval worked after the frontend API configuration was corrected. The loading-state check remains failed pending investigation and retesting.
-
-## 5. Acceptance criteria
-
-The Data Intelligence page must load, retrieve valid results, apply filters and search, handle request errors, display data limitations, and provide appropriate loading behavior. Existing Air Quality functionality must remain operational.
-
-## 6. Final result
-
-* Confirmed passing test cases: 11
-* Confirmed failing test cases: 0
-* Pending test cases: 0
-* Overall status: PASS
-</file>
-
-<file path="docs/DATA_INTELLIGENCE_UI_SPEC.md">
-# Data Intelligence UI Specification
-
-## 1. Purpose
-
-Defines the required user-interface behavior for the Phase 3 Data Intelligence page.
-
-## 2. Page identity
-
-* **Route:** `/data-intelligence`
-* **Implementation:** `frontend/app/data-intelligence/page.tsx`
-* **Framework:** Next.js and TypeScript
-* **Data source:** `/api/intelligence/results`
-
-## 3. Required interface elements
-
-The page should include:
-
-* A clear page title and explanation of the comparative intelligence results.
-* A visible notice identifying the dataset as synthetic and its quality status as conditional.
-* Dataset and method version information when supplied by the API.
-* A result count and the available intelligence records.
-* Pollutant and city filters.
-* A text-search field.
-* A clear presentation of metric values, units, findings, evidence, priority ranks, and limitations when those fields are available.
-
-## 4. Interaction behavior
-
-### Loading
-
-Display a loading indicator or message while the API request is in progress.
-
-### Successful response
-
-Display the returned results and update the visible records when filters or search terms change.
-
-### Empty results
-
-If no records match the current filters or search term, communicate that no matching results are available.
-
-### API error
-
-Display an understandable error message and provide a Retry action.
-
-### Sorting
-
-Keep the existing sorting behavior by pollutant and priority rank.
-
-## 5. Data transparency and accessibility
-
-* Keep synthetic-data and conditional-quality notices visible.
-* Do not describe synthetic records as verified real-world observations.
-* Do not imply that priority ranks establish regulatory compliance, health risk, or safety.
-* Use understandable labels for filters and controls.
-* Ensure important findings and limitations are available as text, not only through color.
-* Handle optional or missing API fields without breaking the page.
-
-## 6. Visual consistency
-
-The Data Intelligence page should remain consistent with the existing project branding and dashboard styling. Any visual changes must preserve the page’s filters, result content, loading state, error state, and Retry behavior.
-
-## 7. Acceptance criteria
-
-* All required interface elements are present.
-* Filters and search update the displayed records.
-* Sorting remains functional.
-* Loading, empty, and error states are understandable.
-* Synthetic-data limitations are visible.
-* The page remains usable without relying on color alone.
-* The existing Air Quality dashboard is not disrupted.
-</file>
-
-<file path="docs/INTELLIGENCE_API_CONTRACT.md">
-# Intelligence API Contract
-
-## 1. Purpose
-
-Defines the API connection between the Phase 3 Data Intelligence frontend and the FastAPI backend.
-
-## 2. Endpoint
-
-* **Method:** GET
-* **Path:** `/api/intelligence/results`
-* **Local URL:** `http://localhost:8000/api/intelligence/results`
-* **Frontend page:** `/data-intelligence`
-* **Frontend configuration:** `NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL`
-* **Cache behavior:** The frontend fetch uses `cache: "no-store"`.
-
-## 3. Response structure
-
-The response contains:
-
-* `metadata`: data version, method version, result count, synthetic-data flag, quality status, and description.
-* `count`: number of returned results.
-* `results`: array of comparative intelligence records.
-
-Each result can include an identifier, result type, group key, metric, value, unit, priority rank, finding, evidence, quality status, limitation, method and data versions, entity name, pollutant, synthetic-data flag, and optional period boundaries.
-
-Evidence items contain a factor and a value that may be a string, number, boolean, or null.
-
-## 4. Frontend behavior
-
-The page validates that the response is an object containing a `results` array. It displays a loading state, an error state with a Retry button, and filtered results when data is available.
-
-Filtering supports pollutant, city, and text search. Results are sorted by pollutant and priority rank.
-
-## 5. CORS and local integration
-
-The backend CORS configuration includes the configured `FRONTEND_URL` and the local origins `http://localhost:3002` and `http://127.0.0.1:3002`.
-
-A CORS issue was resolved during local integration. The endpoint subsequently returned HTTP 200 and the frontend loaded the results.
-
-## 6. Data limitations
-
-The current dataset is synthetic, with `data_version` `phase3-v1.1`, `method_version` `track-a-comparative-v1.0.0`, and `quality_status` `conditional`. The results are descriptive comparisons, not verified real-world measurements, regulatory assessments, health-risk assessments, or predictions.
-
-## 7. Verification
-
-The endpoint was observed returning HTTP 200 and a response count of 32 during local testing. Re-run the endpoint and browser checks after relevant configuration or code changes.
-</file>
-
-<file path="docs/INTELLIGENCE_INTEGRATION_MAPPING.md">
-# Intelligence Integration Mapping
-
-## 1. Purpose
-
-Documents how the Phase 3 Data Intelligence page connects to the existing frontend, API configuration, backend endpoint, and analytical output.
-
-## 2. Integration map
-
-| Component                      | File or endpoint                                 | Responsibility                                         |
-| ------------------------------ | ------------------------------------------------ | ------------------------------------------------------ |
-| Data Intelligence page         | `frontend/app/data-intelligence/page.tsx`        | Fetches and displays comparative intelligence results  |
-| Intelligence API configuration | `NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL`          | Configures the Data Intelligence backend base URL      |
-| Data Intelligence endpoint     | `/api/intelligence/results`                      | Returns the approved intelligence results              |
-| Data Intelligence backend      | Port `8000` locally                              | Serves the intelligence API                            |
-| Intelligence output            | `data-science/outputs/intelligence_results.json` | Supplies the comparative results to the backend        |
-| Air Quality API configuration  | `NEXT_PUBLIC_API_URL`                            | Configures the existing Air Quality backend connection |
-| Air Quality backend            | Port `8001` inside the container                 | Serves the existing Air Quality API                    |
-| Data Intelligence page route   | `/data-intelligence`                             | Provides access to the Data Intelligence interface     |
-
-## 3. Request and response flow
-
-1. The user opens `/data-intelligence`.
-2. The frontend requests `GET /api/intelligence/results` from the configured Data Intelligence API.
-3. The backend loads and returns the intelligence output.
-4. The frontend validates the response and displays the results.
-5. The user can filter results by pollutant, city, and search text.
-
-## 4. Separation of existing functionality
-
-The Data Intelligence page uses its own API configuration. The existing Air Quality dashboard continues to use the separate Air Quality API helper in `frontend/app/lib/api.ts`.
-
-The Data Intelligence integration should not replace or unnecessarily modify the existing map, population lookup, air-quality requests, or dashboard filters.
-
-## 5. Local configuration
-
-* Frontend: `http://localhost:3002`
-* Data Intelligence backend: `http://localhost:8000`
-* Air Quality backend: `http://localhost:8003` from the host when using the Phase 3 Compose configuration.
-* Data Intelligence endpoint: `http://localhost:8000/api/intelligence/results`
-
-## 6. Integration verification
-
-The Data Intelligence endpoint returned HTTP 200 with 32 results during local testing. The backend CORS configuration was updated to allow the Phase 3 frontend origin.
-
-Recheck the endpoint and both frontend pages after any relevant integration changes.
-
-## 7. Known limitations
-
-The current intelligence results are based on synthetic data and have conditional quality status. They should not be presented as verified real-world measurements, regulatory assessments, health-risk assessments, or predictions.
-</file>
-
-<file path="docs/OPERATIONAL_PAGE_REGRESSION_REPORT.md">
-Operational Page Regression Report
-1. Purpose
-
-Record regression checks confirming that the new Data Intelligence page has not disrupted existing Phase 3 application functionality.
-
-2. Test environment
-Frontend URL: http://localhost:3002
-Existing Air Quality dashboard: http://localhost:3002
-Data Intelligence page: http://localhost:3002/data-intelligence
-Air Quality backend: http://localhost:8003
-Data Intelligence backend: http://localhost:8000
-Overall status: PASS
-## 3. Regression checklist
-
-| ID     | Check                               | Expected result                                        | Actual result                                                           | Status |
-| ------ | ----------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------- | ------ |
-| REG-01 | Open the existing dashboard         | Dashboard loads successfully                           | Dashboard opened successfully                                           | PASS   |
-| REG-02 | Load the Air Quality map            | Map renders without a fatal error                      | Map loaded successfully after the API configuration correction          | PASS   |
-| REG-03 | Retrieve air-quality data           | Existing Air Quality API requests work                 | Air-quality data loaded successfully after the correction               | PASS   |
-| REG-04 | Retrieve population data            | Population lookup works where data is available        | Population data loaded successfully                                     | PASS   |
-| REG-05 | Use existing dashboard interactions | Existing map points and interactions remain functional | Map points worked, and the user reported that the dashboard was working | PASS   |
-| REG-06 | Open the Data Intelligence page     | Page loads independently                               | Page opened successfully                                                | PASS   |
-| REG-07 | Retrieve intelligence results       | Endpoint returns valid results                         | API returned a successful response                                      | PASS   |
-| REG-08 | Navigate between pages              | Both routes remain accessible                          | Both routes were confirmed accessible                                   | PASS   |
-| REG-09 | Check browser console               | No new critical errors are observed                    | No new critical errors were observed                                    | PASS   |
-
-## 4. Execution notes
-
-A CORS-related fetch failure initially prevented the Air Quality frontend from retrieving data. After the frontend API configuration correction, the map, air-quality data, population lookup, and map points worked. Both routes remained accessible, and no new critical browser errors were observed.
-
-## 5. Regression acceptance criteria
-
-The existing Air Quality dashboard remains functional, and the Data Intelligence page loads its results without disrupting existing API connections or dashboard access.
-
-## 6. Final result
-
-* Confirmed passing checks: 9
-* Confirmed failing checks: 0
-* Pending checks: 0
-* Overall status: PASS
-</file>
 
 <file path="architecture/ARCHITECTURE.md">
 # Aether Pulse — Architecture
@@ -1350,145 +1050,6 @@ def percentage_above_average(
     )
 </file>
 
-<file path="backend/app/services/intelligence.py">
-import json
-import math
-import os
-from pathlib import Path
-from typing import Any
-
-from fastapi import HTTPException
-
-
-# intelligence.py is located at <repo>/backend/app/services/
-REPO_ROOT = Path(__file__).resolve().parents[3]
-RESULTS_FILE = Path(
-    os.getenv(
-        "INTELLIGENCE_RESULTS_FILE",
-        str(REPO_ROOT / "data-science" / "outputs" / "intelligence_results.json"),
-    )
-)
-
-REQUIRED_FIELDS = {
-    "result_id",
-    "result_type",
-    "group_key",
-    "metric_name",
-    "result_value",
-    "priority_rank",
-    "finding",
-    "evidence",
-    "quality_status",
-    "limitation",
-    "method_version",
-    "data_version",
-    "entity_name",
-    "pollutant",
-    "is_synthetic",
-}
-
-ALLOWED_QUALITY_STATUSES = {"validated", "conditional", "rejected"}
-
-
-def get_intelligence_results() -> dict[str, Any]:
-    """Read and validate the published intelligence result records."""
-
-    if not RESULTS_FILE.is_file():
-        raise HTTPException(
-            status_code=503,
-            detail="The intelligence results file is unavailable.",
-        )
-
-    try:
-        with RESULTS_FILE.open("r", encoding="utf-8") as file:
-            results = json.load(file)
-    except (OSError, json.JSONDecodeError) as error:
-        raise HTTPException(
-            status_code=500,
-            detail="The intelligence results file could not be read.",
-        ) from error
-
-    if not isinstance(results, list):
-        raise HTTPException(
-            status_code=500,
-            detail="The intelligence results must be a JSON list.",
-        )
-
-    seen_ids: set[str] = set()
-
-    for index, record in enumerate(results):
-        if not isinstance(record, dict):
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid result record at index {index}.",
-            )
-
-        missing = REQUIRED_FIELDS - record.keys()
-        if missing:
-            raise HTTPException(
-                status_code=500,
-                detail=(
-                    f"Result record {index} is missing required fields: "
-                    f"{', '.join(sorted(missing))}"
-                ),
-            )
-
-        result_id = record["result_id"]
-        if not isinstance(result_id, str) or not result_id.strip():
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid result_id at index {index}.",
-            )
-
-        if result_id in seen_ids:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Duplicate result_id: {result_id}.",
-            )
-        seen_ids.add(result_id)
-
-        if record["quality_status"] not in ALLOWED_QUALITY_STATUSES:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid quality status for {result_id}.",
-            )
-
-        value = record["result_value"]
-        if (
-            isinstance(value, bool)
-            or not isinstance(value, (int, float))
-            or not math.isfinite(value)
-        ):
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid numeric result_value for {result_id}.",
-            )
-
-        if not isinstance(record["evidence"], list):
-            raise HTTPException(
-                status_code=500,
-                detail=f"Evidence must be a list for {result_id}.",
-            )
-
-    return {
-        "metadata": {
-            "data_version": "phase3-v1.1",
-            "method_version": "track-a-comparative-v1.0.0",
-            "count": len(results),
-            "is_synthetic": True,
-            "quality_status": "conditional",
-            "description": (
-                "Synthetic descriptive comparisons based on the approved "
-                "Phase 3 sample. These are not verified real-world "
-                "measurements, regulatory assessments, health-risk "
-                "assessments, or predictions."
-            ),
-        },
-        "count": len(results),
-        "results": results,
-    }
-</file>
-
 <file path="backend/app/utils/__init__.py">
 
 </file>
@@ -1806,30 +1367,6 @@ Dockerfile
 OPENAQ_API_KEY=
 OPENAQ_BASE_URL=
 WORLDPOP_BASE_URL=
-</file>
-
-<file path="backend/Dockerfile">
-FROM python:3.12-slim
-
-WORKDIR /app
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-COPY backend/requirements.txt .
-
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
-
-COPY backend/app ./app
-COPY backend/data ./data
-COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
-
-ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
-
-EXPOSE 8000 8001
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 </file>
 
 <file path="backend/requirements.txt">
@@ -3013,6 +2550,160 @@ if __name__ == "__main__":
     main()
 </file>
 
+<file path="data-science/scripts/generate_intelligence_summary.py">
+import json
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+SOURCE_FILE = (
+    ROOT / "data-science" / "outputs" / "intelligence_results.json"
+)
+SUMMARY_FILE = (
+    ROOT / "data-science" / "outputs" / "intelligence_summary.json"
+)
+
+
+def distinct_values(records, field):
+    return sorted({
+        str(record[field]).strip()
+        for record in records
+        if record.get(field) is not None
+        and str(record[field]).strip()
+    })
+
+
+def main():
+    if not SOURCE_FILE.is_file():
+        raise FileNotFoundError(
+            f"Results file not found: {SOURCE_FILE}"
+        )
+
+    with SOURCE_FILE.open("r", encoding="utf-8") as file:
+        records = json.load(file)
+
+    # The actual source is a JSON array of result records.
+    if not isinstance(records, list):
+        raise ValueError(
+            "Expected intelligence_results.json to contain a JSON array."
+        )
+
+    if not all(isinstance(record, dict) for record in records):
+        raise ValueError(
+            "Every item in the results array must be a JSON object."
+        )
+
+    if not records:
+        raise ValueError(
+            "The results array is empty; refusing to generate a misleading summary."
+        )
+
+    result_type_counts = Counter(
+        str(record["result_type"])
+        for record in records
+        if record.get("result_type") is not None
+    )
+
+    category_counts = Counter(
+        str(record["result_category"])
+        for record in records
+        if record.get("result_category") is not None
+    )
+
+    versions = {
+        "data_versions": distinct_values(records, "data_version"),
+        "method_versions": distinct_values(records, "method_version"),
+        "quality_statuses": distinct_values(records, "quality_status"),
+    }
+
+    synthetic_flags = sorted({
+        record["is_synthetic"]
+        for record in records
+        if isinstance(record.get("is_synthetic"), bool)
+    })
+
+    ranked_records = [
+        record for record in records
+        if isinstance(record.get("priority_rank"), (int, float))
+        and not isinstance(record.get("priority_rank"), bool)
+    ]
+    ranked_records.sort(key=lambda record: record["priority_rank"])
+
+    example_fields = (
+        "result_id",
+        "result_type",
+        "entity_name",
+        "pollutant",
+        "metric_name",
+        "result_value",
+        "result_unit",
+        "priority_rank",
+        "finding",
+        "limitation",
+    )
+
+    priority_examples = [
+        {
+            field: record[field]
+            for field in example_fields
+            if field in record
+        }
+        for record in ranked_records[:5]
+    ]
+
+    summary = {
+        "summary_schema_version": "1.0.0",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "source": {
+            "file": "data-science/outputs/intelligence_results.json",
+            "source_format": "JSON array of result records",
+        },
+        "versions": versions,
+        "quality": {
+            "is_synthetic_values": synthetic_flags,
+            "record_count": len(records),
+            "contains_conditional_quality": (
+                "conditional" in versions["quality_statuses"]
+            ),
+        },
+        "overview": {
+            "result_count": len(records),
+            "entity_count": len(distinct_values(records, "entity_name")),
+            "entities": distinct_values(records, "entity_name"),
+            "pollutant_count": len(distinct_values(records, "pollutant")),
+            "pollutants": distinct_values(records, "pollutant"),
+            "result_type_counts": dict(sorted(result_type_counts.items())),
+            "result_category_counts": dict(sorted(category_counts.items())),
+        },
+        "priority_examples": priority_examples,
+        "limitations": (
+            "This summary is derived from the published intelligence result "
+            "records. Where results are synthetic, they are descriptive "
+            "comparisons and are not verified real-world measurements, "
+            "regulatory assessments, health-risk assessments, or predictions."
+        ),
+    }
+
+    SUMMARY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with SUMMARY_FILE.open("w", encoding="utf-8") as file:
+        json.dump(summary, file, indent=2, ensure_ascii=False)
+        file.write("\n")
+
+    print("Intelligence summary generated successfully.")
+    print(f"Source records: {len(records)}")
+    print(f"Entities: {summary['overview']['entity_count']}")
+    print(f"Pollutants: {summary['overview']['pollutant_count']}")
+    print(f"Data versions: {versions['data_versions']}")
+    print(f"Method versions: {versions['method_versions']}")
+    print(f"Output: {SUMMARY_FILE}")
+
+
+if __name__ == "__main__":
+    main()
+</file>
+
 <file path="data-science/scripts/profile_canonical_data.py">
 import json
 from pathlib import Path
@@ -3501,6 +3192,164 @@ The dataset is controlled synthetic data. Results must not be described as verif
 The confirmed archetype is a cross-sectional synthetic multi-entity, multi-metric dataset with sparse repeated measurements. Reconsider the archetype only if the canonical data structure or its documented purpose changes.
 </file>
 
+<file path="docs/DATA_INTELLIGENCE_PAGE_PLAN.md">
+# Data Intelligence Page Plan
+
+## 1. Objective
+
+Provide a dedicated page for displaying the approved Phase 3 comparative intelligence results while preserving the existing Air Quality dashboard.
+
+## 2. Page route
+
+* **Route:** `/data-intelligence`
+* **Frontend file:** `frontend/app/data-intelligence/page.tsx`
+* **Frontend:** Next.js with TypeScript
+* **Data source:** Data Intelligence API at `/api/intelligence/results`
+
+## 3. Page content
+
+The page should provide:
+
+* A clear Data Intelligence page heading.
+* A notice identifying the dataset as synthetic and its quality status as conditional.
+* A result count and relevant dataset/method version information when available.
+* Comparative intelligence results with their metric values and units.
+* Evidence, findings, limitations, and priority ranks where supplied by the API.
+* Filters for pollutant, city, and text search.
+* Loading and error states, including a Retry action.
+
+## 4. Data handling
+
+The frontend fetches results using `NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL` and validates that the response contains a `results` array.
+
+The page should display the returned API data rather than inventing or hardcoding analytical findings. Optional fields should be handled safely when they are absent.
+
+## 5. User experience
+
+The page should make the synthetic-data status and analytical limitations easy to understand. Filtering should help users explore results without implying that a higher priority rank proves a city or pollutant is unsafe.
+
+Loading, empty, and error states should be understandable, and the Retry action should allow the user to attempt the request again.
+
+## 6. Existing dashboard protection
+
+The existing Air Quality dashboard, map, population data, and API requests must remain functional. The Data Intelligence page should remain a separate route and use its own API configuration.
+
+## 7. Acceptance criteria
+
+* The `/data-intelligence` route loads.
+* Results are fetched from the configured endpoint.
+* The result count and returned records are displayed correctly.
+* Pollutant, city, and text-search filters work.
+* Loading and error states are handled.
+* Synthetic-data and conditional-quality notices remain visible.
+* The existing Air Quality dashboard continues to work.
+</file>
+
+<file path="docs/DATA_INTELLIGENCE_UAT.md">
+## 3. Test cases
+
+| ID     | Test                            | Expected result                                            | Actual result                                                                                              | Status |
+| ------ | ------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
+| UAT-01 | Open the Data Intelligence page | Page loads without a fatal error                           | Page opened successfully                                                                                   | PASS   |
+| UAT-02 | Request the intelligence API    | Valid response containing a results array                  | API returned a successful response                                                                         | PASS   |
+| UAT-03 | Check result count              | Displayed count matches returned records                   | Displayed count matched the API response                                                                   | PASS   |
+| UAT-04 | Filter by pollutant             | Results match the selected pollutant                       | Filter behaved as expected                                                                                 | PASS   |
+| UAT-05 | Filter by city                  | Results match the selected city                            | Filter behaved as expected                                                                                 | PASS   |
+| UAT-06 | Search results                  | Search narrows results correctly                           | Search behaved as expected                                                                                 | PASS   |
+| UAT-07 | Check loading behavior          | Loading state appears while the request is pending         | Loading state behaved as expected during testing | PASS |
+| UAT-08 | Check API error behavior        | Error message and Retry action work                        | Error state and Retry recovery worked during testing                                                       | PASS   |
+| UAT-09 | Check data-quality notice       | Synthetic-data and conditional-quality notices are visible | Warning was visible and understandable                                                                     | PASS   |
+| UAT-10 | Open the existing dashboard     | Dashboard loads                                            | Dashboard opened successfully                                                                              | PASS   |
+| UAT-11 | Check the existing map and data | Map and existing data requests work                        | Map and air-quality data loaded successfully after the API configuration correction                        | PASS   |
+
+## 4. Execution notes
+
+The Data Intelligence API, result count, pollutant filter, city filter, search, data-quality warning, and error/Retry behavior passed the reported checks. The Air Quality dashboard, map, and data retrieval worked after the frontend API configuration was corrected. The loading-state check remains failed pending investigation and retesting.
+
+## 5. Acceptance criteria
+
+The Data Intelligence page must load, retrieve valid results, apply filters and search, handle request errors, display data limitations, and provide appropriate loading behavior. Existing Air Quality functionality must remain operational.
+
+## 6. Final result
+
+* Confirmed passing test cases: 11
+* Confirmed failing test cases: 0
+* Pending test cases: 0
+* Overall status: PASS
+</file>
+
+<file path="docs/DATA_INTELLIGENCE_UI_SPEC.md">
+# Data Intelligence UI Specification
+
+## 1. Purpose
+
+Defines the required user-interface behavior for the Phase 3 Data Intelligence page.
+
+## 2. Page identity
+
+* **Route:** `/data-intelligence`
+* **Implementation:** `frontend/app/data-intelligence/page.tsx`
+* **Framework:** Next.js and TypeScript
+* **Data source:** `/api/intelligence/results`
+
+## 3. Required interface elements
+
+The page should include:
+
+* A clear page title and explanation of the comparative intelligence results.
+* A visible notice identifying the dataset as synthetic and its quality status as conditional.
+* Dataset and method version information when supplied by the API.
+* A result count and the available intelligence records.
+* Pollutant and city filters.
+* A text-search field.
+* A clear presentation of metric values, units, findings, evidence, priority ranks, and limitations when those fields are available.
+
+## 4. Interaction behavior
+
+### Loading
+
+Display a loading indicator or message while the API request is in progress.
+
+### Successful response
+
+Display the returned results and update the visible records when filters or search terms change.
+
+### Empty results
+
+If no records match the current filters or search term, communicate that no matching results are available.
+
+### API error
+
+Display an understandable error message and provide a Retry action.
+
+### Sorting
+
+Keep the existing sorting behavior by pollutant and priority rank.
+
+## 5. Data transparency and accessibility
+
+* Keep synthetic-data and conditional-quality notices visible.
+* Do not describe synthetic records as verified real-world observations.
+* Do not imply that priority ranks establish regulatory compliance, health risk, or safety.
+* Use understandable labels for filters and controls.
+* Ensure important findings and limitations are available as text, not only through color.
+* Handle optional or missing API fields without breaking the page.
+
+## 6. Visual consistency
+
+The Data Intelligence page should remain consistent with the existing project branding and dashboard styling. Any visual changes must preserve the page’s filters, result content, loading state, error state, and Retry behavior.
+
+## 7. Acceptance criteria
+
+* All required interface elements are present.
+* Filters and search update the displayed records.
+* Sorting remains functional.
+* Loading, empty, and error states are understandable.
+* Synthetic-data limitations are visible.
+* The page remains usable without relying on color alone.
+* The existing Air Quality dashboard is not disrupted.
+</file>
+
 <file path="docs/DATA_QUALITY_ASSESSMENT.md">
 # Data Quality Assessment
 
@@ -3595,6 +3444,150 @@ No restricted or private source data is used in the current canonical package.
 The Phase 2 application retains its existing OpenAQ integration. Phase 3 canonicalization does not replace or modify that application integration.
 
 The canonical dataset provides a stable versioned data foundation for downstream Phase 3 analysis.
+</file>
+
+<file path="docs/INTELLIGENCE_API_CONTRACT.md">
+# Intelligence API Contract
+
+## 1. Purpose
+
+Defines the API connection between the Phase 3 Data Intelligence frontend and the FastAPI backend.
+
+## 2. Endpoint
+
+* **Method:** GET
+* **Path:** `/api/intelligence/results`
+* **Local URL:** `http://localhost:8000/api/intelligence/results`
+* **Frontend page:** `/data-intelligence`
+* **Frontend configuration:** `NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL`
+* **Cache behavior:** The frontend fetch uses `cache: "no-store"`.
+
+## 3. Response structure
+
+The response contains:
+
+* `metadata`: data version, method version, result count, synthetic-data flag, quality status, and description.
+* `count`: number of returned results.
+* `results`: array of comparative intelligence records.
+
+Each result can include an identifier, result type, group key, metric, value, unit, priority rank, finding, evidence, quality status, limitation, method and data versions, entity name, pollutant, synthetic-data flag, and optional period boundaries.
+
+Evidence items contain a factor and a value that may be a string, number, boolean, or null.
+
+## 4. Frontend behavior
+
+The page validates that the response is an object containing a `results` array. It displays a loading state, an error state with a Retry button, and filtered results when data is available.
+
+Filtering supports pollutant, city, and text search. Results are sorted by pollutant and priority rank.
+
+## 5. CORS and local integration
+
+The backend CORS configuration includes the configured `FRONTEND_URL` and the local origins `http://localhost:3002` and `http://127.0.0.1:3002`.
+
+A CORS issue was resolved during local integration. The endpoint subsequently returned HTTP 200 and the frontend loaded the results.
+
+## 6. Data limitations
+
+The current dataset is synthetic, with `data_version` `phase3-v1.1`, `method_version` `track-a-comparative-v1.0.0`, and `quality_status` `conditional`. The results are descriptive comparisons, not verified real-world measurements, regulatory assessments, health-risk assessments, or predictions.
+
+## 7. Verification
+
+The endpoint was observed returning HTTP 200 and a response count of 32 during local testing. Re-run the endpoint and browser checks after relevant configuration or code changes.
+</file>
+
+<file path="docs/INTELLIGENCE_INTEGRATION_MAPPING.md">
+# Intelligence Integration Mapping
+
+## 1. Purpose
+
+Documents how the Phase 3 Data Intelligence page connects to the existing frontend, API configuration, backend endpoint, and analytical output.
+
+## 2. Integration map
+
+| Component                      | File or endpoint                                 | Responsibility                                         |
+| ------------------------------ | ------------------------------------------------ | ------------------------------------------------------ |
+| Data Intelligence page         | `frontend/app/data-intelligence/page.tsx`        | Fetches and displays comparative intelligence results  |
+| Intelligence API configuration | `NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL`          | Configures the Data Intelligence backend base URL      |
+| Data Intelligence endpoint     | `/api/intelligence/results`                      | Returns the approved intelligence results              |
+| Data Intelligence backend      | Port `8000` locally                              | Serves the intelligence API                            |
+| Intelligence output            | `data-science/outputs/intelligence_results.json` | Supplies the comparative results to the backend        |
+| Air Quality API configuration  | `NEXT_PUBLIC_API_URL`                            | Configures the existing Air Quality backend connection |
+| Air Quality backend            | Port `8001` inside the container                 | Serves the existing Air Quality API                    |
+| Data Intelligence page route   | `/data-intelligence`                             | Provides access to the Data Intelligence interface     |
+
+## 3. Request and response flow
+
+1. The user opens `/data-intelligence`.
+2. The frontend requests `GET /api/intelligence/results` from the configured Data Intelligence API.
+3. The backend loads and returns the intelligence output.
+4. The frontend validates the response and displays the results.
+5. The user can filter results by pollutant, city, and search text.
+
+## 4. Separation of existing functionality
+
+The Data Intelligence page uses its own API configuration. The existing Air Quality dashboard continues to use the separate Air Quality API helper in `frontend/app/lib/api.ts`.
+
+The Data Intelligence integration should not replace or unnecessarily modify the existing map, population lookup, air-quality requests, or dashboard filters.
+
+## 5. Local configuration
+
+* Frontend: `http://localhost:3002`
+* Data Intelligence backend: `http://localhost:8000`
+* Air Quality backend: `http://localhost:8003` from the host when using the Phase 3 Compose configuration.
+* Data Intelligence endpoint: `http://localhost:8000/api/intelligence/results`
+
+## 6. Integration verification
+
+The Data Intelligence endpoint returned HTTP 200 with 32 results during local testing. The backend CORS configuration was updated to allow the Phase 3 frontend origin.
+
+Recheck the endpoint and both frontend pages after any relevant integration changes.
+
+## 7. Known limitations
+
+The current intelligence results are based on synthetic data and have conditional quality status. They should not be presented as verified real-world measurements, regulatory assessments, health-risk assessments, or predictions.
+</file>
+
+<file path="docs/OPERATIONAL_PAGE_REGRESSION_REPORT.md">
+Operational Page Regression Report
+1. Purpose
+
+Record regression checks confirming that the new Data Intelligence page has not disrupted existing Phase 3 application functionality.
+
+2. Test environment
+Frontend URL: http://localhost:3002
+Existing Air Quality dashboard: http://localhost:3002
+Data Intelligence page: http://localhost:3002/data-intelligence
+Air Quality backend: http://localhost:8003
+Data Intelligence backend: http://localhost:8000
+Overall status: PASS
+## 3. Regression checklist
+
+| ID     | Check                               | Expected result                                        | Actual result                                                           | Status |
+| ------ | ----------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------- | ------ |
+| REG-01 | Open the existing dashboard         | Dashboard loads successfully                           | Dashboard opened successfully                                           | PASS   |
+| REG-02 | Load the Air Quality map            | Map renders without a fatal error                      | Map loaded successfully after the API configuration correction          | PASS   |
+| REG-03 | Retrieve air-quality data           | Existing Air Quality API requests work                 | Air-quality data loaded successfully after the correction               | PASS   |
+| REG-04 | Retrieve population data            | Population lookup works where data is available        | Population data loaded successfully                                     | PASS   |
+| REG-05 | Use existing dashboard interactions | Existing map points and interactions remain functional | Map points worked, and the user reported that the dashboard was working | PASS   |
+| REG-06 | Open the Data Intelligence page     | Page loads independently                               | Page opened successfully                                                | PASS   |
+| REG-07 | Retrieve intelligence results       | Endpoint returns valid results                         | API returned a successful response                                      | PASS   |
+| REG-08 | Navigate between pages              | Both routes remain accessible                          | Both routes were confirmed accessible                                   | PASS   |
+| REG-09 | Check browser console               | No new critical errors are observed                    | No new critical errors were observed                                    | PASS   |
+
+## 4. Execution notes
+
+A CORS-related fetch failure initially prevented the Air Quality frontend from retrieving data. After the frontend API configuration correction, the map, air-quality data, population lookup, and map points worked. Both routes remained accessible, and no new critical browser errors were observed.
+
+## 5. Regression acceptance criteria
+
+The existing Air Quality dashboard remains functional, and the Data Intelligence page loads its results without disrupting existing API connections or dashboard access.
+
+## 6. Final result
+
+* Confirmed passing checks: 9
+* Confirmed failing checks: 0
+* Pending checks: 0
+* Overall status: PASS
 </file>
 
 <file path="docs/REPRESENTATIVENESS_ASSESSMENT.md">
@@ -6911,49 +6904,6 @@ Thumbs.db
 credentials.json
 </file>
 
-<file path="docker-compose.yml">
-services:
-  backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    container_name: infocreon-airquality-phase3-backend
-    env_file:
-      - ./backend/.env
-    ports:
-      - "8003:8001"
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
-        NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
-        NEXT_PUBLIC_API_URL: "http://localhost:8003"
-    environment:
-      NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
-      NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
-    ports:
-      - "3002:3000"
-    depends_on:
-      - backend
-    restart: unless-stopped
-  
-  data-intelligence-backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    container_name: infocreon-data-intelligence-backend
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-    environment:
-      INTELLIGENCE_RESULTS_FILE: /app/data-science/outputs/intelligence_results.json
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-</file>
-
 <file path="README.md">
 # Aether Pulse — Air Quality Heatmap
 
@@ -7201,1174 +7151,167 @@ This review used source-level visual/interaction inspection of the supplied Reac
 # VAR PASS
 </file>
 
-<file path="backend/app/main.py">
+<file path="backend/app/services/intelligence.py">
 import json
 import math
 import os
 from pathlib import Path
 from typing import Any
 
-import httpx
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
-from app.services.intelligence import get_intelligence_results
-load_dotenv()
+from fastapi import HTTPException
 
-app = FastAPI(title="Air Quality Intelligence API")
 
-FRONTEND_URL = os.getenv(
-    "FRONTEND_URL",
-    "http://localhost:3000",
+# intelligence.py is located at <repo>/backend/app/services/
+REPO_ROOT = Path(__file__).resolve().parents[3]
+RESULTS_FILE = Path(
+    os.getenv(
+        "INTELLIGENCE_RESULTS_FILE",
+        str(REPO_ROOT / "data-science" / "outputs" / "intelligence_results.json"),
+    )
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        FRONTEND_URL,
-        "http://localhost:3002",
-        "http://127.0.0.1:3002",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-OPENAQ_API_KEY = os.getenv("OPENAQ_API_KEY")
-
-OPENAQ_BASE_URL = "https://api.openaq.org/v3"
-WORLDPOP_URL = "https://api.worldpop.org/v1/services/stats"
-WORLDPOP_YEAR = 2020
-WORLDPOP_RESOLUTION = os.getenv(
-    "WORLDPOP_RESOLUTION",
-    "1km",
-)
-
-BASE_DIR = Path(__file__).resolve().parent
-
-MOCK_FILE = BASE_DIR / "mock_data.json"
-OPENAQ_POLLUTANTS = {
-    "pm25": {
-        "id": 2,
-        "name": "PM2.5",
-        "unit": "µg/m³",
-        "score_reference": 55.2,
-    },
-    "pm2.5": {
-        "id": 2,
-        "name": "PM2.5",
-        "unit": "µg/m³",
-        "score_reference": 55.2,
-    },
-    "pm10": {
-        "id": 1,
-        "name": "PM10",
-        "unit": "µg/m³",
-        "score_reference": 100.0,
-    },
-    "no2": {
-        "id": 7,
-        "name": "NO₂",
-        "unit": "ppm",
-        "score_reference": 0.100,
-    },
-    "co": {
-        "id": 8,
-        "name": "CO",
-        "unit": "ppm",
-        "score_reference": 9.0,
-    },
-    "so2": {
-        "id": 9,
-        "name": "SO₂",
-        "unit": "ppm",
-        "score_reference": 0.075,
-    },
-    "o3": {
-        "id": 10,
-        "name": "O₃",
-        "unit": "ppm",
-        "score_reference": 0.070,
-    },
+REQUIRED_FIELDS = {
+    "result_id",
+    "result_type",
+    "group_key",
+    "metric_name",
+    "result_value",
+    "priority_rank",
+    "finding",
+    "evidence",
+    "quality_status",
+    "limitation",
+    "method_version",
+    "data_version",
+    "entity_name",
+    "pollutant",
+    "is_synthetic",
 }
-def get_pollutant_config(pollutant: str) -> dict[str, Any]:
-    pollutant_key = pollutant.lower().strip()
 
-    config = OPENAQ_POLLUTANTS.get(pollutant_key)
+ALLOWED_QUALITY_STATUSES = {"validated", "conditional", "rejected"}
 
-    if config is None:
-        raise ValueError(
-            f"Unsupported pollutant: {pollutant}"
-        )
 
-    return config
-# Regional reference used by your existing dashboard.
-REGIONAL_AVERAGE_PM25 = 55.2
+def get_intelligence_results() -> dict[str, Any]:
+    """Read and validate the published intelligence result records."""
 
-WORLDPOP_CACHE: dict[tuple[float, float], float | None] = {}
-
-
-def load_mock_data() -> dict[str, Any]:
-    with open(MOCK_FILE, "r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-def percentage_difference(
-    value: float,
-    reference: float,
-) -> float:
-    if reference == 0:
-        return 0
-
-    return round(
-        ((value - reference) / reference) * 100,
-        1,
-    )
-
-def calculate_exposure_score(
-    value: float,
-    score_reference: float,
-) -> int:
-    if score_reference <= 0:
-        return 0
-
-    score = (value / score_reference) * 50
-
-    return max(
-        0,
-        min(
-            100,
-            round(score),
-        ),
-    )
-
-   
-
-    return max(
-        0,
-        min(
-            100,
-            round(score),
-        ),
-    )
-
-
-def make_point_feature(
-    *,
-    city: str,
-    country: str,
-    latitude: float,
-    longitude: float,
-    value: float,
-    timestamp: str,
-    population: int | None,
-    source: str,
-    pollutant: str,
-) -> dict[str, Any]:
-
-    config = get_pollutant_config(pollutant)
-
-    pollutant_name = config["name"]
-    pollutant_unit = config["unit"]
-    regional_average = config["score_reference"]
-
-    exposure_score = calculate_exposure_score(
-        value,
-        regional_average,config["score_reference"],
-    )
-
-    
-
-    percentage_above_regional_average = (
-        percentage_difference(
-            value,
-            regional_average,
-        )
-    )
-
-    return {
-        "type": "Feature",
-        "properties": {
-            "city": city,
-            "country": country,
-            "pollutant": config["name"],
-            "value": round(value, 4),
-            "unit": config["unit"],
-            "timestamp": timestamp,
-            "population": population,
-            "exposure_score": exposure_score,
-            "regional_average": regional_average,
-            "percentage_above_regional_average": (
-                percentage_above_regional_average
-            ),
-            "source": source,
-        },
-        "geometry": {
-            "type": "Point",
-            "coordinates": [
-                longitude,
-                latitude,
-            ],
-        },
-    }
-
-
-async def get_worldpop_population(
-    latitude: float,
-    longitude: float,
-) -> float | None:
-
-    delta = 0.025
-
-    geojson = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [
-                                longitude - delta,
-                                latitude - delta,
-                            ],
-                            [
-                                longitude + delta,
-                                latitude - delta,
-                            ],
-                            [
-                                longitude + delta,
-                                latitude + delta,
-                            ],
-                            [
-                                longitude - delta,
-                                latitude + delta,
-                            ],
-                            [
-                                longitude - delta,
-                                latitude - delta,
-                            ],
-                        ]
-                    ],
-                },
-            }
-        ],
-    }
-
-    params = {
-        "dataset": "wpgppop",
-        "year": WORLDPOP_YEAR,
-        "geojson": json.dumps(geojson),
-        "runasync": "false",
-    }
-
-    try:
-        async with httpx.AsyncClient(
-            timeout=60
-        ) as client:
-
-            response = await client.get(
-                WORLDPOP_URL,
-                params=params,
-            )
-
-            print(
-                "WORLDPOP STATUS:",
-                response.status_code,
-            )
-
-            print(
-                "WORLDPOP RESPONSE:",
-                response.text[:5000],
-            )
-
-            response.raise_for_status()
-
-            data = response.json()
-
-        if data.get("error"):
-            print(
-                "WORLDPOP ERROR:",
-                data.get("error_message"),
-            )
-
-            return None
-
-        population = (
-            data
-            .get("data", {})
-            .get("total_population")
-        )
-
-        print(
-            "WORLDPOP POPULATION:",
-            population,
-            "AT:",
-            latitude,
-            longitude,
-        )
-
-        if population is None:
-            print(
-                "WORLDPOP: total_population not found"
-            )
-
-            return None
-
-        return float(population)
-
-    except Exception as error:
-
-        print(
-            "WORLDPOP REQUEST ERROR:",
-            repr(error),
-        )
-
-        return None
-
-
-async def get_cached_worldpop_population(
-    latitude: float,
-    longitude: float,
-) -> float | None:
-
-    # Round coordinates so extremely tiny coordinate
-    # differences don't create unnecessary API requests.
-    cache_key = (
-        round(latitude, 3),
-        round(longitude, 3),
-    )
-
-    if cache_key in WORLDPOP_CACHE:
-        return WORLDPOP_CACHE[cache_key]
-
-    population = await get_worldpop_population(
-        latitude,
-        longitude,
-    )
-
-    WORLDPOP_CACHE[cache_key] = population
-
-    return population
-
-
-async def get_openaq_latest(
-    parameter_id: int,
-) -> list[dict[str, Any]]:
-
-    if not OPENAQ_API_KEY:
-        raise RuntimeError(
-            "OPENAQ_API_KEY is missing from backend/.env"
-        )
-
-    headers = {
-        "X-API-Key": OPENAQ_API_KEY,
-    }
-
-    results: list[dict[str, Any]] = []
-
-    async with httpx.AsyncClient(
-        timeout=30,
-        headers=headers,
-    ) as client:
-
-        response = await client.get(
-            f"{OPENAQ_BASE_URL}/parameters/"
-            f"{parameter_id}/latest",
-            params={
-                "limit": 200,
-                "page": 1,
-            },
-        )
-
-        if response.status_code == 429:
-            raise RuntimeError(
-                "OpenAQ rate limit reached (HTTP 429)."
-            )
-
-        if response.status_code >= 500:
-            raise RuntimeError(
-                f"OpenAQ server error: "
-                f"HTTP {response.status_code}."
-            )
-
-        response.raise_for_status()
-
-        payload = response.json()
-
-        results.extend(
-            payload.get("results", [])
-        )
-
-    print(
-        f"OpenAQ measurements fetched: "
-        f"{len(results)}"
-    )
-
-    return results
-
-
-async def get_openaq_locations(
-    parameter_id: int,
-) -> dict[int, dict[str, Any]]:
-
-    if not OPENAQ_API_KEY:
-        raise RuntimeError(
-            "OPENAQ_API_KEY is missing from backend/.env"
-        )
-
-    headers = {
-        "X-API-Key": OPENAQ_API_KEY,
-    }
-
-    locations: dict[int, dict[str, Any]] = {}
-
-    page = 1
-    max_pages = 20
-
-    async with httpx.AsyncClient(
-        timeout=30,
-        headers=headers,
-    ) as client:
-
-        while page <= max_pages:
-
-            response = await client.get(
-                f"{OPENAQ_BASE_URL}/locations",
-                params={
-                    "parameters_id": parameter_id,
-                    "limit": 1000,
-                    "page": page,
-                },
-            )
-
-            # OpenAQ can occasionally return a server error
-            # on a later page. Keep locations already retrieved.
-            if response.status_code >= 500:
-                print(
-                    f"OpenAQ locations returned "
-                    f"{response.status_code} on page {page}. "
-                    f"Stopping pagination."
-                )
-
-                break
-
-            response.raise_for_status()
-
-            payload = response.json()
-
-            page_results = payload.get(
-                "results",
-                [],
-            )
-
-            if not page_results:
-                break
-
-            for location in page_results:
-
-                location_id = location.get("id")
-
-                if location_id is None:
-                    continue
-
-                locations[int(location_id)] = location
-
-            print(
-                f"OpenAQ locations: page {page}, "
-                f"total collected: {len(locations)}"
-            )
-
-            meta = payload.get(
-                "meta",
-                {},
-            )
-
-            found = meta.get("found")
-
-            # OpenAQ can return values such as ">1000".
-            # Do not blindly call int(found).
-            try:
-                found_int = int(found)
-            except (
-                TypeError,
-                ValueError,
-            ):
-                found_int = None
-
-            if (
-                found_int is not None
-                and len(locations) >= found_int
-            ):
-                break
-
-            page += 1
-
-    print(
-        f"Total OpenAQ locations fetched for "
-        f"parameter {parameter_id}: "
-        f"{len(locations)}"
-    )
-
-    return locations
-
-
-async def get_openaq_locations(
-    parameter_id: int,
-) -> dict[int, dict[str, Any]]:
-
-    if not OPENAQ_API_KEY:
-        raise RuntimeError(
-            "OPENAQ_API_KEY is missing from backend/.env"
-        )
-
-    headers = {
-        "X-API-Key": OPENAQ_API_KEY,
-    }
-
-    locations: dict[int, dict[str, Any]] = {}
-
-    page = 1
-
-    async with httpx.AsyncClient(
-        timeout=30,
-        headers=headers,
-    ) as client:
-
-        while True:
-
-            response = await client.get(
-                f"{OPENAQ_BASE_URL}/locations",
-                params={
-                    "parameters_id": parameter_id,
-                    "limit": 1000,
-                    "page": page,
-                },
-            )
-
-            # OpenAQ can occasionally return a server error
-            # on a later page. Keep successfully retrieved locations.
-            if response.status_code >= 500:
-                print(
-                    f"OpenAQ locations returned "
-                    f"{response.status_code} on page {page}. "
-                    f"Stopping pagination."
-                )
-
-                break
-
-            response.raise_for_status()
-
-            payload = response.json()
-
-            page_results = payload.get(
-                "results",
-                [],
-            )
-
-            if not page_results:
-                break
-
-            for location in page_results:
-
-                location_id = location.get("id")
-
-                if location_id is None:
-                    continue
-
-                locations[int(location_id)] = location
-
-            meta = payload.get(
-                "meta",
-                {},
-            )
-
-            found = meta.get("found")
-
-            if found is None:
-                break
-
-            # OpenAQ can return values such as ">1000".
-            # Only convert found to an integer when possible.
-            try:
-                found_int = int(found)
-            except (
-                TypeError,
-                ValueError,
-            ):
-                found_int = None
-
-            if (
-                found_int is not None
-                and len(locations) >= found_int
-            ):
-                break
-
-            page += 1
-
-            # Safety limit.
-            if page > 20:
-                break
-
-    return locations
-
-
-async def get_location_name(
-    client: httpx.AsyncClient,
-    location_id: int,
-) -> tuple[str, str]:
-
-    try:
-
-        response = await client.get(
-            f"{OPENAQ_BASE_URL}/locations/{location_id}"
-        )
-
-        response.raise_for_status()
-
-        location = response.json().get(
-            "results",
-            [],
-        )
-
-        if not location:
-            return (
-                "Unknown location",
-                "Unknown",
-            )
-
-        location = location[0]
-
-        name = (
-            location.get("locality")
-            or location.get("name")
-            or "Unknown location"
-        )
-
-        country = (
-            location.get("country", {}).get("name")
-            or "Unknown"
-        )
-
-        return name, country
-
-    except Exception as error:
-
-        print(
-            f"OpenAQ location lookup failed "
-            f"for {location_id}:",
-            error,
-        )
-
-        return (
-            "Unknown location",
-            "Unknown",
-        )
-
-
-async def build_live_geojson(
-    parameter_id: int,
-    pollutant_name: str,
-    pollutant_unit: str,
-    score_reference: float,
-    pollutant_key: str,
-) -> dict[str, Any]:
-
-    measurements = await get_openaq_latest(
-        parameter_id
-    )
-
-    if not measurements:
-        raise RuntimeError(
-            f"No measurements available for "
-            f"{pollutant_name}."
+    if not RESULTS_FILE.is_file():
+        raise HTTPException(
+            status_code=503,
+            detail="The intelligence results file is unavailable.",
         )
 
     try:
-        locations = await get_openaq_locations(
-            parameter_id
-        )
-    except Exception as error:
-        print(
-            "OpenAQ location lookup failed:",
-            repr(error),
-        )
-        locations = {}
+        with RESULTS_FILE.open("r", encoding="utf-8") as file:
+            results = json.load(file)
+    except (OSError, json.JSONDecodeError) as error:
+        raise HTTPException(
+            status_code=500,
+            detail="The intelligence results file could not be read.",
+        ) from error
 
-    features: list[dict[str, Any]] = []
-
-    for measurement in measurements:
-
-        coordinates = measurement.get(
-            "coordinates"
+    if not isinstance(results, list):
+        raise HTTPException(
+            status_code=500,
+            detail="The intelligence results must be a JSON list.",
         )
 
-        if not coordinates:
-            continue
+    seen_ids: set[str] = set()
 
-        latitude = coordinates.get(
-            "latitude"
-        )
-
-        longitude = coordinates.get(
-            "longitude"
-        )
-
-        if not isinstance(
-            latitude,
-            (int, float),
-        ):
-            continue
-
-        if not isinstance(
-            longitude,
-            (int, float),
-        ):
-            continue
-
-        value = measurement.get("value")
-
-        if value is None:
-            continue
-
-        try:
-            value = float(value)
-        except (
-            TypeError,
-            ValueError,
-        ):
-            continue
-
-        if not math.isfinite(value):
-            continue
-
-        location_id = measurement.get(
-            "locationsId"
-        )
-
-        location = None
-
-        if location_id is not None:
-            try:
-                location = locations.get(
-                    int(location_id)
-                )
-            except (
-                TypeError,
-                ValueError,
-            ):
-                location = None
-
-        location_name = (
-            location.get("name")
-            if location
-            else None
-        )
-
-        locality = (
-            location.get("locality")
-            if location
-            else None
-        )
-
-        country_data = (
-            location.get("country")
-            if location
-            else None
-        )
-
-        if isinstance(
-            country_data,
-            dict,
-        ):
-            country_name = (
-                country_data.get("name")
-                or "Unknown"
+    for index, record in enumerate(results):
+        if not isinstance(record, dict):
+            raise HTTPException(
+                status_code=500,
+                detail=f"Invalid result record at index {index}.",
             )
 
-            country_code = (
-                country_data.get("code")
-                or ""
+        missing = REQUIRED_FIELDS - record.keys()
+        if missing:
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    f"Result record {index} is missing required fields: "
+                    f"{', '.join(sorted(missing))}"
+                ),
             )
-        else:
-            country_name = "Unknown"
-            country_code = ""
 
-        city_name = (
-            locality
-            or location_name
-            or (
-                f"OpenAQ Location {location_id}"
-                if location_id is not None
-                else "OpenAQ Measurement"
+        result_id = record["result_id"]
+        if not isinstance(result_id, str) or not result_id.strip():
+            raise HTTPException(
+                status_code=500,
+                detail=f"Invalid result_id at index {index}.",
             )
-        )
 
-        timestamp_data = measurement.get(
-            "datetime",
-            {},
-        )
-
-        if isinstance(
-            timestamp_data,
-            dict,
-        ):
-            timestamp = (
-                timestamp_data.get("utc")
-                or ""
+        if result_id in seen_ids:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Duplicate result_id: {result_id}.",
             )
-        else:
-            timestamp = ""
+        seen_ids.add(result_id)
 
-        exposure_score = calculate_exposure_score(
-            value,
-            score_reference,
-        )
-
-        regional_average = score_reference
-
-        percentage_above_regional_average = (
-            percentage_difference(
-                value,
-                regional_average,
+        if record["quality_status"] not in ALLOWED_QUALITY_STATUSES:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Invalid quality status for {result_id}.",
             )
-        )
 
-        features.append(
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                        longitude,
-                        latitude,
-                    ],
-                },
-                "properties": {
-                    "city": city_name,
-                    "country": country_name,
-
-                    # Selected pollutant
-                    "pollutant": pollutant_name,
-
-                    # Actual measurement
-                    "value": round(
-                        value,
-                        4,
-                    ),
-
-                    # Selected pollutant unit
-                    "unit": pollutant_unit,
-
-                    "population": None,
-
-                    # Score calculated for selected pollutant
-                    "exposure_score": (
-                        exposure_score
-                    ),
-
-                    # Reference for selected pollutant
-                    "regional_average": (
-                        regional_average
-                    ),
-
-                    "percentage_above_regional_average": (
-                        percentage_above_regional_average
-                    ),
-
-                    "timestamp": timestamp,
-
-                    "source": "OpenAQ",
-
-                    "locationId": location_id,
-
-                    "countryCode": country_code,
-                },
-            }
-        )
-
-    print(
-        f"{pollutant_name}: "
-        f"GeoJSON features created: "
-        f"{len(features)}"
-    )
-
-    return {
-        "type": "FeatureCollection",
-        "features": features,
-        "pollutant": pollutant_key,
-        "pollutantName": pollutant_name,
-        "unit": pollutant_unit,
-    }
-@app.get("/")
-async def root():
-    return {
-        "status": "ok",
-        "service": "Air Quality Intelligence API",
-    }
-
-def build_fallback_geojson(
-    pollutant: str,
-) -> dict[str, Any]:
-
-    config = get_pollutant_config(
-        pollutant
-    )
-
-    mock_data = load_mock_data()
-
-    reference = config["score_reference"]
-
-    factors = {
-        "pm25": 1.00,
-        "pm10": 1.35,
-        "no2": 0.0008,
-        "co": 0.012,
-        "so2": 0.0004,
-        "o3": 0.001,
-    }
-
-    factor = factors.get(
-        pollutant,
-        1.0,
-    )
-
-    features: list[dict[str, Any]] = []
-
-    for index, original in enumerate(
-        mock_data.get("features", [])
-    ):
-
-        properties = original.get(
-            "properties",
-            {},
-        )
-
-        geometry = original.get(
-            "geometry",
-            {},
-        )
-
-        coordinates = geometry.get(
-            "coordinates",
-            [],
-        )
-
+        value = record["result_value"]
         if (
-            not isinstance(coordinates, list)
-            or len(coordinates) < 2
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
         ):
-            continue
-
-        original_value = properties.get(
-            "value",
-            reference,
-        )
-
-        try:
-            original_value = float(
-                original_value
-            )
-        except (
-            TypeError,
-            ValueError,
-        ):
-            original_value = reference
-
-        if pollutant == "pm25":
-            value = original_value
-        else:
-            # Synthetic fallback values.
-            # These are NOT official measurements.
-            value = (
-                reference
-                * (
-                    original_value
-                    / 55.2
-                )
-                * factor
+            raise HTTPException(
+                status_code=500,
+                detail=f"Invalid numeric result_value for {result_id}.",
             )
 
-        value = max(
-            0,
-            float(value),
-        )
-
-        exposure_score = (
-            calculate_exposure_score(
-                value,
-                reference,
+        if not isinstance(record["evidence"], list):
+            raise HTTPException(
+                status_code=500,
+                detail=f"Evidence must be a list for {result_id}.",
             )
-        )
-
-        percentage = (
-            percentage_difference(
-                value,
-                reference,
-            )
-        )
-
-        features.append(
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": coordinates,
-                },
-                "properties": {
-                    "city": (
-                        properties.get(
-                            "city"
-                        )
-                        or f"Fallback Location {index + 1}"
-                    ),
-                    "country": (
-                        properties.get(
-                            "country"
-                        )
-                        or "Unknown"
-                    ),
-                    "pollutant": config[
-                        "name"
-                    ],
-                    "value": round(
-                        value,
-                        4,
-                    ),
-                    "unit": config[
-                        "unit"
-                    ],
-                    "timestamp": (
-                        properties.get(
-                            "timestamp"
-                        )
-                        or ""
-                    ),
-                    "population": (
-                        properties.get(
-                            "population"
-                        )
-                    ),
-                    "exposure_score": (
-                        exposure_score
-                    ),
-                    "regional_average": (
-                        reference
-                    ),
-                    "percentage_above_regional_average": (
-                        percentage
-                    ),
-                    "source": "Synthetic fallback",
-                    "fallback": True,
-                },
-            }
-        )
 
     return {
-        "type": "FeatureCollection",
-        "features": features,
-        "pollutant": pollutant,
-        "pollutantName": config[
-            "name"
-        ],
-        "unit": config[
-            "unit"
-        ],
-        "fallback": True,
+        "metadata": {
+            "data_version": "phase3-v1.1",
+            "method_version": "track-a-comparative-v1.0.0",
+            "count": len(results),
+            "is_synthetic": True,
+            "quality_status": "conditional",
+            "description": (
+                "Synthetic descriptive comparisons based on the approved "
+                "Phase 3 sample. These are not verified real-world "
+                "measurements, regulatory assessments, health-risk "
+                "assessments, or predictions."
+            ),
+        },
+        "count": len(results),
+        "results": results,
     }
-@app.get("/api/air-quality")
-async def air_quality(
-    pollutant: str = Query("pm25"),
-):
-    pollutant_key = pollutant.lower().strip()
+</file>
 
-    # Treat pm2.5 as the same internal pollutant as pm25.
-    if pollutant_key == "pm2.5":
-        pollutant_key = "pm25"
+<file path="backend/Dockerfile">
+FROM python:3.12-slim
 
-    pollutant_config = OPENAQ_POLLUTANTS.get(
-        pollutant_key
-    )
+WORKDIR /app
 
-    if pollutant_config is None:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "message": "Unsupported pollutant.",
-                "supported": [
-                    "pm25",
-                    "pm10",
-                    "no2",
-                    "co",
-                    "so2",
-                    "o3",
-                ],
-            },
-        )
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-    parameter_id = pollutant_config["id"]
+COPY backend/requirements.txt .
 
-    try:
-        data = await build_live_geojson(
-            parameter_id=parameter_id,
-            pollutant_name=pollutant_config["name"],
-            pollutant_unit=pollutant_config["unit"],
-            score_reference=pollutant_config[
-                "score_reference"
-            ],
-            pollutant_key=pollutant_key,
-        )
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-        if not data.get("features"):
-            raise RuntimeError(
-                "OpenAQ returned no usable measurements."
-            )
+COPY backend/app ./app
+COPY backend/data ./data
+COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
 
-        return data
+ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
 
-    except Exception as error:
+EXPOSE 8000 8001
 
-        print(
-            "OpenAQ failed. Using fallback data:",
-            repr(error),
-        )
-
-        return build_fallback_geojson(
-            pollutant_key
-        )
-
-@app.get("/api/population")
-async def population(
-    latitude: float,
-    longitude: float,
-):
-
-    value = await get_worldpop_population(
-        latitude=latitude,
-        longitude=longitude,
-    )
-
-    if value is None:
-
-        raise HTTPException(
-            status_code=502,
-            detail="WorldPop population data unavailable.",
-        )
-
-    return {
-        "latitude": latitude,
-        "longitude": longitude,
-        "population": value,
-        "source": "WorldPop",
-        "year": WORLDPOP_YEAR,
-        "resolution": WORLDPOP_RESOLUTION,
-    }
-@app.get("/api/intelligence/results")
-async def intelligence_results():
-    """Return the approved comparative intelligence results."""
-    return get_intelligence_results()
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 </file>
 
 <file path="data/canonical/intelligence_data.csv">
@@ -15770,460 +14713,6 @@ export default function AirQualityDashboard() {
 }
 </file>
 
-<file path="frontend/app/data-intelligence/page.tsx">
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-
-type EvidenceItem = {
-  factor: string;
-  value: string | number | boolean | null;
-};
-
-type IntelligenceResult = {
-  result_id: string;
-  result_type: string;
-  group_key: string;
-  metric_name: string;
-  result_value: number;
-  result_unit?: string;
-  metric_unit?: string;
-  priority_rank: number;
-  finding: string;
-  evidence: EvidenceItem[];
-  quality_status: string;
-  limitation: string;
-  method_version: string;
-  data_version: string;
-  entity_name: string;
-  pollutant: string;
-  is_synthetic: boolean;
-  period_start?: string;
-  period_end?: string;
-};
-
-type IntelligenceResponse = {
-  metadata: {
-    data_version: string;
-    method_version: string;
-    count: number;
-    is_synthetic: boolean;
-    quality_status: string;
-    description: string;
-  };
-  count: number;
-  results: IntelligenceResult[];
-};
-
-
-const DATA_INTELLIGENCE_API_BASE =
-  process.env.NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL ??
-  "http://localhost:8000";
-
-const pollutantNames: Record<string, string> = {
-  no2: "NO₂",
-  o3: "O₃",
-  pm10: "PM10",
-  "pm2.5": "PM2.5",
-};
-
-function formatValue(value: string | number | boolean | null) {
-  if (value === null) return "—";
-
-  if (typeof value === "number") {
-    return value.toLocaleString("en-IN", {
-      maximumFractionDigits: 3,
-    });
-  }
-
-  return String(value);
-}
-
-export default function DataIntelligencePage() {
-  const [data, setData] = useState<IntelligenceResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [pollutant, setPollutant] = useState("all");
-  const [city, setCity] = useState("all");
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadResults() {
-      try {
-        setLoading(true);
-        setError("");
-
-        
-  const response = await fetch(
-    `${DATA_INTELLIGENCE_API_BASE}/api/intelligence/results`,
-    { cache: "no-store" }
-  );
-
-        if (!response.ok) {
-          throw new Error(`The API returned HTTP ${response.status}.`);
-        }
-
-        const payload: unknown = await response.json();
-
-        if (
-          !payload ||
-          typeof payload !== "object" ||
-          !("results" in payload) ||
-          !Array.isArray(payload.results)
-        ) {
-          throw new Error("The API response has an unexpected format.");
-        }
-
-        setData(payload as IntelligenceResponse);
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") {
-          return;
-        }
-
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Unable to load intelligence results."
-        );
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    void loadResults();
-
-    return () => controller.abort();
-  }, []);
-
-  const allResults = useMemo(
-  () => data?.results ?? [],
-  [data]
-);
-
-  const cities = useMemo(
-    () =>
-      [...new Set(allResults.map((result) => result.entity_name))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allResults]
-  );
-
-  const pollutants = useMemo(
-    () =>
-      [...new Set(allResults.map((result) => result.pollutant))].sort(),
-    [allResults]
-  );
-
-  const filteredResults = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    return allResults
-      .filter(
-        (result) =>
-          pollutant === "all" || result.pollutant === pollutant
-      )
-      .filter(
-        (result) => city === "all" || result.entity_name === city
-      )
-      .filter(
-        (result) =>
-          !term ||
-          [
-            result.entity_name,
-            result.pollutant,
-            result.finding,
-            result.result_id,
-          ].some((value) => value.toLowerCase().includes(term))
-      )
-      .sort(
-        (a, b) =>
-          a.pollutant.localeCompare(b.pollutant) ||
-          a.priority_rank - b.priority_rank
-      );
-  }, [allResults, pollutant, city, search]);
-
-  return (
-    <main className="min-h-screen bg-[#030712] px-4 py-8 text-slate-100 sm:px-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <header className="border-b border-slate-800 pb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
-            INFOCREON / AETHER PULSE
-          </p>
-
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Data Intelligence
-          </h1>
-
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-            Explore the approved Phase 3 comparative rankings, inspect
-            supporting evidence, and review the limitations of each result.
-          </p>
-        </header>
-
-        <section
-          className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4"
-          aria-label="Synthetic data notice"
-        >
-          <p className="text-sm font-semibold text-amber-300">
-            Synthetic sample · Conditional quality
-          </p>
-
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            These results are descriptive comparisons from a synthetic
-            sample. They are not verified real-world measurements,
-            regulatory assessments, health-risk assessments, or predictions.
-            Rankings should not be interpreted as evidence of safety or
-            danger.
-          </p>
-        </section>
-
-        {loading && (
-          <div className="rounded-xl border border-slate-800 p-8 text-slate-300">
-            Loading approved intelligence results…
-          </div>
-        )}
-
-        {!loading && error && (
-          <section
-            className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-5"
-            role="alert"
-          >
-            <h2 className="font-semibold text-rose-300">
-              Results could not be loaded
-            </h2>
-
-            <p className="mt-2 text-sm text-slate-300">{error}</p>
-
-            <p className="mt-2 text-sm text-slate-400">
-              Check that the backend is running and the API URL is correct.
-            </p>
-
-            <button
-              className="mt-4 rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800"
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </button>
-          </section>
-        )}
-
-        {!loading && !error && data && (
-          <>
-            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: "Published results", value: data.count },
-                { label: "Cities", value: cities.length },
-                { label: "Pollutants", value: pollutants.length },
-                {
-                  label: "Quality status",
-                  value: data.metadata.quality_status,
-                },
-              ].map((item) => (
-                <article
-                  key={item.label}
-                  className="rounded-xl border border-slate-800 bg-[#0B1117] p-5"
-                >
-                  <p className="text-sm text-slate-400">{item.label}</p>
-
-                  <p className="mt-3 text-2xl font-semibold text-sky-300">
-                    {item.value}
-                  </p>
-                </article>
-              ))}
-            </section>
-
-            <section className="rounded-xl border border-slate-800 bg-[#0B1117] p-5">
-              <h2 className="text-lg font-semibold">Explore results</h2>
-
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                <label className="text-sm text-slate-300">
-                  Pollutant
-                  <select
-                    value={pollutant}
-                    onChange={(event) => setPollutant(event.target.value)}
-                    className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
-                  >
-                    <option value="all">All pollutants</option>
-                    {pollutants.map((value) => (
-                      <option key={value} value={value}>
-                        {pollutantNames[value] ?? value}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="text-sm text-slate-300">
-                  City
-                  <select
-                    value={city}
-                    onChange={(event) => setCity(event.target.value)}
-                    className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
-                  >
-                    <option value="all">All cities</option>
-                    {cities.map((value) => (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="text-sm text-slate-300">
-                  Search
-                  <input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="City, pollutant, finding…"
-                    className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 placeholder:text-slate-500"
-                  />
-                </label>
-              </div>
-
-              <p className="mt-4 text-xs text-slate-400" aria-live="polite">
-                Showing {filteredResults.length} of {allResults.length} results
-              </p>
-            </section>
-
-            <section className="space-y-4">
-              {filteredResults.map((result) => (
-                <article
-                  key={result.result_id}
-                  className="rounded-xl border border-slate-800 bg-[#0B1117] p-5 sm:p-6"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-sky-400">
-                        {pollutantNames[result.pollutant] ?? result.pollutant}
-                        {" · "}Rank {result.priority_rank}
-                      </p>
-
-                      <h2 className="mt-2 text-xl font-semibold">
-                        {result.entity_name}
-                      </h2>
-
-                      <p className="mt-1 text-xs text-slate-500">
-                        Result ID: {result.result_id}
-                      </p>
-                    </div>
-
-                    <div className="rounded-lg border border-amber-500/30 px-3 py-2">
-                      <p className="text-xs text-amber-300">
-                        {result.quality_status}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <p className="text-sm text-slate-400">
-                      Sampled mean ·{" "}
-                      {result.result_unit ??
-                        result.metric_unit ??
-                        "unit not specified"}
-                    </p>
-
-                    <p className="mt-1 text-3xl font-semibold tabular-nums">
-                      {formatValue(result.result_value)}
-                    </p>
-                  </div>
-
-                  <p className="mt-4 text-sm leading-6 text-slate-300">
-                    {result.finding}
-                  </p>
-
-                  <details className="mt-5 border-t border-slate-800 pt-4">
-                    <summary className="cursor-pointer text-sm font-medium text-sky-300">
-                      View evidence and methodology
-                    </summary>
-
-                    <div className="mt-4 overflow-x-auto">
-                      <table className="w-full text-left text-sm">
-                        <thead className="text-slate-400">
-                          <tr>
-                            <th className="py-2 pr-4 font-medium">
-                              Evidence
-                            </th>
-                            <th className="py-2 font-medium">Value</th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {result.evidence.map((item, index) => (
-                            <tr
-                              key={`${result.result_id}-${item.factor}-${index}`}
-                              className="border-t border-slate-800"
-                            >
-                              <td className="py-2 pr-4 text-slate-300">
-                                {item.factor.replaceAll("_", " ")}
-                              </td>
-
-                              <td className="py-2 text-slate-100">
-                                {formatValue(item.value)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="mt-4 grid gap-3 text-sm text-slate-400 sm:grid-cols-2">
-                      <p>
-                        <span className="text-slate-200">Method:</span>{" "}
-                        {result.method_version}
-                      </p>
-
-                      <p>
-                        <span className="text-slate-200">Data version:</span>{" "}
-                        {result.data_version}
-                      </p>
-
-                      {result.period_start && (
-                        <p>
-                          <span className="text-slate-200">Period start:</span>{" "}
-                          {result.period_start}
-                        </p>
-                      )}
-
-                      {result.period_end && (
-                        <p>
-                          <span className="text-slate-200">Period end:</span>{" "}
-                          {result.period_end}
-                        </p>
-                      )}
-                    </div>
-
-                    <p className="mt-4 text-sm leading-6 text-amber-200/90">
-                      Limitation: {result.limitation}
-                    </p>
-                  </details>
-                </article>
-              ))}
-
-              {filteredResults.length === 0 && (
-                <div className="rounded-xl border border-slate-800 p-8 text-center text-slate-400">
-                  No results match these filters. Try a different city,
-                  pollutant, or search term.
-                </div>
-              )}
-            </section>
-
-            <footer className="border-t border-slate-800 py-5 text-xs leading-5 text-slate-500">
-              Data version: {data.metadata.data_version} · Method version:{" "}
-              {data.metadata.method_version}. Rankings describe this
-              synthetic sample only and must not be treated as regulatory or
-              health advice.
-            </footer>
-          </>
-        )}
-      </div>
-    </main>
-  );
-}
-</file>
-
 <file path="scripts/data_pipeline/extract_data.py">
 from pathlib import Path
 import csv
@@ -17556,6 +16045,73 @@ def main():
 
 if __name__ == "__main__":
     main()
+</file>
+
+<file path="docker-compose.yml">
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: infocreon-airquality-phase3-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8003:8001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
+        NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
+        NEXT_PUBLIC_API_URL: "http://localhost:8003"
+    environment:
+      NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
+      NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
+    ports:
+      - "3002:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+  
+  data-intelligence-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: infocreon-data-intelligence-backend
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      INTELLIGENCE_RESULTS_FILE: /app/data-science/outputs/intelligence_results.json
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+</file>
+
+<file path="Dockerfile.intelligence">
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+COPY backend/requirements.txt /app/backend/requirements.txt
+
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt
+
+COPY backend/ /app/backend/
+
+COPY data-science/outputs/intelligence_results.json \
+     /app/data-science/outputs/intelligence_results.json
+
+COPY data-science/outputs/intelligence_summary.json \
+     /app/data-science/outputs/intelligence_summary.json
+WORKDIR /app/backend
+
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
 </file>
 
 <file path="data/quality/validation_report.json">
@@ -20432,63 +18988,1770 @@ data/
 ]
 </file>
 
+<file path="frontend/app/data-intelligence/page.tsx">
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+type EvidenceItem = {
+  factor: string;
+  value: string | number | boolean | null;
+};
+
+type IntelligenceResult = {
+  result_id: string;
+  result_type: string;
+  group_key: string;
+  metric_name: string;
+  result_value: number;
+  result_unit?: string;
+  metric_unit?: string;
+  priority_rank: number;
+  finding: string;
+  evidence: EvidenceItem[];
+  quality_status: string;
+  limitation: string;
+  method_version: string;
+  data_version: string;
+  entity_name: string;
+  pollutant: string;
+  is_synthetic: boolean;
+  period_start?: string;
+  period_end?: string;
+};
+
+type IntelligenceResponse = {
+  metadata: {
+    data_version: string;
+    method_version: string;
+    count: number;
+    is_synthetic: boolean;
+    quality_status: string;
+    description: string;
+  };
+  count: number;
+  results: IntelligenceResult[];
+};
+
+
+const DATA_INTELLIGENCE_API_BASE =
+  process.env.NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL ??
+  "http://localhost:8000";
+
+const pollutantNames: Record<string, string> = {
+  no2: "NO₂",
+  o3: "O₃",
+  pm10: "PM10",
+  "pm2.5": "PM2.5",
+};
+
+function formatValue(value: string | number | boolean | null) {
+  if (value === null) return "—";
+
+  if (typeof value === "number") {
+    return value.toLocaleString("en-IN", {
+      maximumFractionDigits: 3,
+    });
+  }
+
+  return String(value);
+}
+
+export default function DataIntelligencePage() {
+  const [data, setData] = useState<IntelligenceResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [pollutant, setPollutant] = useState("all");
+  const [city, setCity] = useState("all");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadResults() {
+      try {
+        setLoading(true);
+        setError("");
+
+        
+  const response = await fetch(
+    `${DATA_INTELLIGENCE_API_BASE}/api/intelligence/results`,
+    { cache: "no-store" }
+  );
+
+        if (!response.ok) {
+          throw new Error(`The API returned HTTP ${response.status}.`);
+        }
+
+        const payload: unknown = await response.json();
+
+        if (
+          !payload ||
+          typeof payload !== "object" ||
+          !("results" in payload) ||
+          !Array.isArray(payload.results)
+        ) {
+          throw new Error("The API response has an unexpected format.");
+        }
+
+        setData(payload as IntelligenceResponse);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load intelligence results."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadResults();
+
+    return () => controller.abort();
+  }, []);
+
+  const allResults = useMemo(
+  () => data?.results ?? [],
+  [data]
+);
+
+  const cities = useMemo(
+    () =>
+      [...new Set(allResults.map((result) => result.entity_name))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allResults]
+  );
+
+  const pollutants = useMemo(
+    () =>
+      [...new Set(allResults.map((result) => result.pollutant))].sort(),
+    [allResults]
+  );
+
+  const filteredResults = useMemo(() => {
+    const term = search.trim().toLowerCase();
+
+    return allResults
+      .filter(
+        (result) =>
+          pollutant === "all" || result.pollutant === pollutant
+      )
+      .filter(
+        (result) => city === "all" || result.entity_name === city
+      )
+      .filter(
+        (result) =>
+          !term ||
+          [
+            result.entity_name,
+            result.pollutant,
+            result.finding,
+            result.result_id,
+          ].some((value) => value.toLowerCase().includes(term))
+      )
+      .sort(
+        (a, b) =>
+          a.pollutant.localeCompare(b.pollutant) ||
+          a.priority_rank - b.priority_rank
+      );
+  }, [allResults, pollutant, city, search]);
+
+  return (
+    <main className="min-h-screen bg-[#030712] px-4 py-8 text-slate-100 sm:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <header className="border-b border-slate-800 pb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
+            INFOCREON / AETHER PULSE
+          </p>
+
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Data Intelligence
+          </h1>
+
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+            Explore the approved Phase 3 comparative rankings, inspect
+            supporting evidence, and review the limitations of each result.
+          </p>
+        </header>
+
+        <section
+          className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4"
+          aria-label="Synthetic data notice"
+        >
+          <p className="text-sm font-semibold text-amber-300">
+            Synthetic sample · Conditional quality
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            These results are descriptive comparisons from a synthetic
+            sample. They are not verified real-world measurements,
+            regulatory assessments, health-risk assessments, or predictions.
+            Rankings should not be interpreted as evidence of safety or
+            danger.
+          </p>
+        </section>
+
+        {loading && (
+          <div className="rounded-xl border border-slate-800 p-8 text-slate-300">
+            Loading approved intelligence results…
+          </div>
+        )}
+
+        {!loading && error && (
+          <section
+            className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-5"
+            role="alert"
+          >
+            <h2 className="font-semibold text-rose-300">
+              Results could not be loaded
+            </h2>
+
+            <p className="mt-2 text-sm text-slate-300">{error}</p>
+
+            <p className="mt-2 text-sm text-slate-400">
+              Check that the backend is running and the API URL is correct.
+            </p>
+
+            <button
+              className="mt-4 rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </button>
+          </section>
+        )}
+
+        {!loading && !error && data && (
+          <>
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { label: "Published results", value: data.count },
+                { label: "Cities", value: cities.length },
+                { label: "Pollutants", value: pollutants.length },
+                {
+                  label: "Quality status",
+                  value: data.metadata.quality_status,
+                },
+              ].map((item) => (
+                <article
+                  key={item.label}
+                  className="rounded-xl border border-slate-800 bg-[#0B1117] p-5"
+                >
+                  <p className="text-sm text-slate-400">{item.label}</p>
+
+                  <p className="mt-3 text-2xl font-semibold text-sky-300">
+                    {item.value}
+                  </p>
+                </article>
+              ))}
+            </section>
+
+            <section className="rounded-xl border border-slate-800 bg-[#0B1117] p-5">
+              <h2 className="text-lg font-semibold">Explore results</h2>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                <label className="text-sm text-slate-300">
+                  Pollutant
+                  <select
+                    value={pollutant}
+                    onChange={(event) => setPollutant(event.target.value)}
+                    className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+                  >
+                    <option value="all">All pollutants</option>
+                    {pollutants.map((value) => (
+                      <option key={value} value={value}>
+                        {pollutantNames[value] ?? value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="text-sm text-slate-300">
+                  City
+                  <select
+                    value={city}
+                    onChange={(event) => setCity(event.target.value)}
+                    className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+                  >
+                    <option value="all">All cities</option>
+                    {cities.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="text-sm text-slate-300">
+                  Search
+                  <input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="City, pollutant, finding…"
+                    className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 placeholder:text-slate-500"
+                  />
+                </label>
+              </div>
+
+              <p className="mt-4 text-xs text-slate-400" aria-live="polite">
+                Showing {filteredResults.length} of {allResults.length} results
+              </p>
+            </section>
+
+            <section className="space-y-4">
+              {filteredResults.map((result) => (
+                <article
+                  key={result.result_id}
+                  className="rounded-xl border border-slate-800 bg-[#0B1117] p-5 sm:p-6"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-sky-400">
+                        {pollutantNames[result.pollutant] ?? result.pollutant}
+                        {" · "}Rank {result.priority_rank}
+                      </p>
+
+                      <h2 className="mt-2 text-xl font-semibold">
+                        {result.entity_name}
+                      </h2>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        Result ID: {result.result_id}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-amber-500/30 px-3 py-2">
+                      <p className="text-xs text-amber-300">
+                        {result.quality_status}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="text-sm text-slate-400">
+                      Sampled mean ·{" "}
+                      {result.result_unit ??
+                        result.metric_unit ??
+                        "unit not specified"}
+                    </p>
+
+                    <p className="mt-1 text-3xl font-semibold tabular-nums">
+                      {formatValue(result.result_value)}
+                    </p>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-6 text-slate-300">
+                    {result.finding}
+                  </p>
+
+                  <details className="mt-5 border-t border-slate-800 pt-4">
+                    <summary className="cursor-pointer text-sm font-medium text-sky-300">
+                      View evidence and methodology
+                    </summary>
+
+                    <div className="mt-4 overflow-x-auto">
+                      <table className="w-full text-left text-sm">
+                        <thead className="text-slate-400">
+                          <tr>
+                            <th className="py-2 pr-4 font-medium">
+                              Evidence
+                            </th>
+                            <th className="py-2 font-medium">Value</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {result.evidence.map((item, index) => (
+                            <tr
+                              key={`${result.result_id}-${item.factor}-${index}`}
+                              className="border-t border-slate-800"
+                            >
+                              <td className="py-2 pr-4 text-slate-300">
+                                {item.factor.replaceAll("_", " ")}
+                              </td>
+
+                              <td className="py-2 text-slate-100">
+                                {formatValue(item.value)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 text-sm text-slate-400 sm:grid-cols-2">
+                      <p>
+                        <span className="text-slate-200">Method:</span>{" "}
+                        {result.method_version}
+                      </p>
+
+                      <p>
+                        <span className="text-slate-200">Data version:</span>{" "}
+                        {result.data_version}
+                      </p>
+
+                      {result.period_start && (
+                        <p>
+                          <span className="text-slate-200">Period start:</span>{" "}
+                          {result.period_start}
+                        </p>
+                      )}
+
+                      {result.period_end && (
+                        <p>
+                          <span className="text-slate-200">Period end:</span>{" "}
+                          {result.period_end}
+                        </p>
+                      )}
+                    </div>
+
+                    <p className="mt-4 text-sm leading-6 text-amber-200/90">
+                      Limitation: {result.limitation}
+                    </p>
+                  </details>
+                </article>
+              ))}
+
+              {filteredResults.length === 0 && (
+                <div className="rounded-xl border border-slate-800 p-8 text-center text-slate-400">
+                  No results match these filters. Try a different city,
+                  pollutant, or search term.
+                </div>
+              )}
+            </section>
+
+            <footer className="border-t border-slate-800 py-5 text-xs leading-5 text-slate-500">
+              Data version: {data.metadata.data_version} · Method version:{" "}
+              {data.metadata.method_version}. Rankings describe this
+              synthetic sample only and must not be treated as regulatory or
+              health advice.
+            </footer>
+          </>
+        )}
+      </div>
+    </main>
+  );
+}
+</file>
+
+<file path="backend/app/main.py">
+import json
+import math
+import os
+from pathlib import Path
+from typing import Any
+
+import httpx
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from app.services.intelligence import get_intelligence_results
+load_dotenv()
+
+app = FastAPI(title="Air Quality Intelligence API")
+
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:3000",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        FRONTEND_URL,
+        "http://localhost:3002",
+        "http://127.0.0.1:3002",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+OPENAQ_API_KEY = os.getenv("OPENAQ_API_KEY")
+
+OPENAQ_BASE_URL = "https://api.openaq.org/v3"
+WORLDPOP_URL = "https://api.worldpop.org/v1/services/stats"
+WORLDPOP_YEAR = 2020
+WORLDPOP_RESOLUTION = os.getenv(
+    "WORLDPOP_RESOLUTION",
+    "1km",
+)
+
+BASE_DIR = Path(__file__).resolve().parent
+
+MOCK_FILE = BASE_DIR / "mock_data.json"
+OPENAQ_POLLUTANTS = {
+    "pm25": {
+        "id": 2,
+        "name": "PM2.5",
+        "unit": "µg/m³",
+        "score_reference": 55.2,
+    },
+    "pm2.5": {
+        "id": 2,
+        "name": "PM2.5",
+        "unit": "µg/m³",
+        "score_reference": 55.2,
+    },
+    "pm10": {
+        "id": 1,
+        "name": "PM10",
+        "unit": "µg/m³",
+        "score_reference": 100.0,
+    },
+    "no2": {
+        "id": 7,
+        "name": "NO₂",
+        "unit": "ppm",
+        "score_reference": 0.100,
+    },
+    "co": {
+        "id": 8,
+        "name": "CO",
+        "unit": "ppm",
+        "score_reference": 9.0,
+    },
+    "so2": {
+        "id": 9,
+        "name": "SO₂",
+        "unit": "ppm",
+        "score_reference": 0.075,
+    },
+    "o3": {
+        "id": 10,
+        "name": "O₃",
+        "unit": "ppm",
+        "score_reference": 0.070,
+    },
+}
+def get_pollutant_config(pollutant: str) -> dict[str, Any]:
+    pollutant_key = pollutant.lower().strip()
+
+    config = OPENAQ_POLLUTANTS.get(pollutant_key)
+
+    if config is None:
+        raise ValueError(
+            f"Unsupported pollutant: {pollutant}"
+        )
+
+    return config
+# Regional reference used by your existing dashboard.
+REGIONAL_AVERAGE_PM25 = 55.2
+
+WORLDPOP_CACHE: dict[tuple[float, float], float | None] = {}
+
+
+def load_mock_data() -> dict[str, Any]:
+    with open(MOCK_FILE, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+def percentage_difference(
+    value: float,
+    reference: float,
+) -> float:
+    if reference == 0:
+        return 0
+
+    return round(
+        ((value - reference) / reference) * 100,
+        1,
+    )
+
+def calculate_exposure_score(
+    value: float,
+    score_reference: float,
+) -> int:
+    if score_reference <= 0:
+        return 0
+
+    score = (value / score_reference) * 50
+
+    return max(
+        0,
+        min(
+            100,
+            round(score),
+        ),
+    )
+
+   
+
+    return max(
+        0,
+        min(
+            100,
+            round(score),
+        ),
+    )
+
+
+def make_point_feature(
+    *,
+    city: str,
+    country: str,
+    latitude: float,
+    longitude: float,
+    value: float,
+    timestamp: str,
+    population: int | None,
+    source: str,
+    pollutant: str,
+) -> dict[str, Any]:
+
+    config = get_pollutant_config(pollutant)
+
+    pollutant_name = config["name"]
+    pollutant_unit = config["unit"]
+    regional_average = config["score_reference"]
+
+    exposure_score = calculate_exposure_score(
+        value,
+        regional_average,config["score_reference"],
+    )
+
+    
+
+    percentage_above_regional_average = (
+        percentage_difference(
+            value,
+            regional_average,
+        )
+    )
+
+    return {
+        "type": "Feature",
+        "properties": {
+            "city": city,
+            "country": country,
+            "pollutant": config["name"],
+            "value": round(value, 4),
+            "unit": config["unit"],
+            "timestamp": timestamp,
+            "population": population,
+            "exposure_score": exposure_score,
+            "regional_average": regional_average,
+            "percentage_above_regional_average": (
+                percentage_above_regional_average
+            ),
+            "source": source,
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+                longitude,
+                latitude,
+            ],
+        },
+    }
+
+
+async def get_worldpop_population(
+    latitude: float,
+    longitude: float,
+) -> float | None:
+
+    delta = 0.025
+
+    geojson = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [
+                                longitude - delta,
+                                latitude - delta,
+                            ],
+                            [
+                                longitude + delta,
+                                latitude - delta,
+                            ],
+                            [
+                                longitude + delta,
+                                latitude + delta,
+                            ],
+                            [
+                                longitude - delta,
+                                latitude + delta,
+                            ],
+                            [
+                                longitude - delta,
+                                latitude - delta,
+                            ],
+                        ]
+                    ],
+                },
+            }
+        ],
+    }
+
+    params = {
+        "dataset": "wpgppop",
+        "year": WORLDPOP_YEAR,
+        "geojson": json.dumps(geojson),
+        "runasync": "false",
+    }
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=60
+        ) as client:
+
+            response = await client.get(
+                WORLDPOP_URL,
+                params=params,
+            )
+
+            print(
+                "WORLDPOP STATUS:",
+                response.status_code,
+            )
+
+            print(
+                "WORLDPOP RESPONSE:",
+                response.text[:5000],
+            )
+
+            response.raise_for_status()
+
+            data = response.json()
+
+        if data.get("error"):
+            print(
+                "WORLDPOP ERROR:",
+                data.get("error_message"),
+            )
+
+            return None
+
+        population = (
+            data
+            .get("data", {})
+            .get("total_population")
+        )
+
+        print(
+            "WORLDPOP POPULATION:",
+            population,
+            "AT:",
+            latitude,
+            longitude,
+        )
+
+        if population is None:
+            print(
+                "WORLDPOP: total_population not found"
+            )
+
+            return None
+
+        return float(population)
+
+    except Exception as error:
+
+        print(
+            "WORLDPOP REQUEST ERROR:",
+            repr(error),
+        )
+
+        return None
+
+
+async def get_cached_worldpop_population(
+    latitude: float,
+    longitude: float,
+) -> float | None:
+
+    # Round coordinates so extremely tiny coordinate
+    # differences don't create unnecessary API requests.
+    cache_key = (
+        round(latitude, 3),
+        round(longitude, 3),
+    )
+
+    if cache_key in WORLDPOP_CACHE:
+        return WORLDPOP_CACHE[cache_key]
+
+    population = await get_worldpop_population(
+        latitude,
+        longitude,
+    )
+
+    WORLDPOP_CACHE[cache_key] = population
+
+    return population
+
+
+async def get_openaq_latest(
+    parameter_id: int,
+) -> list[dict[str, Any]]:
+
+    if not OPENAQ_API_KEY:
+        raise RuntimeError(
+            "OPENAQ_API_KEY is missing from backend/.env"
+        )
+
+    headers = {
+        "X-API-Key": OPENAQ_API_KEY,
+    }
+
+    results: list[dict[str, Any]] = []
+
+    async with httpx.AsyncClient(
+        timeout=30,
+        headers=headers,
+    ) as client:
+
+        response = await client.get(
+            f"{OPENAQ_BASE_URL}/parameters/"
+            f"{parameter_id}/latest",
+            params={
+                "limit": 200,
+                "page": 1,
+            },
+        )
+
+        if response.status_code == 429:
+            raise RuntimeError(
+                "OpenAQ rate limit reached (HTTP 429)."
+            )
+
+        if response.status_code >= 500:
+            raise RuntimeError(
+                f"OpenAQ server error: "
+                f"HTTP {response.status_code}."
+            )
+
+        response.raise_for_status()
+
+        payload = response.json()
+
+        results.extend(
+            payload.get("results", [])
+        )
+
+    print(
+        f"OpenAQ measurements fetched: "
+        f"{len(results)}"
+    )
+
+    return results
+
+
+async def get_openaq_locations(
+    parameter_id: int,
+) -> dict[int, dict[str, Any]]:
+
+    if not OPENAQ_API_KEY:
+        raise RuntimeError(
+            "OPENAQ_API_KEY is missing from backend/.env"
+        )
+
+    headers = {
+        "X-API-Key": OPENAQ_API_KEY,
+    }
+
+    locations: dict[int, dict[str, Any]] = {}
+
+    page = 1
+    max_pages = 20
+
+    async with httpx.AsyncClient(
+        timeout=30,
+        headers=headers,
+    ) as client:
+
+        while page <= max_pages:
+
+            response = await client.get(
+                f"{OPENAQ_BASE_URL}/locations",
+                params={
+                    "parameters_id": parameter_id,
+                    "limit": 1000,
+                    "page": page,
+                },
+            )
+
+            # OpenAQ can occasionally return a server error
+            # on a later page. Keep locations already retrieved.
+            if response.status_code >= 500:
+                print(
+                    f"OpenAQ locations returned "
+                    f"{response.status_code} on page {page}. "
+                    f"Stopping pagination."
+                )
+
+                break
+
+            response.raise_for_status()
+
+            payload = response.json()
+
+            page_results = payload.get(
+                "results",
+                [],
+            )
+
+            if not page_results:
+                break
+
+            for location in page_results:
+
+                location_id = location.get("id")
+
+                if location_id is None:
+                    continue
+
+                locations[int(location_id)] = location
+
+            print(
+                f"OpenAQ locations: page {page}, "
+                f"total collected: {len(locations)}"
+            )
+
+            meta = payload.get(
+                "meta",
+                {},
+            )
+
+            found = meta.get("found")
+
+            # OpenAQ can return values such as ">1000".
+            # Do not blindly call int(found).
+            try:
+                found_int = int(found)
+            except (
+                TypeError,
+                ValueError,
+            ):
+                found_int = None
+
+            if (
+                found_int is not None
+                and len(locations) >= found_int
+            ):
+                break
+
+            page += 1
+
+    print(
+        f"Total OpenAQ locations fetched for "
+        f"parameter {parameter_id}: "
+        f"{len(locations)}"
+    )
+
+    return locations
+
+
+async def get_openaq_locations(
+    parameter_id: int,
+) -> dict[int, dict[str, Any]]:
+
+    if not OPENAQ_API_KEY:
+        raise RuntimeError(
+            "OPENAQ_API_KEY is missing from backend/.env"
+        )
+
+    headers = {
+        "X-API-Key": OPENAQ_API_KEY,
+    }
+
+    locations: dict[int, dict[str, Any]] = {}
+
+    page = 1
+
+    async with httpx.AsyncClient(
+        timeout=30,
+        headers=headers,
+    ) as client:
+
+        while True:
+
+            response = await client.get(
+                f"{OPENAQ_BASE_URL}/locations",
+                params={
+                    "parameters_id": parameter_id,
+                    "limit": 1000,
+                    "page": page,
+                },
+            )
+
+            # OpenAQ can occasionally return a server error
+            # on a later page. Keep successfully retrieved locations.
+            if response.status_code >= 500:
+                print(
+                    f"OpenAQ locations returned "
+                    f"{response.status_code} on page {page}. "
+                    f"Stopping pagination."
+                )
+
+                break
+
+            response.raise_for_status()
+
+            payload = response.json()
+
+            page_results = payload.get(
+                "results",
+                [],
+            )
+
+            if not page_results:
+                break
+
+            for location in page_results:
+
+                location_id = location.get("id")
+
+                if location_id is None:
+                    continue
+
+                locations[int(location_id)] = location
+
+            meta = payload.get(
+                "meta",
+                {},
+            )
+
+            found = meta.get("found")
+
+            if found is None:
+                break
+
+            # OpenAQ can return values such as ">1000".
+            # Only convert found to an integer when possible.
+            try:
+                found_int = int(found)
+            except (
+                TypeError,
+                ValueError,
+            ):
+                found_int = None
+
+            if (
+                found_int is not None
+                and len(locations) >= found_int
+            ):
+                break
+
+            page += 1
+
+            # Safety limit.
+            if page > 20:
+                break
+
+    return locations
+
+
+async def get_location_name(
+    client: httpx.AsyncClient,
+    location_id: int,
+) -> tuple[str, str]:
+
+    try:
+
+        response = await client.get(
+            f"{OPENAQ_BASE_URL}/locations/{location_id}"
+        )
+
+        response.raise_for_status()
+
+        location = response.json().get(
+            "results",
+            [],
+        )
+
+        if not location:
+            return (
+                "Unknown location",
+                "Unknown",
+            )
+
+        location = location[0]
+
+        name = (
+            location.get("locality")
+            or location.get("name")
+            or "Unknown location"
+        )
+
+        country = (
+            location.get("country", {}).get("name")
+            or "Unknown"
+        )
+
+        return name, country
+
+    except Exception as error:
+
+        print(
+            f"OpenAQ location lookup failed "
+            f"for {location_id}:",
+            error,
+        )
+
+        return (
+            "Unknown location",
+            "Unknown",
+        )
+
+
+async def build_live_geojson(
+    parameter_id: int,
+    pollutant_name: str,
+    pollutant_unit: str,
+    score_reference: float,
+    pollutant_key: str,
+) -> dict[str, Any]:
+
+    measurements = await get_openaq_latest(
+        parameter_id
+    )
+
+    if not measurements:
+        raise RuntimeError(
+            f"No measurements available for "
+            f"{pollutant_name}."
+        )
+
+    try:
+        locations = await get_openaq_locations(
+            parameter_id
+        )
+    except Exception as error:
+        print(
+            "OpenAQ location lookup failed:",
+            repr(error),
+        )
+        locations = {}
+
+    features: list[dict[str, Any]] = []
+
+    for measurement in measurements:
+
+        coordinates = measurement.get(
+            "coordinates"
+        )
+
+        if not coordinates:
+            continue
+
+        latitude = coordinates.get(
+            "latitude"
+        )
+
+        longitude = coordinates.get(
+            "longitude"
+        )
+
+        if not isinstance(
+            latitude,
+            (int, float),
+        ):
+            continue
+
+        if not isinstance(
+            longitude,
+            (int, float),
+        ):
+            continue
+
+        value = measurement.get("value")
+
+        if value is None:
+            continue
+
+        try:
+            value = float(value)
+        except (
+            TypeError,
+            ValueError,
+        ):
+            continue
+
+        if not math.isfinite(value):
+            continue
+
+        location_id = measurement.get(
+            "locationsId"
+        )
+
+        location = None
+
+        if location_id is not None:
+            try:
+                location = locations.get(
+                    int(location_id)
+                )
+            except (
+                TypeError,
+                ValueError,
+            ):
+                location = None
+
+        location_name = (
+            location.get("name")
+            if location
+            else None
+        )
+
+        locality = (
+            location.get("locality")
+            if location
+            else None
+        )
+
+        country_data = (
+            location.get("country")
+            if location
+            else None
+        )
+
+        if isinstance(
+            country_data,
+            dict,
+        ):
+            country_name = (
+                country_data.get("name")
+                or "Unknown"
+            )
+
+            country_code = (
+                country_data.get("code")
+                or ""
+            )
+        else:
+            country_name = "Unknown"
+            country_code = ""
+
+        city_name = (
+            locality
+            or location_name
+            or (
+                f"OpenAQ Location {location_id}"
+                if location_id is not None
+                else "OpenAQ Measurement"
+            )
+        )
+
+        timestamp_data = measurement.get(
+            "datetime",
+            {},
+        )
+
+        if isinstance(
+            timestamp_data,
+            dict,
+        ):
+            timestamp = (
+                timestamp_data.get("utc")
+                or ""
+            )
+        else:
+            timestamp = ""
+
+        exposure_score = calculate_exposure_score(
+            value,
+            score_reference,
+        )
+
+        regional_average = score_reference
+
+        percentage_above_regional_average = (
+            percentage_difference(
+                value,
+                regional_average,
+            )
+        )
+
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        longitude,
+                        latitude,
+                    ],
+                },
+                "properties": {
+                    "city": city_name,
+                    "country": country_name,
+
+                    # Selected pollutant
+                    "pollutant": pollutant_name,
+
+                    # Actual measurement
+                    "value": round(
+                        value,
+                        4,
+                    ),
+
+                    # Selected pollutant unit
+                    "unit": pollutant_unit,
+
+                    "population": None,
+
+                    # Score calculated for selected pollutant
+                    "exposure_score": (
+                        exposure_score
+                    ),
+
+                    # Reference for selected pollutant
+                    "regional_average": (
+                        regional_average
+                    ),
+
+                    "percentage_above_regional_average": (
+                        percentage_above_regional_average
+                    ),
+
+                    "timestamp": timestamp,
+
+                    "source": "OpenAQ",
+
+                    "locationId": location_id,
+
+                    "countryCode": country_code,
+                },
+            }
+        )
+
+    print(
+        f"{pollutant_name}: "
+        f"GeoJSON features created: "
+        f"{len(features)}"
+    )
+
+    return {
+        "type": "FeatureCollection",
+        "features": features,
+        "pollutant": pollutant_key,
+        "pollutantName": pollutant_name,
+        "unit": pollutant_unit,
+    }
+@app.get("/")
+async def root():
+    return {
+        "status": "ok",
+        "service": "Air Quality Intelligence API",
+    }
+
+def build_fallback_geojson(
+    pollutant: str,
+) -> dict[str, Any]:
+
+    config = get_pollutant_config(
+        pollutant
+    )
+
+    mock_data = load_mock_data()
+
+    reference = config["score_reference"]
+
+    factors = {
+        "pm25": 1.00,
+        "pm10": 1.35,
+        "no2": 0.0008,
+        "co": 0.012,
+        "so2": 0.0004,
+        "o3": 0.001,
+    }
+
+    factor = factors.get(
+        pollutant,
+        1.0,
+    )
+
+    features: list[dict[str, Any]] = []
+
+    for index, original in enumerate(
+        mock_data.get("features", [])
+    ):
+
+        properties = original.get(
+            "properties",
+            {},
+        )
+
+        geometry = original.get(
+            "geometry",
+            {},
+        )
+
+        coordinates = geometry.get(
+            "coordinates",
+            [],
+        )
+
+        if (
+            not isinstance(coordinates, list)
+            or len(coordinates) < 2
+        ):
+            continue
+
+        original_value = properties.get(
+            "value",
+            reference,
+        )
+
+        try:
+            original_value = float(
+                original_value
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            original_value = reference
+
+        if pollutant == "pm25":
+            value = original_value
+        else:
+            # Synthetic fallback values.
+            # These are NOT official measurements.
+            value = (
+                reference
+                * (
+                    original_value
+                    / 55.2
+                )
+                * factor
+            )
+
+        value = max(
+            0,
+            float(value),
+        )
+
+        exposure_score = (
+            calculate_exposure_score(
+                value,
+                reference,
+            )
+        )
+
+        percentage = (
+            percentage_difference(
+                value,
+                reference,
+            )
+        )
+
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": coordinates,
+                },
+                "properties": {
+                    "city": (
+                        properties.get(
+                            "city"
+                        )
+                        or f"Fallback Location {index + 1}"
+                    ),
+                    "country": (
+                        properties.get(
+                            "country"
+                        )
+                        or "Unknown"
+                    ),
+                    "pollutant": config[
+                        "name"
+                    ],
+                    "value": round(
+                        value,
+                        4,
+                    ),
+                    "unit": config[
+                        "unit"
+                    ],
+                    "timestamp": (
+                        properties.get(
+                            "timestamp"
+                        )
+                        or ""
+                    ),
+                    "population": (
+                        properties.get(
+                            "population"
+                        )
+                    ),
+                    "exposure_score": (
+                        exposure_score
+                    ),
+                    "regional_average": (
+                        reference
+                    ),
+                    "percentage_above_regional_average": (
+                        percentage
+                    ),
+                    "source": "Synthetic fallback",
+                    "fallback": True,
+                },
+            }
+        )
+
+    return {
+        "type": "FeatureCollection",
+        "features": features,
+        "pollutant": pollutant,
+        "pollutantName": config[
+            "name"
+        ],
+        "unit": config[
+            "unit"
+        ],
+        "fallback": True,
+    }
+@app.get("/api/air-quality")
+async def air_quality(
+    pollutant: str = Query("pm25"),
+):
+    pollutant_key = pollutant.lower().strip()
+
+    # Treat pm2.5 as the same internal pollutant as pm25.
+    if pollutant_key == "pm2.5":
+        pollutant_key = "pm25"
+
+    pollutant_config = OPENAQ_POLLUTANTS.get(
+        pollutant_key
+    )
+
+    if pollutant_config is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Unsupported pollutant.",
+                "supported": [
+                    "pm25",
+                    "pm10",
+                    "no2",
+                    "co",
+                    "so2",
+                    "o3",
+                ],
+            },
+        )
+
+    parameter_id = pollutant_config["id"]
+
+    try:
+        data = await build_live_geojson(
+            parameter_id=parameter_id,
+            pollutant_name=pollutant_config["name"],
+            pollutant_unit=pollutant_config["unit"],
+            score_reference=pollutant_config[
+                "score_reference"
+            ],
+            pollutant_key=pollutant_key,
+        )
+
+        if not data.get("features"):
+            raise RuntimeError(
+                "OpenAQ returned no usable measurements."
+            )
+
+        return data
+
+    except Exception as error:
+
+        print(
+            "OpenAQ failed. Using fallback data:",
+            repr(error),
+        )
+
+        return build_fallback_geojson(
+            pollutant_key
+        )
+
+@app.get("/api/population")
+async def population(
+    latitude: float,
+    longitude: float,
+):
+
+    value = await get_worldpop_population(
+        latitude=latitude,
+        longitude=longitude,
+    )
+
+    if value is None:
+
+        raise HTTPException(
+            status_code=502,
+            detail="WorldPop population data unavailable.",
+        )
+
+    return {
+        "latitude": latitude,
+        "longitude": longitude,
+        "population": value,
+        "source": "WorldPop",
+        "year": WORLDPOP_YEAR,
+        "resolution": WORLDPOP_RESOLUTION,
+    }
+@app.get("/api/intelligence/results")
+async def intelligence_results():
+    """Return the approved comparative intelligence results."""
+    return get_intelligence_results()
+@app.get("/api/intelligence/summary")
+async def intelligence_summary():
+    """Return the generated intelligence summary."""
+    summary_path = (
+        Path(__file__).resolve().parents[2]
+        / "data-science"
+        / "outputs"
+        / "intelligence_summary.json"
+    )
+
+    try:
+        with summary_path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=500,
+            detail="Intelligence summary file is missing.",
+        )
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=500,
+            detail="Intelligence summary file contains invalid JSON.",
+        )
+</file>
+
 <file path="data-science/outputs/intelligence_summary.json">
 {
-  "project_id": "POC-32",
-  "project_title": "Infocreon Aether Pulse Air Quality Heatmap",
-  "approved_track": "Track A — Comparative Intelligence",
-  "primary_analytical_question": "Within each pollutant, how do sampled city measurements compare with each other and with that pollutant's overall mean?",
-  "decision_to_be_supported": "Explore descriptive differences among synthetic city-pollutant groups; no operational or public-health decision is supported.",
-  "data_version": "phase3-v1.1",
-  "method_version": "track-a-comparative-v1.0.0",
-  "result_count": 32,
-  "key_findings": [
+  "summary_schema_version": "1.0.0",
+  "generated_at_utc": "2026-10-11T02:03:52.795767+00:00",
+  "source": {
+    "file": "data-science/outputs/intelligence_results.json",
+    "source_format": "JSON array of result records"
+  },
+  "versions": {
+    "data_versions": [
+      "phase3-v1.1"
+    ],
+    "method_versions": [
+      "track-a-comparative-v1.0.0"
+    ],
+    "quality_statuses": [
+      "conditional"
+    ]
+  },
+  "quality": {
+    "is_synthetic_values": [
+      true
+    ],
+    "record_count": 32,
+    "contains_conditional_quality": true
+  },
+  "overview": {
+    "result_count": 32,
+    "entity_count": 8,
+    "entities": [
+      "Ahmedabad",
+      "Bengaluru",
+      "Chennai",
+      "Delhi",
+      "Hyderabad",
+      "Kolkata",
+      "Mumbai",
+      "Pune"
+    ],
+    "pollutant_count": 4,
+    "pollutants": [
+      "no2",
+      "o3",
+      "pm10",
+      "pm2.5"
+    ],
+    "result_type_counts": {
+      "ranking": 32
+    },
+    "result_category_counts": {
+      "above_baseline": 16,
+      "below_baseline": 16
+    }
+  },
+  "priority_examples": [
     {
+      "result_id": "RES-0001",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "no2",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 52.89333333333334,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 23.116666666666664,
-      "pollutant_baseline_mean": 36.2075,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "no2_mean",
+      "result_value": 52.89333333333334,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     },
     {
+      "result_id": "RES-0009",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "o3",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 90.46666666666665,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 42.026666666666664,
-      "pollutant_baseline_mean": 62.29708333333334,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "o3_mean",
+      "result_value": 90.46666666666665,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for o3 by sampled mean; its mean is 28.1696 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     },
     {
+      "result_id": "RES-0017",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "pm10",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 118.64333333333333,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 56.20666666666667,
-      "pollutant_baseline_mean": 81.86291666666666,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "pm10_mean",
+      "result_value": 118.64333333333333,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for pm10 by sampled mean; its mean is 36.7804 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     },
     {
+      "result_id": "RES-0025",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "pm2.5",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 65.41666666666667,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 29.42,
-      "pollutant_baseline_mean": 44.90416666666667,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "pm2.5_mean",
+      "result_value": 65.41666666666667,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for pm2.5 by sampled mean; its mean is 20.5125 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
+    },
+    {
+      "result_id": "RES-0002",
+      "result_type": "ranking",
+      "entity_name": "Ahmedabad",
+      "pollutant": "no2",
+      "metric_name": "no2_mean",
+      "result_value": 41.52,
+      "result_unit": "µg/m³",
+      "priority_rank": 2,
+      "finding": "Ahmedabad ranks 2 for no2 by sampled mean; its mean is 5.3125 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     }
   ],
-  "priority_items": [],
-  "validation_result": "PENDING",
-  "important_limitations": [
-    "All observations are synthetic.",
-    "Only three timestamps across one calendar date are represented in the Post #2 evidence.",
-    "Rankings are descriptive and do not establish real-world air-quality conditions or health risk.",
-    "The pollutant-wide mean is a baseline, not a regulatory threshold."
-  ],
-  "generated_at": "2026-10-10T21:38:32.853624+00:00"
+  "limitations": "This summary is derived from the published intelligence result records. Where results are synthetic, they are descriptive comparisons and are not verified real-world measurements, regulatory assessments, health-risk assessments, or predictions."
 }
 </file>
 
