@@ -8,7 +8,10 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.services.intelligence import (
+    get_intelligence_results,
+    get_intelligence_summary,
+)
 load_dotenv()
 
 app = FastAPI(title="Air Quality Intelligence API")
@@ -22,8 +25,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         FRONTEND_URL,
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        "http://localhost:3002",
+        "http://127.0.0.1:3002",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -1161,3 +1164,14 @@ async def population(
         "year": WORLDPOP_YEAR,
         "resolution": WORLDPOP_RESOLUTION,
     }
+@app.get("/api/intelligence/results")
+async def intelligence_results():
+    """Return the approved comparative intelligence results."""
+    return get_intelligence_results()
+
+@app.get("/api/intelligence/summary")
+async def intelligence_summary():
+    """Return the validated intelligence summary."""
+    return get_intelligence_summary()
+
+    

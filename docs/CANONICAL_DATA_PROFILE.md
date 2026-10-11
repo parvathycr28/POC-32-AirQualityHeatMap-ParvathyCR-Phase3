@@ -55,3 +55,4 @@ The generated output is `data-science/outputs/canonical_profile.json`.
 ## 8. Conclusion
 
 The canonical dataset has the expected 96-row, 20-column structure and includes multiple entities, pollutant categories, and repeated timestamps. It is suitable for assessing bounded descriptive analytical work, subject to the quality, representativeness, and track-specific limitations documented in the accompanying reports.
+s

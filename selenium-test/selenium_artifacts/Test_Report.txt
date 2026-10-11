@@ -1,0 +1,32 @@
+INFOCREON POC-32 - SELENIUM E2E TEST REPORT
+====================================================
+Operational dashboard: https://poc-32-airqualityheatmap-frontend.onrender.com
+Local Data Intelligence page: http://localhost:3000/data-intelligence
+Executed: 2026-10-11T03:00:10
+
+[PASS] Operational URL opens
+       Opened https://poc-32-airqualityheatmap-frontend.onrender.com/
+[PASS] Main dashboard loads
+       REAL RAILS and Air Quality Heatmap are visible.
+[PASS] Core visualization appears
+       Leaflet map content is rendered.
+[PASS] Operational API communication
+       Successful API response: https://poc-32-airqualityheatmap-backend.onrender.com/api/air-quality?pollutant=PM2.5
+[PASS] Operational data is loaded
+       At least one city data card is rendered.
+[PASS] Pollutant filter interaction
+       Changed pollutant from PM2.5 to PM10.
+[PASS] Operational intelligence panel
+       Panel opened and closed successfully.
+[PASS] Local Data Intelligence page
+       Page loaded: http://localhost:3000/data-intelligence
+[PASS] Local Data Intelligence API
+       API returned HTTP 200.
+[PASS] Operational responsive check
+       Dashboard rendered at 390x844 without horizontal overflow.
+[PASS] Screenshot captured
+       Saved to C:\Users\ACER\Documents\POC-32-AirQualityHeatmap-ParvathyCR1\POC-32-AirQualityHeatMap-ParvathyCR-Phase3\selenium-test\selenium_artifacts\aether_pulse_e2e.png
+
+Result: PASS
+Passed: 11/11
+Screenshot: C:\Users\ACER\Documents\POC-32-AirQualityHeatmap-ParvathyCR1\POC-32-AirQualityHeatMap-ParvathyCR-Phase3\selenium-test\selenium_artifacts\aether_pulse_e2e.png
