@@ -7151,169 +7151,6 @@ This review used source-level visual/interaction inspection of the supplied Reac
 # VAR PASS
 </file>
 
-<file path="backend/app/services/intelligence.py">
-import json
-import math
-import os
-from pathlib import Path
-from typing import Any
-
-from fastapi import HTTPException
-
-
-# intelligence.py is located at <repo>/backend/app/services/
-REPO_ROOT = Path(__file__).resolve().parents[3]
-RESULTS_FILE = Path(
-    os.getenv(
-        "INTELLIGENCE_RESULTS_FILE",
-        str(REPO_ROOT / "data-science" / "outputs" / "intelligence_results.json"),
-    )
-)
-
-REQUIRED_FIELDS = {
-    "result_id",
-    "result_type",
-    "group_key",
-    "metric_name",
-    "result_value",
-    "priority_rank",
-    "finding",
-    "evidence",
-    "quality_status",
-    "limitation",
-    "method_version",
-    "data_version",
-    "entity_name",
-    "pollutant",
-    "is_synthetic",
-}
-
-ALLOWED_QUALITY_STATUSES = {"validated", "conditional", "rejected"}
-
-
-def get_intelligence_results() -> dict[str, Any]:
-    """Read and validate the published intelligence result records."""
-
-    if not RESULTS_FILE.is_file():
-        raise HTTPException(
-            status_code=503,
-            detail="The intelligence results file is unavailable.",
-        )
-
-    try:
-        with RESULTS_FILE.open("r", encoding="utf-8") as file:
-            results = json.load(file)
-    except (OSError, json.JSONDecodeError) as error:
-        raise HTTPException(
-            status_code=500,
-            detail="The intelligence results file could not be read.",
-        ) from error
-
-    if not isinstance(results, list):
-        raise HTTPException(
-            status_code=500,
-            detail="The intelligence results must be a JSON list.",
-        )
-
-    seen_ids: set[str] = set()
-
-    for index, record in enumerate(results):
-        if not isinstance(record, dict):
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid result record at index {index}.",
-            )
-
-        missing = REQUIRED_FIELDS - record.keys()
-        if missing:
-            raise HTTPException(
-                status_code=500,
-                detail=(
-                    f"Result record {index} is missing required fields: "
-                    f"{', '.join(sorted(missing))}"
-                ),
-            )
-
-        result_id = record["result_id"]
-        if not isinstance(result_id, str) or not result_id.strip():
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid result_id at index {index}.",
-            )
-
-        if result_id in seen_ids:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Duplicate result_id: {result_id}.",
-            )
-        seen_ids.add(result_id)
-
-        if record["quality_status"] not in ALLOWED_QUALITY_STATUSES:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid quality status for {result_id}.",
-            )
-
-        value = record["result_value"]
-        if (
-            isinstance(value, bool)
-            or not isinstance(value, (int, float))
-            or not math.isfinite(value)
-        ):
-            raise HTTPException(
-                status_code=500,
-                detail=f"Invalid numeric result_value for {result_id}.",
-            )
-
-        if not isinstance(record["evidence"], list):
-            raise HTTPException(
-                status_code=500,
-                detail=f"Evidence must be a list for {result_id}.",
-            )
-
-    return {
-        "metadata": {
-            "data_version": "phase3-v1.1",
-            "method_version": "track-a-comparative-v1.0.0",
-            "count": len(results),
-            "is_synthetic": True,
-            "quality_status": "conditional",
-            "description": (
-                "Synthetic descriptive comparisons based on the approved "
-                "Phase 3 sample. These are not verified real-world "
-                "measurements, regulatory assessments, health-risk "
-                "assessments, or predictions."
-            ),
-        },
-        "count": len(results),
-        "results": results,
-    }
-</file>
-
-<file path="backend/Dockerfile">
-FROM python:3.12-slim
-
-WORKDIR /app
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-COPY backend/requirements.txt .
-
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
-
-COPY backend/app ./app
-COPY backend/data ./data
-COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
-
-ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
-
-EXPOSE 8000 8001
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
-</file>
-
 <file path="data/canonical/intelligence_data.csv">
 record_id,record_type,observed_at,entity_id,related_entity_id,entity_name,category,subcategory,status,stage,metric_name,metric_value,metric_unit,text_value,latitude,longitude,source_name,source_record_id,is_synthetic,data_version
 aq-0001,measurement,2026-08-23T00:00:00Z,ahmedabad,,Ahmedabad,air_quality,no2,observed,observation,no2,44.12,µg/m³,India,23.0225,72.5714,Synthetic OpenAQ-shaped sample,ahmedabad-no2-0000,true,phase3-v1.1
@@ -16047,49 +15884,6 @@ if __name__ == "__main__":
     main()
 </file>
 
-<file path="docker-compose.yml">
-services:
-  backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    container_name: infocreon-airquality-phase3-backend
-    env_file:
-      - ./backend/.env
-    ports:
-      - "8003:8001"
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
-        NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
-        NEXT_PUBLIC_API_URL: "http://localhost:8003"
-    environment:
-      NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
-      NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8001"
-    ports:
-      - "3002:3000"
-    depends_on:
-      - backend
-    restart: unless-stopped
-  
-  data-intelligence-backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    container_name: infocreon-data-intelligence-backend
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-    environment:
-      INTELLIGENCE_RESULTS_FILE: /app/data-science/outputs/intelligence_results.json
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-</file>
-
 <file path="Dockerfile.intelligence">
 FROM python:3.11-slim
 
@@ -16112,6 +15906,489 @@ COPY data-science/outputs/intelligence_summary.json \
 WORKDIR /app/backend
 
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+</file>
+
+<file path="backend/app/services/intelligence.py">
+import json
+import math
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from fastapi import HTTPException
+
+
+# Repository paths used when explicit environment variables are not set.
+REPO_ROOT = Path(__file__).resolve().parents[3]
+OUTPUT_DIR = REPO_ROOT / "data-science" / "outputs"
+
+# Allow Docker Compose or another deployment environment to specify
+# the exact paths of the published analytical output files.
+RESULTS_FILE = Path(
+    os.environ.get(
+        "INTELLIGENCE_RESULTS_FILE",
+        str(OUTPUT_DIR / "intelligence_results.json"),
+    )
+)
+
+SUMMARY_FILE = Path(
+    os.environ.get(
+        "INTELLIGENCE_SUMMARY_FILE",
+        str(OUTPUT_DIR / "intelligence_summary.json"),
+    )
+)
+
+EXPECTED_DATA_VERSION = "phase3-v1.1"
+EXPECTED_METHOD_VERSION = "track-a-comparative-v1.0.0"
+EXPECTED_RESULT_COUNT = 32
+
+REQUIRED_RESULT_FIELDS = {
+    "result_id",
+    "result_type",
+    "group_key",
+    "metric_name",
+    "result_value",
+    "priority_rank",
+    "finding",
+    "evidence",
+    "quality_status",
+    "limitation",
+    "method_version",
+    "data_version",
+    "generated_at",
+    "entity_name",
+    "pollutant",
+    "is_synthetic",
+}
+
+REQUIRED_SUMMARY_FIELDS = {
+    "project_id",
+    "project_title",
+    "approved_track",
+    "primary_analytical_question",
+    "decision_to_be_supported",
+    "data_version",
+    "method_version",
+    "result_count",
+    "key_findings",
+    "priority_items",
+    "validation_result",
+    "important_limitations",
+    "generated_at",
+}
+
+ALLOWED_QUALITY_STATUSES = {
+    "validated",
+    "conditional",
+    "rejected",
+}
+
+# Operational freshness threshold; this is not an analytical validity score.
+STALE_AFTER_HOURS = 168
+
+
+def _fail(message: str, status_code: int = 500) -> None:
+    """Raise an HTTP error with a clear diagnostic message."""
+    raise HTTPException(
+        status_code=status_code,
+        detail=message,
+    )
+
+
+def _read_json(path: Path, label: str) -> Any:
+    """Read a JSON file and return its decoded contents."""
+    if not path.is_file():
+        _fail(
+            f"The {label} file is unavailable at the configured path.",
+            503,
+        )
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+
+    except (OSError, json.JSONDecodeError) as error:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"The {label} file could not be read as valid JSON."
+            ),
+        ) from error
+
+
+def _parse_timestamp(value: Any, label: str) -> datetime:
+    """Parse an ISO 8601 timestamp and require timezone information."""
+    if not isinstance(value, str) or not value.strip():
+        _fail(f"{label} must be an ISO 8601 timestamp.")
+
+    try:
+        parsed = datetime.fromisoformat(
+            value.replace("Z", "+00:00")
+        )
+    except ValueError:
+        _fail(f"{label} must be a valid ISO 8601 timestamp.")
+
+    if parsed.tzinfo is None:
+        _fail(f"{label} must include a timezone.")
+
+    return parsed.astimezone(timezone.utc)
+
+
+def _validate_summary(summary: Any) -> dict[str, Any]:
+    """Validate the approved analytical summary before returning it."""
+    if not isinstance(summary, dict):
+        _fail(
+            "The intelligence summary must be a JSON object."
+        )
+
+    missing = REQUIRED_SUMMARY_FIELDS - summary.keys()
+
+    if missing:
+        _fail(
+            "The intelligence summary is missing required fields: "
+            + ", ".join(sorted(missing))
+        )
+
+    required_string_fields = {
+        "project_id",
+        "project_title",
+        "approved_track",
+        "primary_analytical_question",
+        "decision_to_be_supported",
+        "data_version",
+        "method_version",
+        "validation_result",
+        "generated_at",
+    }
+
+    for field in required_string_fields:
+        value = summary[field]
+
+        if not isinstance(value, str) or not value.strip():
+            _fail(
+                f"The summary field '{field}' is missing or invalid."
+            )
+
+    if summary["data_version"] != EXPECTED_DATA_VERSION:
+        _fail(
+            "The summary data version is not the approved version."
+        )
+
+    if summary["method_version"] != EXPECTED_METHOD_VERSION:
+        _fail(
+            "The summary method version is not the approved version."
+        )
+
+    if summary["validation_result"] != "PASS":
+        _fail(
+            "The analytical summary has not passed validation."
+        )
+
+    if (
+        type(summary["result_count"]) is not int
+        or summary["result_count"] != EXPECTED_RESULT_COUNT
+    ):
+        _fail(
+            "The summary result count does not match the approved count."
+        )
+
+    if not isinstance(summary["key_findings"], list):
+        _fail("Summary key_findings must be an array.")
+
+    if not isinstance(summary["priority_items"], list):
+        _fail("Summary priority_items must be an array.")
+
+    if not isinstance(summary["important_limitations"], list):
+        _fail(
+            "Summary important_limitations must be an array."
+        )
+
+    if not all(
+        isinstance(item, str) and item.strip()
+        for item in summary["important_limitations"]
+    ):
+        _fail(
+            "Summary important_limitations contains an invalid item."
+        )
+
+    _parse_timestamp(
+        summary["generated_at"],
+        "Summary generated_at",
+    )
+
+    return summary
+
+
+def _validate_results(
+    results: Any,
+    summary: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Validate result records against the approved summary contract."""
+    if not isinstance(results, list):
+        _fail(
+            "The intelligence results must be a JSON array."
+        )
+
+    if len(results) != EXPECTED_RESULT_COUNT:
+        _fail(
+            "The result array does not match the approved result count."
+        )
+
+    if len(results) != summary["result_count"]:
+        _fail(
+            "The result array and summary result count do not match."
+        )
+
+    summary_timestamp = _parse_timestamp(
+        summary["generated_at"],
+        "Summary generated_at",
+    )
+
+    seen_ids: set[str] = set()
+
+    for index, record in enumerate(results):
+        if not isinstance(record, dict):
+            _fail(
+                f"Result record {index} must be a JSON object."
+            )
+
+        missing = REQUIRED_RESULT_FIELDS - record.keys()
+
+        if missing:
+            _fail(
+                f"Result record {index} is missing required fields: "
+                + ", ".join(sorted(missing))
+            )
+
+        result_id = record["result_id"]
+
+        if not isinstance(result_id, str) or not result_id.strip():
+            _fail(
+                f"Result record {index} has an invalid result_id."
+            )
+
+        if result_id in seen_ids:
+            _fail(f"Duplicate result_id: {result_id}.")
+
+        seen_ids.add(result_id)
+
+        required_string_fields = (
+            "result_type",
+            "group_key",
+            "metric_name",
+            "finding",
+            "quality_status",
+            "limitation",
+            "method_version",
+            "data_version",
+            "generated_at",
+            "entity_name",
+            "pollutant",
+        )
+
+        for field in required_string_fields:
+            value = record[field]
+
+            if not isinstance(value, str) or not value.strip():
+                _fail(
+                    f"{result_id} has an invalid {field}."
+                )
+
+        if record["result_type"] != "ranking":
+            _fail(
+                f"{result_id} has an unsupported result_type."
+            )
+
+        if record["data_version"] != summary["data_version"]:
+            _fail(
+                f"{result_id} has a mismatched data version."
+            )
+
+        if record["method_version"] != summary["method_version"]:
+            _fail(
+                f"{result_id} has a mismatched method version."
+            )
+
+        if record["quality_status"] not in ALLOWED_QUALITY_STATUSES:
+            _fail(
+                f"{result_id} has an invalid quality status."
+            )
+
+        if record["is_synthetic"] is not True:
+            _fail(
+                f"{result_id} does not declare the approved "
+                "synthetic status."
+            )
+
+        value = record["result_value"]
+
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+        ):
+            _fail(
+                f"{result_id} has an invalid numeric result_value."
+            )
+
+        rank = record["priority_rank"]
+
+        if type(rank) is not int or rank < 1:
+            _fail(
+                f"{result_id} has an invalid priority_rank."
+            )
+
+        evidence = record["evidence"]
+
+        if not isinstance(evidence, list) or not evidence:
+            _fail(
+                f"{result_id} must contain non-empty evidence."
+            )
+
+        for item in evidence:
+            if (
+                not isinstance(item, dict)
+                or not isinstance(item.get("factor"), str)
+                or not item["factor"].strip()
+                or "value" not in item
+            ):
+                _fail(
+                    f"{result_id} contains a malformed evidence item."
+                )
+
+            evidence_value = item["value"]
+
+            if (
+                evidence_value is not None
+                and not isinstance(
+                    evidence_value,
+                    (str, int, float, bool),
+                )
+            ):
+                _fail(
+                    f"{result_id} contains an unsupported evidence value."
+                )
+
+            if (
+                isinstance(evidence_value, float)
+                and not math.isfinite(evidence_value)
+            ):
+                _fail(
+                    f"{result_id} contains a non-finite evidence value."
+                )
+
+        record_timestamp = _parse_timestamp(
+            record["generated_at"],
+            f"{result_id} generated_at",
+        )
+
+        if record_timestamp != summary_timestamp:
+            _fail(
+                f"{result_id} generated_at does not match "
+                "the summary timestamp."
+            )
+
+    return results
+
+
+def get_intelligence_summary() -> dict[str, Any]:
+    """Return the approved summary only when its contract is valid."""
+    summary = _read_json(
+        SUMMARY_FILE,
+        "intelligence summary",
+    )
+
+    return _validate_summary(summary)
+
+
+def get_intelligence_results() -> dict[str, Any]:
+    """Validate results against the approved summary before returning them."""
+    summary = get_intelligence_summary()
+
+    raw_results = _read_json(
+        RESULTS_FILE,
+        "intelligence results",
+    )
+
+    results = _validate_results(
+        raw_results,
+        summary,
+    )
+
+    generated_at = _parse_timestamp(
+        summary["generated_at"],
+        "Summary generated_at",
+    )
+
+    age_hours = max(
+        0.0,
+        (
+            datetime.now(timezone.utc) - generated_at
+        ).total_seconds() / 3600,
+    )
+
+    freshness_status = (
+        "STALE"
+        if age_hours > STALE_AFTER_HOURS
+        else "CURRENT"
+    )
+
+    quality_statuses = sorted(
+        {
+            record["quality_status"]
+            for record in results
+        }
+    )
+
+    quality_status = (
+        quality_statuses[0]
+        if len(quality_statuses) == 1
+        else "mixed"
+    )
+
+    return {
+        "metadata": {
+            "data_version": summary["data_version"],
+            "method_version": summary["method_version"],
+            "count": len(results),
+            "is_synthetic": True,
+            "quality_status": quality_status,
+            "description": summary["decision_to_be_supported"],
+            "approved_track": summary["approved_track"],
+            "generated_at": summary["generated_at"],
+            "freshness_status": freshness_status,
+            "freshness_age_hours": round(age_hours, 2),
+            "stale_after_hours": STALE_AFTER_HOURS,
+            "validation_result": summary["validation_result"],
+        },
+        "count": len(results),
+        "results": results,
+    }
+</file>
+
+<file path="backend/Dockerfile">
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY backend/requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY backend/app ./app
+COPY backend/data ./data
+COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
+COPY data-science/outputs/intelligence_summary.json ./data-science/outputs/intelligence_summary.json
+ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
+
+EXPOSE 8000 8001
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 </file>
 
 <file path="data/quality/validation_report.json">
@@ -16679,6 +16956,60 @@ data/
 }
 </file>
 
+<file path="docker-compose.yml">
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: infocreon-airquality-phase3-backend
+    environment:
+      INTELLIGENCE_RESULTS_FILE: /app/data-science/outputs/intelligence_results.json
+      INTELLIGENCE_SUMMARY_FILE: /app/data-science/outputs/intelligence_summary.json
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8003:8001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
+        NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8003"
+        NEXT_PUBLIC_API_URL: "http://localhost:8003"
+    environment:
+      NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
+      NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8003"
+    ports:
+      - "3002:3000"
+    depends_on:
+      - backend
+      - data-intelligence-backend
+    restart: unless-stopped
+
+  data-intelligence-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: infocreon-data-intelligence-backend
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    environment:
+      INTELLIGENCE_RESULTS_FILE: /app/data-science/outputs/intelligence_results.json
+      INTELLIGENCE_SUMMARY_FILE: /app/data-science/outputs/intelligence_summary.json
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+</file>
+
 <file path="data-science/outputs/intelligence_results.json">
 [
   {
@@ -16735,7 +17066,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
@@ -16807,7 +17138,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
@@ -16879,7 +17210,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
@@ -16951,7 +17282,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
@@ -17023,7 +17354,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
@@ -17095,7 +17426,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
@@ -17167,7 +17498,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
@@ -17239,7 +17570,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
@@ -17311,7 +17642,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
@@ -17383,7 +17714,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
@@ -17455,7 +17786,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
@@ -17527,7 +17858,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
@@ -17599,7 +17930,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
@@ -17671,7 +18002,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
@@ -17743,7 +18074,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
@@ -17815,7 +18146,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
@@ -17887,7 +18218,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
@@ -17959,7 +18290,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
@@ -18031,7 +18362,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
@@ -18103,7 +18434,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
@@ -18175,7 +18506,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
@@ -18247,7 +18578,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
@@ -18319,7 +18650,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
@@ -18391,7 +18722,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
@@ -18463,7 +18794,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Delhi",
@@ -18535,7 +18866,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Ahmedabad",
@@ -18607,7 +18938,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Kolkata",
@@ -18679,7 +19010,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Mumbai",
@@ -18751,7 +19082,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Hyderabad",
@@ -18823,7 +19154,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Chennai",
@@ -18895,7 +19226,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Pune",
@@ -18967,7 +19298,7 @@ data/
     ],
     "method_version": "track-a-comparative-v1.0.0",
     "data_version": "phase3-v1.1",
-    "generated_at": "2026-10-10T21:38:32.853624+00:00",
+    "generated_at": "2026-10-11T08:55:58.910438+00:00",
     "quality_status": "conditional",
     "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.",
     "entity_name": "Bengaluru",
@@ -18991,6 +19322,7 @@ data/
 <file path="frontend/app/data-intelligence/page.tsx">
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type EvidenceItem = {
@@ -19013,6 +19345,7 @@ type IntelligenceResult = {
   limitation: string;
   method_version: string;
   data_version: string;
+  generated_at: string;
   entity_name: string;
   pollutant: string;
   is_synthetic: boolean;
@@ -19028,15 +19361,47 @@ type IntelligenceResponse = {
     is_synthetic: boolean;
     quality_status: string;
     description: string;
+    approved_track: string;
+    generated_at: string;
+    freshness_status: string;
+    freshness_age_hours: number;
+    stale_after_hours: number;
+    validation_result: string;
   };
   count: number;
   results: IntelligenceResult[];
 };
 
+type IntelligenceSummary = {
+  project_id: string;
+  project_title: string;
+  approved_track: string;
+  primary_analytical_question: string;
+  decision_to_be_supported: string;
+  data_version: string;
+  method_version: string;
+  result_count: number;
+  key_findings: unknown[];
+  priority_items: unknown[];
+  validation_result: string;
+  important_limitations: string[];
+  generated_at: string;
+};
 
-const DATA_INTELLIGENCE_API_BASE =
+const DATA_INTELLIGENCE_API_BASE = (
   process.env.NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL ??
-  "http://localhost:8000";
+  "http://localhost:8000"
+).replace(/\/$/, "");
+
+const EXPECTED_DATA_VERSION = "phase3-v1.1";
+const EXPECTED_METHOD_VERSION = "track-a-comparative-v1.0.0";
+const EXPECTED_RESULT_COUNT = 32;
+
+const ALLOWED_QUALITY_STATUSES = new Set([
+  "validated",
+  "conditional",
+  "rejected",
+]);
 
 const pollutantNames: Record<string, string> = {
   no2: "NO₂",
@@ -19045,7 +19410,327 @@ const pollutantNames: Record<string, string> = {
   "pm2.5": "PM2.5",
 };
 
-function formatValue(value: string | number | boolean | null) {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function requireString(
+  record: Record<string, unknown>,
+  key: string,
+  label: string
+): string {
+  const value = record[key];
+
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error(`${label} is missing or invalid.`);
+  }
+
+  return value;
+}
+
+function validateSummary(payload: unknown): IntelligenceSummary {
+  if (!isRecord(payload)) {
+    throw new Error(
+      "The intelligence summary must be a JSON object."
+    );
+  }
+
+  const requiredStringFields = [
+    "project_id",
+    "project_title",
+    "approved_track",
+    "primary_analytical_question",
+    "decision_to_be_supported",
+    "data_version",
+    "method_version",
+    "validation_result",
+    "generated_at",
+  ];
+
+  for (const field of requiredStringFields) {
+    requireString(
+      payload,
+      field,
+      `Summary field '${field}'`
+    );
+  }
+
+  if (payload.data_version !== EXPECTED_DATA_VERSION) {
+    throw new Error(
+      "The summary data version is not the expected version."
+    );
+  }
+
+  if (payload.method_version !== EXPECTED_METHOD_VERSION) {
+    throw new Error(
+      "The summary method version is not the expected version."
+    );
+  }
+
+  if (payload.validation_result !== "PASS") {
+    throw new Error(
+      "The analytical summary has not passed validation."
+    );
+  }
+
+  if (
+    !Number.isInteger(payload.result_count) ||
+    payload.result_count !== EXPECTED_RESULT_COUNT
+  ) {
+    throw new Error(
+      "The summary result count is inconsistent."
+    );
+  }
+
+  if (
+    !Array.isArray(payload.key_findings) ||
+    !Array.isArray(payload.priority_items) ||
+    !Array.isArray(payload.important_limitations)
+  ) {
+    throw new Error(
+      "The summary findings, priorities, or limitations are invalid."
+    );
+  }
+
+  if (
+    !payload.important_limitations.every(
+      (item) =>
+        typeof item === "string" && item.trim() !== ""
+    )
+  ) {
+    throw new Error(
+      "The summary contains an invalid analytical limitation."
+    );
+  }
+
+  const generatedAt = payload.generated_at as string;
+
+  if (
+    !Number.isFinite(Date.parse(generatedAt)) ||
+    !/(Z|[+-]\d{2}:\d{2})$/i.test(generatedAt)
+  ) {
+    throw new Error(
+      "The summary timestamp must be valid and include a timezone."
+    );
+  }
+
+  return payload as unknown as IntelligenceSummary;
+}
+
+function validateResults(
+  payload: unknown,
+  summaryData: IntelligenceSummary
+): IntelligenceResponse {
+  if (!isRecord(payload) || !isRecord(payload.metadata)) {
+    throw new Error(
+      "The intelligence results response has an invalid structure."
+    );
+  }
+
+  if (!Array.isArray(payload.results)) {
+    throw new Error(
+      "The API results field must be an array."
+    );
+  }
+
+  const metadata = payload.metadata;
+  const results = payload.results;
+
+  if (
+    payload.count !== results.length ||
+    metadata.count !== results.length ||
+    results.length !== EXPECTED_RESULT_COUNT ||
+    results.length !== summaryData.result_count
+  ) {
+    throw new Error(
+      "The summary, metadata, and results counts do not match."
+    );
+  }
+
+  if (
+    metadata.data_version !== EXPECTED_DATA_VERSION ||
+    metadata.data_version !== summaryData.data_version ||
+    metadata.method_version !== EXPECTED_METHOD_VERSION ||
+    metadata.method_version !== summaryData.method_version
+  ) {
+    throw new Error(
+      "The results and summary versions do not match."
+    );
+  }
+
+  if (
+    metadata.validation_result !== "PASS" ||
+    metadata.generated_at !== summaryData.generated_at ||
+    metadata.approved_track !== summaryData.approved_track ||
+    metadata.is_synthetic !== true ||
+    typeof metadata.quality_status !== "string" ||
+    typeof metadata.description !== "string"
+  ) {
+    throw new Error(
+      "The results metadata does not match the approved summary."
+    );
+  }
+
+  if (
+    !["CURRENT", "STALE"].includes(
+      String(metadata.freshness_status)
+    ) ||
+    typeof metadata.freshness_age_hours !== "number" ||
+    !Number.isFinite(metadata.freshness_age_hours) ||
+    typeof metadata.stale_after_hours !== "number" ||
+    !Number.isFinite(metadata.stale_after_hours)
+  ) {
+    throw new Error(
+      "The data freshness metadata is invalid."
+    );
+  }
+
+  const seenIds = new Set<string>();
+
+  for (const item of results) {
+    if (!isRecord(item)) {
+      throw new Error(
+        "A result record is not a valid object."
+      );
+    }
+
+    const requiredStringFields = [
+      "result_id",
+      "result_type",
+      "group_key",
+      "metric_name",
+      "finding",
+      "quality_status",
+      "limitation",
+      "method_version",
+      "data_version",
+      "generated_at",
+      "entity_name",
+      "pollutant",
+    ];
+
+    for (const field of requiredStringFields) {
+      requireString(
+        item,
+        field,
+        `Result field '${field}'`
+      );
+    }
+
+    if (item.result_type !== "ranking") {
+      throw new Error(
+        "A result has an unsupported result type."
+      );
+    }
+
+    if (
+      item.data_version !== summaryData.data_version ||
+      item.method_version !== summaryData.method_version ||
+      item.generated_at !== summaryData.generated_at
+    ) {
+      throw new Error(
+        "A result's version or timestamp is inconsistent."
+      );
+    }
+
+    if (item.is_synthetic !== true) {
+      throw new Error(
+        "A result is missing the synthetic-data flag."
+      );
+    }
+
+    if (
+      typeof item.result_value !== "number" ||
+      !Number.isFinite(item.result_value)
+    ) {
+      throw new Error(
+        "A result contains an invalid numeric value."
+      );
+    }
+
+    if (
+      !Number.isInteger(item.priority_rank) ||
+      (item.priority_rank as number) < 1
+    ) {
+      throw new Error(
+        "A result contains an invalid priority rank."
+      );
+    }
+
+    if (
+      typeof item.quality_status !== "string" ||
+      !ALLOWED_QUALITY_STATUSES.has(item.quality_status)
+    ) {
+      throw new Error(
+        "A result contains an unsupported quality status."
+      );
+    }
+
+    const resultId = item.result_id as string;
+
+    if (seenIds.has(resultId)) {
+      throw new Error(
+        "Duplicate result IDs were found."
+      );
+    }
+
+    seenIds.add(resultId);
+
+    if (
+      !Array.isArray(item.evidence) ||
+      item.evidence.length === 0
+    ) {
+      throw new Error(
+        "A result is missing its supporting evidence."
+      );
+    }
+
+    for (const evidence of item.evidence) {
+      if (
+        !isRecord(evidence) ||
+        typeof evidence.factor !== "string" ||
+        evidence.factor.trim() === "" ||
+        !("value" in evidence)
+      ) {
+        throw new Error(
+          "A result contains an invalid evidence item."
+        );
+      }
+
+      const evidenceValue = evidence.value;
+
+      if (
+        evidenceValue !== null &&
+        typeof evidenceValue !== "string" &&
+        typeof evidenceValue !== "number" &&
+        typeof evidenceValue !== "boolean"
+      ) {
+        throw new Error(
+          "An evidence item contains an unsupported value."
+        );
+      }
+
+      if (
+        typeof evidenceValue === "number" &&
+        !Number.isFinite(evidenceValue)
+      ) {
+        throw new Error(
+          "An evidence item contains a non-finite number."
+        );
+      }
+    }
+  }
+
+  return payload as unknown as IntelligenceResponse;
+}
+
+function formatValue(
+  value: string | number | boolean | null
+) {
   if (value === null) return "—";
 
   if (typeof value === "number") {
@@ -19058,7 +19743,12 @@ function formatValue(value: string | number | boolean | null) {
 }
 
 export default function DataIntelligencePage() {
-  const [data, setData] = useState<IntelligenceResponse | null>(null);
+  const [data, setData] =
+    useState<IntelligenceResponse | null>(null);
+
+  const [summary, setSummary] =
+    useState<IntelligenceSummary | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pollutant, setPollutant] = useState("all");
@@ -19073,32 +19763,64 @@ export default function DataIntelligencePage() {
         setLoading(true);
         setError("");
 
-        
-  const response = await fetch(
-    `${DATA_INTELLIGENCE_API_BASE}/api/intelligence/results`,
-    { cache: "no-store" }
-  );
+        const [resultsResponse, summaryResponse] =
+          await Promise.all([
+            fetch(
+              `${DATA_INTELLIGENCE_API_BASE}/api/intelligence/results`,
+              {
+                cache: "no-store",
+                signal: controller.signal,
+              }
+            ),
+            fetch(
+              `${DATA_INTELLIGENCE_API_BASE}/api/intelligence/summary`,
+              {
+                cache: "no-store",
+                signal: controller.signal,
+              }
+            ),
+          ]);
 
-        if (!response.ok) {
-          throw new Error(`The API returned HTTP ${response.status}.`);
+        if (!resultsResponse.ok) {
+          throw new Error(
+            `The results API returned HTTP ${resultsResponse.status}.`
+          );
         }
 
-        const payload: unknown = await response.json();
-
-        if (
-          !payload ||
-          typeof payload !== "object" ||
-          !("results" in payload) ||
-          !Array.isArray(payload.results)
-        ) {
-          throw new Error("The API response has an unexpected format.");
+        if (!summaryResponse.ok) {
+          throw new Error(
+            `The summary API returned HTTP ${summaryResponse.status}.`
+          );
         }
 
-        setData(payload as IntelligenceResponse);
+        const [
+          resultsPayload,
+          summaryPayload,
+        ]: [unknown, unknown] = await Promise.all([
+          resultsResponse.json(),
+          summaryResponse.json(),
+        ]);
+
+        const validatedSummary =
+          validateSummary(summaryPayload);
+
+        const validatedResults = validateResults(
+          resultsPayload,
+          validatedSummary
+        );
+
+        setSummary(validatedSummary);
+        setData(validatedResults);
       } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") {
+        if (
+          err instanceof Error &&
+          err.name === "AbortError"
+        ) {
           return;
         }
+
+        setData(null);
+        setSummary(null);
 
         setError(
           err instanceof Error
@@ -19118,21 +19840,27 @@ export default function DataIntelligencePage() {
   }, []);
 
   const allResults = useMemo(
-  () => data?.results ?? [],
-  [data]
-);
+    () => data?.results ?? [],
+    [data]
+  );
 
   const cities = useMemo(
     () =>
-      [...new Set(allResults.map((result) => result.entity_name))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
+      [
+        ...new Set(
+          allResults.map((result) => result.entity_name)
+        ),
+      ].sort((a, b) => a.localeCompare(b)),
     [allResults]
   );
 
   const pollutants = useMemo(
     () =>
-      [...new Set(allResults.map((result) => result.pollutant))].sort(),
+      [
+        ...new Set(
+          allResults.map((result) => result.pollutant)
+        ),
+      ].sort(),
     [allResults]
   );
 
@@ -19142,10 +19870,13 @@ export default function DataIntelligencePage() {
     return allResults
       .filter(
         (result) =>
-          pollutant === "all" || result.pollutant === pollutant
+          pollutant === "all" ||
+          result.pollutant === pollutant
       )
       .filter(
-        (result) => city === "all" || result.entity_name === city
+        (result) =>
+          city === "all" ||
+          result.entity_name === city
       )
       .filter(
         (result) =>
@@ -19155,7 +19886,9 @@ export default function DataIntelligencePage() {
             result.pollutant,
             result.finding,
             result.result_id,
-          ].some((value) => value.toLowerCase().includes(term))
+          ].some((value) =>
+            value.toLowerCase().includes(term)
+          )
       )
       .sort(
         (a, b) =>
@@ -19168,6 +19901,18 @@ export default function DataIntelligencePage() {
     <main className="min-h-screen bg-[#030712] px-4 py-8 text-slate-100 sm:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="border-b border-slate-800 pb-6">
+          <nav
+            aria-label="Primary navigation"
+            className="mb-5"
+          >
+            <Link
+              href="/"
+              className="text-sm text-sky-300 hover:text-sky-200"
+            >
+              ← Operational View
+            </Link>
+          </nav>
+
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
             INFOCREON / AETHER PULSE
           </p>
@@ -19177,8 +19922,9 @@ export default function DataIntelligencePage() {
           </h1>
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-            Explore the approved Phase 3 comparative rankings, inspect
-            supporting evidence, and review the limitations of each result.
+            Explore the approved Phase 3 comparative rankings,
+            inspect supporting evidence, and review the
+            limitations of each result.
           </p>
         </header>
 
@@ -19191,16 +19937,20 @@ export default function DataIntelligencePage() {
           </p>
 
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            These results are descriptive comparisons from a synthetic
-            sample. They are not verified real-world measurements,
-            regulatory assessments, health-risk assessments, or predictions.
-            Rankings should not be interpreted as evidence of safety or
-            danger.
+            These results are descriptive comparisons from a
+            synthetic sample. They are not verified real-world
+            measurements, regulatory assessments, health-risk
+            assessments, or predictions. Rankings should not be
+            interpreted as evidence of safety or danger.
           </p>
         </section>
 
         {loading && (
-          <div className="rounded-xl border border-slate-800 p-8 text-slate-300">
+          <div
+            className="rounded-xl border border-slate-800 p-8 text-slate-300"
+            role="status"
+            aria-live="polite"
+          >
             Loading approved intelligence results…
           </div>
         )}
@@ -19214,10 +19964,13 @@ export default function DataIntelligencePage() {
               Results could not be loaded
             </h2>
 
-            <p className="mt-2 text-sm text-slate-300">{error}</p>
+            <p className="mt-2 text-sm text-slate-300">
+              {error}
+            </p>
 
             <p className="mt-2 text-sm text-slate-400">
-              Check that the backend is running and the API URL is correct.
+              Check that the backend is running, both API
+              endpoints are available, and the API URL is correct.
             </p>
 
             <button
@@ -19229,13 +19982,22 @@ export default function DataIntelligencePage() {
           </section>
         )}
 
-        {!loading && !error && data && (
+        {!loading && !error && data && summary && (
           <>
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { label: "Published results", value: data.count },
-                { label: "Cities", value: cities.length },
-                { label: "Pollutants", value: pollutants.length },
+                {
+                  label: "Published results",
+                  value: data.count,
+                },
+                {
+                  label: "Cities",
+                  value: cities.length,
+                },
+                {
+                  label: "Pollutants",
+                  value: pollutants.length,
+                },
                 {
                   label: "Quality status",
                   value: data.metadata.quality_status,
@@ -19245,7 +20007,9 @@ export default function DataIntelligencePage() {
                   key={item.label}
                   className="rounded-xl border border-slate-800 bg-[#0B1117] p-5"
                 >
-                  <p className="text-sm text-slate-400">{item.label}</p>
+                  <p className="text-sm text-slate-400">
+                    {item.label}
+                  </p>
 
                   <p className="mt-3 text-2xl font-semibold text-sky-300">
                     {item.value}
@@ -19255,17 +20019,138 @@ export default function DataIntelligencePage() {
             </section>
 
             <section className="rounded-xl border border-slate-800 bg-[#0B1117] p-5">
-              <h2 className="text-lg font-semibold">Explore results</h2>
+              <h2 className="text-lg font-semibold">
+                Methodology and data provenance
+              </h2>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm text-slate-400">
+                    Approved analytical track
+                  </p>
+                  <p className="mt-1 text-sm text-slate-100">
+                    {summary.approved_track}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-400">
+                    Validation result
+                  </p>
+                  <p className="mt-1 font-semibold text-emerald-300">
+                    {summary.validation_result}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-400">
+                    Data version
+                  </p>
+                  <p className="mt-1 text-sm text-slate-100">
+                    {summary.data_version}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-400">
+                    Method version
+                  </p>
+                  <p className="mt-1 text-sm text-slate-100">
+                    {summary.method_version}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-400">
+                    Results generated (UTC)
+                  </p>
+                  <p className="mt-1 break-words text-sm text-slate-100">
+                    <time dateTime={summary.generated_at}>
+                      {new Date(
+                        summary.generated_at
+                      ).toISOString()}
+                    </time>
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-400">
+                    Data freshness
+                  </p>
+
+                  <p
+                    className={`mt-1 font-semibold ${
+                      data.metadata.freshness_status === "STALE"
+                        ? "text-amber-300"
+                        : "text-emerald-300"
+                    }`}
+                  >
+                    {data.metadata.freshness_status}
+                  </p>
+
+                  <p className="mt-1 text-xs text-slate-400">
+                    Age:{" "}
+                    {data.metadata.freshness_age_hours.toFixed(1)}{" "}
+                    hours · Threshold:{" "}
+                    {data.metadata.stale_after_hours} hours
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 border-t border-slate-800 pt-4">
+                <h3 className="text-sm font-semibold text-slate-200">
+                  Primary analytical question
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  {summary.primary_analytical_question}
+                </p>
+
+                <h3 className="mt-4 text-sm font-semibold text-slate-200">
+                  Decision supported
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  {summary.decision_to_be_supported}
+                </p>
+              </div>
+
+              <details className="mt-5 border-t border-slate-800 pt-4">
+                <summary className="cursor-pointer text-sm font-medium text-sky-300">
+                  Important analytical limitations
+                </summary>
+
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-400">
+                  {summary.important_limitations.map(
+                    (limitation, index) => (
+                      <li key={`${index}-${limitation}`}>
+                        {limitation}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </details>
+            </section>
+
+            <section className="rounded-xl border border-slate-800 bg-[#0B1117] p-5">
+              <h2 className="text-lg font-semibold">
+                Explore results
+              </h2>
 
               <div className="mt-4 grid gap-4 md:grid-cols-3">
                 <label className="text-sm text-slate-300">
                   Pollutant
                   <select
                     value={pollutant}
-                    onChange={(event) => setPollutant(event.target.value)}
+                    onChange={(event) =>
+                      setPollutant(event.target.value)
+                    }
                     className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
                   >
-                    <option value="all">All pollutants</option>
+                    <option value="all">
+                      All pollutants
+                    </option>
+
                     {pollutants.map((value) => (
                       <option key={value} value={value}>
                         {pollutantNames[value] ?? value}
@@ -19278,10 +20163,13 @@ export default function DataIntelligencePage() {
                   City
                   <select
                     value={city}
-                    onChange={(event) => setCity(event.target.value)}
+                    onChange={(event) =>
+                      setCity(event.target.value)
+                    }
                     className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
                   >
                     <option value="all">All cities</option>
+
                     {cities.map((value) => (
                       <option key={value} value={value}>
                         {value}
@@ -19294,15 +20182,21 @@ export default function DataIntelligencePage() {
                   Search
                   <input
                     value={search}
-                    onChange={(event) => setSearch(event.target.value)}
+                    onChange={(event) =>
+                      setSearch(event.target.value)
+                    }
                     placeholder="City, pollutant, finding…"
                     className="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 placeholder:text-slate-500"
                   />
                 </label>
               </div>
 
-              <p className="mt-4 text-xs text-slate-400" aria-live="polite">
-                Showing {filteredResults.length} of {allResults.length} results
+              <p
+                className="mt-4 text-xs text-slate-400"
+                aria-live="polite"
+              >
+                Showing {filteredResults.length} of{" "}
+                {allResults.length} results
               </p>
             </section>
 
@@ -19315,7 +20209,8 @@ export default function DataIntelligencePage() {
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                       <p className="text-xs uppercase tracking-wider text-sky-400">
-                        {pollutantNames[result.pollutant] ?? result.pollutant}
+                        {pollutantNames[result.pollutant] ??
+                          result.pollutant}
                         {" · "}Rank {result.priority_rank}
                       </p>
 
@@ -19364,50 +20259,74 @@ export default function DataIntelligencePage() {
                             <th className="py-2 pr-4 font-medium">
                               Evidence
                             </th>
-                            <th className="py-2 font-medium">Value</th>
+                            <th className="py-2 font-medium">
+                              Value
+                            </th>
                           </tr>
                         </thead>
 
                         <tbody>
-                          {result.evidence.map((item, index) => (
-                            <tr
-                              key={`${result.result_id}-${item.factor}-${index}`}
-                              className="border-t border-slate-800"
-                            >
-                              <td className="py-2 pr-4 text-slate-300">
-                                {item.factor.replaceAll("_", " ")}
-                              </td>
+                          {result.evidence.map(
+                            (item, index) => (
+                              <tr
+                                key={`${result.result_id}-${item.factor}-${index}`}
+                                className="border-t border-slate-800"
+                              >
+                                <td className="py-2 pr-4 text-slate-300">
+                                  {item.factor.replaceAll(
+                                    "_",
+                                    " "
+                                  )}
+                                </td>
 
-                              <td className="py-2 text-slate-100">
-                                {formatValue(item.value)}
-                              </td>
-                            </tr>
-                          ))}
+                                <td className="py-2 text-slate-100">
+                                  {formatValue(item.value)}
+                                </td>
+                              </tr>
+                            )
+                          )}
                         </tbody>
                       </table>
                     </div>
 
                     <div className="mt-4 grid gap-3 text-sm text-slate-400 sm:grid-cols-2">
                       <p>
-                        <span className="text-slate-200">Method:</span>{" "}
+                        <span className="text-slate-200">
+                          Method:
+                        </span>{" "}
                         {result.method_version}
                       </p>
 
                       <p>
-                        <span className="text-slate-200">Data version:</span>{" "}
+                        <span className="text-slate-200">
+                          Data version:
+                        </span>{" "}
                         {result.data_version}
+                      </p>
+
+                      <p>
+                        <span className="text-slate-200">
+                          Generated at (UTC):
+                        </span>{" "}
+                        {new Date(
+                          result.generated_at
+                        ).toISOString()}
                       </p>
 
                       {result.period_start && (
                         <p>
-                          <span className="text-slate-200">Period start:</span>{" "}
+                          <span className="text-slate-200">
+                            Period start:
+                          </span>{" "}
                           {result.period_start}
                         </p>
                       )}
 
                       {result.period_end && (
                         <p>
-                          <span className="text-slate-200">Period end:</span>{" "}
+                          <span className="text-slate-200">
+                            Period end:
+                          </span>{" "}
                           {result.period_end}
                         </p>
                       )}
@@ -19422,17 +20341,17 @@ export default function DataIntelligencePage() {
 
               {filteredResults.length === 0 && (
                 <div className="rounded-xl border border-slate-800 p-8 text-center text-slate-400">
-                  No results match these filters. Try a different city,
-                  pollutant, or search term.
+                  No results match these filters. Try a different
+                  city, pollutant, or search term.
                 </div>
               )}
             </section>
 
             <footer className="border-t border-slate-800 py-5 text-xs leading-5 text-slate-500">
-              Data version: {data.metadata.data_version} · Method version:{" "}
-              {data.metadata.method_version}. Rankings describe this
-              synthetic sample only and must not be treated as regulatory or
-              health advice.
+              Data version: {data.metadata.data_version} ·
+              Method version: {data.metadata.method_version}.
+              Rankings describe this synthetic sample only and
+              must not be treated as regulatory or health advice.
             </footer>
           </>
         )}
@@ -19453,7 +20372,10 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from app.services.intelligence import get_intelligence_results
+from app.services.intelligence import (
+    get_intelligence_results,
+    get_intelligence_summary,
+)
 load_dotenv()
 
 app = FastAPI(title="Air Quality Intelligence API")
@@ -20610,148 +21532,70 @@ async def population(
 async def intelligence_results():
     """Return the approved comparative intelligence results."""
     return get_intelligence_results()
+
 @app.get("/api/intelligence/summary")
 async def intelligence_summary():
-    """Return the generated intelligence summary."""
-    summary_path = (
-        Path(__file__).resolve().parents[2]
-        / "data-science"
-        / "outputs"
-        / "intelligence_summary.json"
-    )
-
-    try:
-        with summary_path.open("r", encoding="utf-8") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=500,
-            detail="Intelligence summary file is missing.",
-        )
-    except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=500,
-            detail="Intelligence summary file contains invalid JSON.",
-        )
+    """Return the validated intelligence summary."""
+    return get_intelligence_summary()
 </file>
 
 <file path="data-science/outputs/intelligence_summary.json">
 {
-  "summary_schema_version": "1.0.0",
-  "generated_at_utc": "2026-10-11T02:03:52.795767+00:00",
-  "source": {
-    "file": "data-science/outputs/intelligence_results.json",
-    "source_format": "JSON array of result records"
-  },
-  "versions": {
-    "data_versions": [
-      "phase3-v1.1"
-    ],
-    "method_versions": [
-      "track-a-comparative-v1.0.0"
-    ],
-    "quality_statuses": [
-      "conditional"
-    ]
-  },
-  "quality": {
-    "is_synthetic_values": [
-      true
-    ],
-    "record_count": 32,
-    "contains_conditional_quality": true
-  },
-  "overview": {
-    "result_count": 32,
-    "entity_count": 8,
-    "entities": [
-      "Ahmedabad",
-      "Bengaluru",
-      "Chennai",
-      "Delhi",
-      "Hyderabad",
-      "Kolkata",
-      "Mumbai",
-      "Pune"
-    ],
-    "pollutant_count": 4,
-    "pollutants": [
-      "no2",
-      "o3",
-      "pm10",
-      "pm2.5"
-    ],
-    "result_type_counts": {
-      "ranking": 32
-    },
-    "result_category_counts": {
-      "above_baseline": 16,
-      "below_baseline": 16
-    }
-  },
-  "priority_examples": [
+  "project_id": "POC-32",
+  "project_title": "Infocreon Aether Pulse Air Quality Heatmap",
+  "approved_track": "Track A — Comparative Intelligence",
+  "primary_analytical_question": "Within each pollutant, how do sampled city measurements compare with each other and with that pollutant's overall mean?",
+  "decision_to_be_supported": "Explore descriptive differences among synthetic city-pollutant groups; no operational or public-health decision is supported.",
+  "data_version": "phase3-v1.1",
+  "method_version": "track-a-comparative-v1.0.0",
+  "result_count": 32,
+  "key_findings": [
     {
-      "result_id": "RES-0001",
-      "result_type": "ranking",
-      "entity_name": "Delhi",
       "pollutant": "no2",
-      "metric_name": "no2_mean",
-      "result_value": 52.89333333333334,
-      "result_unit": "µg/m³",
-      "priority_rank": 1,
-      "finding": "Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.",
-      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 52.89333333333334,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 23.116666666666664,
+      "pollutant_baseline_mean": 36.2075,
+      "finding_scope": "Synthetic descriptive comparison only"
     },
     {
-      "result_id": "RES-0009",
-      "result_type": "ranking",
-      "entity_name": "Delhi",
       "pollutant": "o3",
-      "metric_name": "o3_mean",
-      "result_value": 90.46666666666665,
-      "result_unit": "µg/m³",
-      "priority_rank": 1,
-      "finding": "Delhi ranks 1 for o3 by sampled mean; its mean is 28.1696 µg/m³ relative to the pollutant-wide sample mean baseline.",
-      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 90.46666666666665,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 42.026666666666664,
+      "pollutant_baseline_mean": 62.29708333333334,
+      "finding_scope": "Synthetic descriptive comparison only"
     },
     {
-      "result_id": "RES-0017",
-      "result_type": "ranking",
-      "entity_name": "Delhi",
       "pollutant": "pm10",
-      "metric_name": "pm10_mean",
-      "result_value": 118.64333333333333,
-      "result_unit": "µg/m³",
-      "priority_rank": 1,
-      "finding": "Delhi ranks 1 for pm10 by sampled mean; its mean is 36.7804 µg/m³ relative to the pollutant-wide sample mean baseline.",
-      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 118.64333333333333,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 56.20666666666667,
+      "pollutant_baseline_mean": 81.86291666666666,
+      "finding_scope": "Synthetic descriptive comparison only"
     },
     {
-      "result_id": "RES-0025",
-      "result_type": "ranking",
-      "entity_name": "Delhi",
       "pollutant": "pm2.5",
-      "metric_name": "pm2.5_mean",
-      "result_value": 65.41666666666667,
-      "result_unit": "µg/m³",
-      "priority_rank": 1,
-      "finding": "Delhi ranks 1 for pm2.5 by sampled mean; its mean is 20.5125 µg/m³ relative to the pollutant-wide sample mean baseline.",
-      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
-    },
-    {
-      "result_id": "RES-0002",
-      "result_type": "ranking",
-      "entity_name": "Ahmedabad",
-      "pollutant": "no2",
-      "metric_name": "no2_mean",
-      "result_value": 41.52,
-      "result_unit": "µg/m³",
-      "priority_rank": 2,
-      "finding": "Ahmedabad ranks 2 for no2 by sampled mean; its mean is 5.3125 µg/m³ relative to the pollutant-wide sample mean baseline.",
-      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 65.41666666666667,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 29.42,
+      "pollutant_baseline_mean": 44.90416666666667,
+      "finding_scope": "Synthetic descriptive comparison only"
     }
   ],
-  "limitations": "This summary is derived from the published intelligence result records. Where results are synthetic, they are descriptive comparisons and are not verified real-world measurements, regulatory assessments, health-risk assessments, or predictions."
+  "priority_items": [],
+  "validation_result": "PASS",
+  "important_limitations": [
+    "All observations are synthetic.",
+    "Only three timestamps across one calendar date are represented in the Post #2 evidence.",
+    "Rankings are descriptive and do not establish real-world air-quality conditions or health risk.",
+    "The pollutant-wide mean is a baseline, not a regulatory threshold."
+  ],
+  "generated_at": "2026-10-11T08:55:58.910438+00:00"
 }
 </file>
 
