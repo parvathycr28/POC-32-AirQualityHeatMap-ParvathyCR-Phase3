@@ -13,9 +13,9 @@ from app.services.intelligence import (
     get_intelligence_summary,
 )
 load_dotenv()
-
+from app.assistant.router import router as assistant_router
 app = FastAPI(title="Air Quality Intelligence API")
-
+app.include_router(assistant_router)
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
     "http://localhost:3000",

@@ -42,12 +42,26 @@ The content is organized as follows:
 <directory_structure>
 architecture/
   ARCHITECTURE.md
+assistant/
+  config/
+    intents.json
+    settings.py
+  core/
+    assistant_service.py
+    evidence_builder.py
+    intent_router.py
+    response_validator.py
+  queries/
+    intelligence_queries.py
 backend/
   app/
     adapters/
       __init__.py
       openaq.py
       worldpop.py
+    assistant/
+      __init__.py
+      router.py
     models/
       __init__.py
       schemas.py
@@ -117,6 +131,11 @@ docs/
   ANALYTICAL_READINESS_REPORT.md
   ANALYTICAL_TRACK_EXECUTION_PLAN.md
   ANALYTICAL_VALIDATION_REPORT.md
+  ASSISTANT_ARCHITECTURE.md
+  ASSISTANT_GROUNDING_VALIDATION.md
+  ASSISTANT_QUERY_CONTRACT.md
+  ASSISTANT_SAFETY_AND_SCOPE.md
+  ASSISTANT_SUITABILITY_ASSESSMENT.md
   CANONICAL_DATA_MAPPING.md
   CANONICAL_DATA_PACKAGE_VALIDATION.md
   CANONICAL_DATA_PROFILE.md
@@ -126,15 +145,19 @@ docs/
   DATA_INTELLIGENCE_UI_SPEC.md
   DATA_QUALITY_ASSESSMENT.md
   DATA_SOURCE_INVENTORY.md
+  GROUNDED_RESPONSE_CONTRACT.md
   INTELLIGENCE_API_CONTRACT.md
   INTELLIGENCE_INTEGRATION_MAPPING.md
   INTELLIGENCE_OUTPUT_CONTRACT.md
   OPERATIONAL_PAGE_REGRESSION_REPORT.md
   REPRESENTATIVENESS_ASSESSMENT.md
   SAMPLING_AND_REDUCTION_REPORT.md
+  SUPPORTED_QUESTION_CATALOG.md
   WEAK_CASE_AND_LIMITATION_REVIEW.md
 frontend/
   app/
+    assistant/
+      page.tsx
     components/
       air-quality-dashboard.tsx
       air-quality-map.tsx
@@ -146,6 +169,7 @@ frontend/
       page.tsx
     lib/
       api.ts
+      assistant-api.ts
     favicon.ico
     globals.css
     layout.tsx
@@ -184,6 +208,10 @@ selenium-test/
     Test_Report.txt
   requirements-selenium.txt
   test_poc.py
+tests/
+  assistant/
+    test_assistant_service.py
+    test_grounding.py
 .gitignore
 docker-compose.yml
 Dockerfile.intelligence
@@ -194,6 +222,2382 @@ VAR_REPORT
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="assistant/config/intents.json">
+{
+  "catalog_version": "1.0.0",
+  "mode": "deterministic_guided",
+  "approved_track": "A Comparative Intelligence",
+  "intents": [
+    {
+      "name": "summary",
+      "enabled": true,
+      "required_parameters": []
+    },
+    {
+      "name": "highest_city",
+      "enabled": true,
+      "required_parameters": ["pollutant"]
+    },
+    {
+      "name": "compare_cities",
+      "enabled": true,
+      "required_parameters": ["pollutant", "city_a", "city_b"]
+    },
+    {
+      "name": "result_evidence",
+      "enabled": true,
+      "required_parameters": ["result_id"]
+    },
+    {
+      "name": "methodology",
+      "enabled": true,
+      "required_parameters": []
+    }
+  ]
+}
+</file>
+
+<file path="assistant/config/settings.py">
+from pathlib import Path
+import os
+
+# Resolve the repository root from this file:
+# assistant/config/settings.py -> repository root
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+RESULTS_FILE = Path(
+    os.getenv(
+        "INTELLIGENCE_RESULTS_FILE",
+        PROJECT_ROOT / "data-science" / "outputs" / "intelligence_results.json",
+    )
+)
+
+SUMMARY_FILE = Path(
+    os.getenv(
+        "INTELLIGENCE_SUMMARY_FILE",
+        PROJECT_ROOT / "data-science" / "outputs" / "intelligence_summary.json",
+    )
+)
+
+VALIDATION_FILE = Path(
+    os.getenv(
+        "INTELLIGENCE_VALIDATION_FILE",
+        PROJECT_ROOT / "data-science" / "outputs" / "validation_metrics.json",
+    )
+)
+
+MAX_QUESTION_LENGTH = 500
+MAX_SUMMARY_RESULTS = 10
+</file>
+
+<file path="assistant/core/assistant_service.py">
+"""Deterministic, evidence-grounded assistant service. No LLM is used."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from assistant.config.settings import RESULTS_FILE, SUMMARY_FILE
+from assistant.core.evidence_builder import build_evidence_package
+from assistant.core.intent_router import check_question, classify_question
+from assistant.core.response_validator import validate_evidence_package
+from assistant.queries.intelligence_queries import (
+    compare_cities,
+    get_highest_city,
+    get_result_evidence,
+    get_summary_results,
+    load_results,
+    load_summary,
+)
+
+
+SAFE_FALLBACK = (
+    "I can't answer that from the currently supported intelligence queries. "
+    "Try asking for a summary, the highest sampled mean for a pollutant, "
+    "a comparison of two cities, evidence for a result ID, or the method "
+    "and limitations."
+)
+
+
+def _normalise_router_result(
+    routed: Any,
+) -> tuple[str | None, dict[str, Any]]:
+    """Accept common router return shapes without guessing an intent."""
+    if isinstance(routed, str):
+        return routed, {}
+
+    if not isinstance(routed, dict):
+        return None, {}
+
+    intent = routed.get("intent") or routed.get("name")
+    parameters = routed.get("parameters") or routed.get("entities") or {}
+
+    if not isinstance(parameters, dict):
+        parameters = {}
+
+    return (str(intent) if intent else None), parameters
+
+
+def _normalise_intent(intent: str | None) -> str | None:
+    if not intent:
+        return None
+
+    value = intent.strip().lower().replace("-", "_").replace(" ", "_")
+
+    aliases = {
+        "summary": "summary",
+        "summarize": "summary",
+        "summarise": "summary",
+        "methodology": "methodology",
+        "method": "methodology",
+        "limitations": "methodology",
+        "result_evidence": "result_evidence",
+        "evidence": "result_evidence",
+        "highest_city": "highest_city",
+        "highest_sampled_mean": "highest_city",
+        "compare_cities": "compare_cities",
+        "city_comparison": "compare_cities",
+    }
+    return aliases.get(value)
+
+
+def _extract_parameter(
+    parameters: dict[str, Any],
+    *names: str,
+) -> Any:
+    """Read a parameter by case-insensitive key."""
+    lowered = {str(key).lower(): value for key, value in parameters.items()}
+
+    for name in names:
+        value = lowered.get(name.lower())
+        if value is not None and value != "":
+            return value
+
+    return None
+
+
+def _extract_result_id(
+    question: str,
+    parameters: dict[str, Any],
+) -> str | None:
+    value = _extract_parameter(parameters, "result_id", "id")
+    if isinstance(value, str) and value.strip():
+        return value.strip().upper()
+
+    # Fallback only for the explicit, allowlisted RES-<digits> identifier form.
+    import re
+
+    match = re.search(r"\bRES-\d+\b", question, flags=re.IGNORECASE)
+    return match.group(0).upper() if match else None
+
+
+def _extract_cities(
+    question: str,
+    parameters: dict[str, Any],
+) -> tuple[str | None, str | None]:
+    city_a = _extract_parameter(parameters, "city_a", "city1", "first_city")
+    city_b = _extract_parameter(parameters, "city_b", "city2", "second_city")
+
+    if city_a and city_b:
+        return str(city_a).strip().lower(), str(city_b).strip().lower()
+
+    # Conservative fallback for common natural-language comparisons.
+    # City names must still match entity_id values in approved results.
+    import re
+
+    match = re.search(
+        r"\bcompare\s+([a-z][a-z .'-]+?)\s+and\s+"
+        r"([a-z][a-z .'-]+?)\s+for\s+([a-z0-9.]+)",
+        question,
+        flags=re.IGNORECASE,
+    )
+    if match:
+        return match.group(1).strip().lower(), match.group(2).strip().lower()
+
+    return None, None
+
+
+def _extract_pollutant(
+    question: str,
+    parameters: dict[str, Any],
+) -> str | None:
+    value = _extract_parameter(parameters, "pollutant", "metric", "metric_name")
+
+    if value:
+        candidate = str(value).strip().lower()
+    else:
+        lowered_question = question.lower()
+        candidate = next(
+            (
+                pollutant
+                for pollutant in ("pm2.5", "pm25", "pm10", "no2", "o3")
+                if pollutant in lowered_question
+            ),
+            "",
+        )
+
+    aliases = {
+        "pm25": "pm2.5",
+        "pm2_5": "pm2.5",
+        "nitrogen dioxide": "no2",
+        "ozone": "o3",
+    }
+    candidate = aliases.get(candidate, candidate)
+
+    return candidate if candidate in {"no2", "o3", "pm10", "pm2.5"} else None
+
+
+def _public_record(record: dict[str, Any]) -> dict[str, Any]:
+    """Return approved fields only; never expose arbitrary source fields."""
+    allowed = (
+        "result_id",
+        "result_type",
+        "record_id",
+        "entity_id",
+        "group_key",
+        "period_start",
+        "period_end",
+        "metric_name",
+        "result_value",
+        "result_unit",
+        "result_category",
+        "priority_rank",
+        "finding",
+        "evidence",
+        "quality_status",
+        "limitation",
+        "data_version",
+        "method_version",
+        "generated_at",
+    )
+    return {key: record.get(key) for key in allowed if key in record}
+
+
+def _record_city(record: dict[str, Any]) -> str:
+    """Extract a displayable city label from approved record identifiers."""
+    entity = record.get("entity_id")
+
+    if not isinstance(entity, str) or not entity.strip():
+        return "Unknown city"
+
+    value = entity.strip()
+
+    # Support identifiers such as 'delhi' or 'delhi_no2'.
+    # Only strip a suffix when it matches a known pollutant.
+    lowered = value.lower()
+    for pollutant in ("pm2.5", "pm25", "pm10", "no2", "o3"):
+        suffix = f"_{pollutant}"
+        if lowered.endswith(suffix):
+            value = value[: -len(suffix)]
+            break
+
+    return value.replace("_", " ").replace("-", " ").title()
+
+
+def _format_record_value(record: dict[str, Any]) -> str | None:
+    """Format a stored numeric result without calculating a new metric."""
+    value = record.get("result_value")
+
+    if isinstance(value, bool) or value is None:
+        return None
+
+    if not isinstance(value, (int, float)):
+        return None
+
+    unit = record.get("result_unit")
+    formatted = f"{value:g}"
+
+    if isinstance(unit, str) and unit.strip():
+        formatted = f"{formatted} {unit.strip()}"
+
+    return formatted
+
+
+def _methodology_response(
+    results: list[dict[str, Any]],
+    summary: dict[str, Any] | None,
+) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
+    """Describe recorded method/version/limitations without inventing them."""
+    data_versions = sorted({
+        str(record["data_version"])
+        for record in results
+        if record.get("data_version") not in (None, "")
+    })
+    method_versions = sorted({
+        str(record["method_version"])
+        for record in results
+        if record.get("method_version") not in (None, "")
+    })
+
+    limitations: list[str] = []
+    quality_statuses = sorted({
+        str(record["quality_status"])
+        for record in results
+        if record.get("quality_status") not in (None, "")
+    })
+
+    for record in results:
+        limitation = record.get("limitation")
+        if isinstance(limitation, list):
+            limitations.extend(str(item) for item in limitation if item)
+        elif limitation:
+            limitations.append(str(limitation))
+
+    if isinstance(summary, dict):
+        for key in ("limitations", "limitation"):
+            value = summary.get(key)
+            if isinstance(value, list):
+                limitations.extend(str(item) for item in value if item)
+            elif value:
+                limitations.append(str(value))
+
+        metadata = summary.get("metadata")
+        if isinstance(metadata, dict):
+            for key in ("limitations", "limitation"):
+                value = metadata.get(key)
+                if isinstance(value, list):
+                    limitations.extend(str(item) for item in value if item)
+                elif value:
+                    limitations.append(str(value))
+
+    limitations = list(dict.fromkeys(limitations))
+
+    details = {
+        "data_versions": data_versions,
+        "method_versions": method_versions,
+        "quality_statuses": quality_statuses,
+        "limitations": limitations,
+    }
+
+    parts = [
+        "This assistant reads existing approved intelligence outputs. "
+        "It does not recompute the analytical track or generate predictions.",
+        "Recorded data version: "
+        + (", ".join(data_versions) if data_versions else "unavailable")
+        + ".",
+        "Recorded method version: "
+        + (", ".join(method_versions) if method_versions else "unavailable")
+        + ".",
+        "Recorded quality status: "
+        + (", ".join(quality_statuses) if quality_statuses else "unavailable")
+        + ".",
+        "Recorded limitations: "
+        + (
+            "; ".join(limitations)
+            if limitations
+            else "not provided in the loaded outputs"
+        )
+        + ".",
+    ]
+
+    return " ".join(parts), [], details
+
+
+def answer_question(
+    question: str,
+    *,
+    results_path: str | None = None,
+    summary_path: str | None = None,
+) -> dict[str, Any]:
+    """
+    Answer a supported question using existing approved output files.
+
+    Returns a JSON-serialisable response. Exceptions from malformed or
+    unavailable data are converted into a safe service error.
+    """
+    question = question.strip() if isinstance(question, str) else ""
+
+    if not question:
+        return {
+            "status": "refused",
+            "answer": "Please enter a question.",
+            "evidence": [],
+            "validation": {"valid": False, "errors": ["Question is empty."]},
+        }
+
+    if len(question) > 500:
+        return {
+            "status": "refused",
+            "answer": "Questions must be 500 characters or fewer.",
+            "evidence": [],
+            "validation": {"valid": False, "errors": ["Question is too long."]},
+        }
+
+    try:
+        safety_result = check_question(question)
+
+        if safety_result is False:
+            return {
+                "status": "refused",
+                "answer": SAFE_FALLBACK,
+                "evidence": [],
+                "validation": {
+                    "valid": False,
+                    "errors": ["Question failed the safety check."],
+                },
+            }
+
+        if isinstance(safety_result, dict) and not safety_result.get(
+            "allowed", safety_result.get("safe", True)
+        ):
+            return {
+                "status": "refused",
+                "answer": SAFE_FALLBACK,
+                "evidence": [],
+                "validation": {
+                    "valid": False,
+                    "errors": ["Question failed the safety check."],
+                },
+            }
+
+        routed = classify_question(question)
+        intent_raw, parameters = _normalise_router_result(routed)
+        intent = _normalise_intent(intent_raw)
+
+        if isinstance(routed, dict) and routed.get("supported") is False:
+            intent = None
+
+        if intent is None:
+            return {
+                "status": "unsupported",
+                "answer": SAFE_FALLBACK,
+                "evidence": [],
+                "validation": {
+                    "valid": False,
+                    "errors": ["Question did not match a supported intent."],
+                },
+            }
+
+        results = load_results(results_path or str(RESULTS_FILE))
+        summary = None
+
+        try:
+            summary = load_summary(summary_path or str(SUMMARY_FILE))
+        except (FileNotFoundError, ValueError, TypeError):
+            summary = None
+
+        selected: list[dict[str, Any]] = []
+        details: dict[str, Any] = {}
+        answer = ""
+
+        if intent == "summary":
+            selected = get_summary_results(results, limit=10)
+            answer = (
+                f"Retrieved {len(selected)} approved Track A result record(s). "
+                "The records below are existing outputs, not newly calculated findings."
+            )
+
+        elif intent == "highest_city":
+            pollutant = _extract_pollutant(question, parameters)
+
+            if not pollutant:
+                return {
+                    "status": "needs_clarification",
+                    "answer": (
+                        "Please specify one supported pollutant: NO2, O3, PM10, or PM2.5."
+                    ),
+                    "evidence": [],
+                    "validation": {
+                        "valid": False,
+                        "errors": ["Pollutant is missing or invalid."],
+                    },
+                }
+
+            result = get_highest_city(results, pollutant)
+
+            if result:
+                selected = [result]
+                city = _record_city(result)
+                value = _format_record_value(result)
+
+                if value is not None:
+                    answer = (
+                        f"{city} has the highest recorded sampled mean for "
+                        f"{pollutant.upper()} among the retrieved approved records: "
+                        f"{value}. This is an existing result, not a new calculation."
+                    )
+                else:
+                    answer = (
+                        f"The approved results identify {city} as having the "
+                        f"highest sampled mean for {pollutant.upper()} among the "
+                        "retrieved records. A numeric result value is not available "
+                        "in the approved record."
+                    )
+            else:
+                answer = (
+                    f"No approved result was found to identify the highest sampled "
+                    f"mean for {pollutant.upper()}."
+                )
+
+        elif intent == "compare_cities":
+            pollutant = _extract_pollutant(question, parameters)
+            city_a, city_b = _extract_cities(question, parameters)
+
+            if not pollutant or not city_a or not city_b:
+                return {
+                    "status": "needs_clarification",
+                    "answer": (
+                        "Please provide two city names and one pollutant "
+                        "(NO2, O3, PM10, or PM2.5)."
+                    ),
+                    "evidence": [],
+                    "validation": {
+                        "valid": False,
+                        "errors": ["Comparison parameters are incomplete."],
+                    },
+                }
+
+            selected = compare_cities(results, pollutant, city_a, city_b)
+
+            if len(selected) >= 2:
+                comparison_lines: list[str] = []
+
+                for record in selected:
+                    city = _record_city(record)
+                    value = _format_record_value(record)
+
+                    if value is not None:
+                        comparison_lines.append(f"{city}: {value}")
+                    else:
+                        comparison_lines.append(
+                            f"{city}: the numeric value is not available"
+                        )
+
+                answer = (
+                    f"Existing {pollutant.upper()} result records for "
+                    f"{city_a.title()} and {city_b.title()}: "
+                    + "; ".join(comparison_lines)
+                    + ". These are retrieved values; no new metric was calculated."
+                )
+            else:
+                answer = (
+                    f"Found {len(selected)} matching approved record(s) for "
+                    f"{city_a.title()} and {city_b.title()} for {pollutant.upper()}. "
+                    "The available evidence is shown below; no new metric was calculated."
+                )
+
+        elif intent == "result_evidence":
+            result_id = _extract_result_id(question, parameters)
+
+            if not result_id:
+                return {
+                    "status": "needs_clarification",
+                    "answer": "Please provide a result ID, such as RES-0001.",
+                    "evidence": [],
+                    "validation": {
+                        "valid": False,
+                        "errors": ["Result ID is missing."],
+                    },
+                }
+
+            result = get_result_evidence(results, result_id)
+
+            if result:
+                selected = [result]
+
+            answer = f"Retrieved the approved evidence record for {result_id}."
+
+        elif intent == "methodology":
+            answer, selected, details = _methodology_response(results, summary)
+
+            # Keep a source record for traceable provenance when available.
+            if not selected and results:
+                selected = results[:1]
+
+        else:
+            return {
+                "status": "unsupported",
+                "answer": SAFE_FALLBACK,
+                "evidence": [],
+                "validation": {
+                    "valid": False,
+                    "errors": ["Intent is not allowlisted."],
+                },
+            }
+
+        selected = [
+            record for record in selected
+            if isinstance(record, dict)
+        ]
+
+        if intent != "methodology" and not selected:
+            return {
+                "status": "not_found",
+                "answer": (
+                    "No matching approved result was found. I will not infer or "
+                    "invent a replacement result."
+                ),
+                "evidence": [],
+                "validation": {
+                    "valid": False,
+                    "errors": ["No matching records found."],
+                },
+            }
+
+        package = build_evidence_package(
+            question=question,
+            intent=intent,
+            result_records=selected,
+            summary=summary,
+            parameters=parameters,
+        )
+
+        validation = validate_evidence_package(package)
+
+        if not validation["valid"]:
+            return {
+                "status": "blocked",
+                "answer": (
+                    "I couldn't safely answer because the retrieved evidence "
+                    "did not pass grounding checks."
+                ),
+                "evidence": [],
+                "evidence_package": package,
+                "validation": validation,
+            }
+
+        if intent == "methodology" and not selected:
+            if (
+                not package["source"]["data_versions"]
+                or not package["source"]["method_versions"]
+            ):
+                return {
+                    "status": "blocked",
+                    "answer": (
+                        "I couldn't verify the recorded data and method versions, "
+                        "so I can't provide a grounded methodology response."
+                    ),
+                    "evidence": [],
+                    "evidence_package": package,
+                    "validation": {
+                        "valid": False,
+                        "errors": ["Methodology response lacks version metadata."],
+                    },
+                }
+
+        return {
+            "status": "ok",
+            "answer": answer,
+            "details": details,
+            "evidence": [_public_record(record) for record in selected],
+            "evidence_package": package,
+            "validation": validation,
+            "grounding": {
+                "mode": "deterministic",
+                "llm_used": False,
+                "generated_findings": False,
+                "source": "approved_intelligence_results",
+            },
+        }
+
+    except (FileNotFoundError, ValueError, TypeError, KeyError) as exc:
+        # Do not return filesystem paths, file contents, or configuration data.
+        return {
+            "status": "service_error",
+            "answer": (
+                "The approved intelligence data could not be safely loaded "
+                "or validated. Please check the configured output files and logs."
+            ),
+            "evidence": [],
+            "validation": {
+                "valid": False,
+                "errors": [
+                    f"Data loading or validation failed: {type(exc).__name__}"
+                ],
+            },
+        }
+</file>
+
+<file path="assistant/core/evidence_builder.py">
+"""Build traceable evidence packages from approved intelligence outputs."""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any
+
+
+def _first_available(*values: Any) -> Any:
+    """Return the first value that is not None or an empty string."""
+    for value in values:
+        if value is not None and value != "":
+            return value
+    return None
+
+
+def _find_metadata(
+    summary: dict[str, Any] | None,
+    *keys: str,
+) -> Any:
+    """Read metadata from the summary or its known metadata containers."""
+    if not isinstance(summary, dict):
+        return None
+
+    containers = [summary]
+
+    for container_key in ("metadata", "quality", "data_quality", "provenance"):
+        value = summary.get(container_key)
+        if isinstance(value, dict):
+            containers.append(value)
+
+    for container in containers:
+        for key in keys:
+            value = container.get(key)
+            if value is not None and value != "":
+                return value
+
+    return None
+
+
+def build_evidence_package(
+    *,
+    question: str,
+    intent: str,
+    result_records: list[dict[str, Any]],
+    summary: dict[str, Any] | None = None,
+    parameters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """
+    Create a structured evidence package for one supported assistant request.
+
+    Values are copied from approved output records or metadata.
+    This function does not compute new findings, rankings, or predictions.
+    """
+    parameters = parameters or {}
+    selected_records: list[dict[str, Any]] = []
+
+    for record in result_records:
+        if not isinstance(record, dict):
+            continue
+
+        selected_records.append({
+            "result_id": record.get("result_id"),
+            "result_type": record.get("result_type"),
+            "record_id": record.get("record_id"),
+            "entity_id": record.get("entity_id"),
+            "group_key": record.get("group_key"),
+            "period_start": record.get("period_start"),
+            "period_end": record.get("period_end"),
+            "metric_name": record.get("metric_name"),
+            "result_value": record.get("result_value"),
+            "result_unit": record.get("result_unit"),
+            "result_category": record.get("result_category"),
+            "priority_rank": record.get("priority_rank"),
+            "finding": record.get("finding"),
+            "evidence": record.get("evidence"),
+            "quality_status": record.get("quality_status"),
+            "limitation": record.get("limitation"),
+            "data_version": record.get("data_version"),
+            "method_version": record.get("method_version"),
+            "generated_at": record.get("generated_at"),
+        })
+
+    versions = sorted({
+        str(record["data_version"])
+        for record in selected_records
+        if record.get("data_version") not in (None, "")
+    })
+    method_versions = sorted({
+        str(record["method_version"])
+        for record in selected_records
+        if record.get("method_version") not in (None, "")
+    })
+
+    quality_values = [
+        record.get("quality_status")
+        for record in selected_records
+        if record.get("quality_status") not in (None, "")
+    ]
+
+    limitations = []
+    for record in selected_records:
+        value = record.get("limitation")
+        if value is None or value == "":
+            continue
+        if isinstance(value, list):
+            limitations.extend(str(item) for item in value if item)
+        else:
+            limitations.append(str(value))
+
+    summary_quality = _find_metadata(
+        summary,
+        "quality_status",
+        "validation_status",
+        "status",
+    )
+    summary_limitation = _find_metadata(
+        summary,
+        "limitation",
+        "limitations",
+    )
+
+    if isinstance(summary_limitation, list):
+        limitations.extend(str(item) for item in summary_limitation if item)
+    elif summary_limitation:
+        limitations.append(str(summary_limitation))
+
+    # Preserve order while removing duplicate limitation messages.
+    limitations = list(dict.fromkeys(limitations))
+
+    generated_at_values = [
+        record.get("generated_at")
+        for record in selected_records
+        if record.get("generated_at") not in (None, "")
+    ]
+
+    quality_status = (
+        quality_values[0]
+        if quality_values and len(set(map(str, quality_values))) == 1
+        else summary_quality
+    )
+
+    return {
+        "evidence_package_version": "grounded-evidence-v1.0.0",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "question": question,
+        "intent": intent,
+        "parameters": parameters,
+        "source": {
+            "name": "approved_intelligence_results",
+            "record_count": len(selected_records),
+            "result_ids": [
+                record["result_id"]
+                for record in selected_records
+                if record.get("result_id")
+            ],
+            "data_versions": versions,
+            "method_versions": method_versions,
+            "generated_at_values": generated_at_values,
+        },
+        "quality": {
+            "quality_status": quality_status,
+            "record_quality_statuses": quality_values,
+            "limitations": limitations,
+            "quality_metadata_available": bool(
+                quality_values or summary_quality
+            ),
+        },
+        "records": selected_records,
+        "checks": {
+            "has_records": bool(selected_records),
+            "has_result_ids": bool(
+                selected_records
+                and all(record.get("result_id") for record in selected_records)
+            ),
+            "has_data_version": bool(versions),
+            "has_method_version": bool(method_versions),
+            "has_metric_values": bool(
+                selected_records
+                and all(record.get("result_value") is not None
+                        for record in selected_records)
+            ),
+        },
+    }
+</file>
+
+<file path="assistant/core/intent_router.py">
+import re
+
+SUPPORTED_QUESTIONS = [
+    "Summarize the approved findings",
+    "Which city has the highest sampled mean for a pollutant?",
+    "Compare two cities for a pollutant",
+    "Show evidence for a result ID",
+    "Explain the method, versions, quality, and limitations",
+]
+
+UNSAFE_PATTERNS = [
+    r"\b(ignore|override|bypass)\b.{0,50}\b(instructions|security|rules|authorization)\b",
+    r"\b(show|reveal|print|dump)\b.{0,50}\b(secret|token|password|api key|system prompt|environment variables)\b",
+    r"\b(exec|execute|run)\b.{0,50}\b(sql|python|shell|command|code)\b",
+]
+
+
+def check_question(question: str) -> str | None:
+    if not isinstance(question, str):
+        return "Please enter a text question."
+
+    if not question.strip():
+        return "Please enter a question."
+
+    if len(question) > 500:
+        return "The question is too long. Limit it to 500 characters."
+
+    for pattern in UNSAFE_PATTERNS:
+        if re.search(pattern, question, flags=re.IGNORECASE):
+            return (
+                "I can't help with requests to bypass security, expose secrets, "
+                "or execute arbitrary commands."
+            )
+
+    return None
+
+
+def classify_question(question: str) -> dict:
+    """Recognize only supported questions and extract explicit parameters."""
+    text = re.sub(r"\s+", " ", question.strip())
+    text = re.sub(r"[.!]+$", "", text)
+
+    # Summary
+    if re.fullmatch(
+        r"(summari[sz]e (the )?(approved )?(track a )?(findings|results)"
+        r"|what are the approved findings|give me a summary"
+        r"|summari[sz]e the track a findings)",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return {"intent": "summary", "parameters": {}}
+
+    # Method, versions, quality, and limitations
+    if re.fullmatch(
+        r"(explain|show|tell me about|describe)"
+        r" (the )?(methodology|method|data version|method version|"
+        r"limitations|quality status|"
+        r"the method,? (data version|versions?)"
+        r"(,? quality)?(,? and limitations)?|"
+        r"the data version,? method version,? quality,? and limitations)",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return {"intent": "methodology", "parameters": {}}
+
+    # Evidence for an existing result ID
+    evidence_match = re.fullmatch(
+        r"(show|get|explain|retrieve) evidence (for )?"
+        r"(RES-[A-Za-z0-9_-]+)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if evidence_match:
+        return {
+            "intent": "result_evidence",
+            "parameters": {"result_id": evidence_match.group(3).upper()},
+        }
+
+    # Highest sampled mean
+    highest_match = re.fullmatch(
+        r"(which city has the highest sampled mean for|"
+        r"which city ranks first for|"
+        r"which city has the highest mean for)"
+        r" ([A-Za-z0-9. -]+)\??",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if highest_match:
+        return {
+            "intent": "highest_city",
+            "parameters": {"pollutant": highest_match.group(2).strip()},
+        }
+
+    # Compare two cities for a pollutant
+    compare_match = re.fullmatch(
+        r"compare ([A-Za-z .'-]+) and ([A-Za-z .'-]+) for "
+        r"([A-Za-z0-9. -]+)\??",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if compare_match:
+        return {
+            "intent": "compare_cities",
+            "parameters": {
+                "city_a": compare_match.group(1).strip(),
+                "city_b": compare_match.group(2).strip(),
+                "pollutant": compare_match.group(3).strip(),
+            },
+        }
+
+    return {
+        "intent": "unsupported",
+        "parameters": {},
+        "suggestions": SUPPORTED_QUESTIONS,
+    }
+</file>
+
+<file path="assistant/core/response_validator.py">
+"""Validate evidence packages before producing grounded answers."""
+
+from __future__ import annotations
+
+from typing import Any
+
+
+def validate_evidence_package(
+    package: dict[str, Any],
+    *,
+    require_quality_metadata: bool = False,
+) -> dict[str, Any]:
+    """Validate provenance, versions, and record integrity."""
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    records = package.get("records")
+    source = package.get("source")
+    checks = package.get("checks")
+    quality = package.get("quality")
+
+    if not isinstance(records, list) or not records:
+        errors.append("No approved evidence records were retrieved.")
+        records = []
+
+    if not isinstance(source, dict):
+        errors.append("Evidence source metadata is missing.")
+        source = {}
+
+    if not isinstance(checks, dict):
+        errors.append("Evidence checks are missing.")
+        checks = {}
+
+    if not isinstance(quality, dict):
+        errors.append("Quality metadata is missing.")
+        quality = {}
+
+    if not source.get("data_versions"):
+        errors.append("Data version is missing.")
+
+    if not source.get("method_versions"):
+        errors.append("Method version is missing.")
+
+    if len(source.get("data_versions", [])) > 1:
+        errors.append("Evidence contains inconsistent data versions.")
+
+    if len(source.get("method_versions", [])) > 1:
+        errors.append("Evidence contains inconsistent method versions.")
+
+    if records and not checks.get("has_result_ids"):
+        errors.append("One or more evidence records lack result IDs.")
+
+    if require_quality_metadata and not quality.get(
+        "quality_metadata_available"
+    ):
+        errors.append("Required quality metadata is unavailable.")
+    elif not quality.get("quality_metadata_available"):
+        warnings.append(
+            "Explicit quality status is unavailable; do not imply validation."
+        )
+
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            errors.append(f"Evidence record {index} is not an object.")
+            continue
+
+        if not record.get("result_id"):
+            errors.append(f"Evidence record {index} lacks a result ID.")
+
+        if record.get("result_value") is not None:
+            value = record["result_value"]
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                errors.append(
+                    f"Evidence record {index} has a non-numeric metric value."
+                )
+
+    return {
+        "valid": not errors,
+        "errors": errors,
+        "warnings": warnings,
+        "record_count": len(records),
+    }
+
+
+def validate_answer_records(
+    answer_records: list[dict[str, Any]],
+    evidence_package: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Ensure every answer record is backed by an exact source result ID.
+
+    This validates record provenance. It does not attempt to infer whether
+    arbitrary natural-language statements are logically entailed.
+    """
+    evidence_records = evidence_package.get("records", [])
+    allowed_ids = {
+        record.get("result_id")
+        for record in evidence_records
+        if isinstance(record, dict) and record.get("result_id")
+    }
+
+    errors: list[str] = []
+
+    if not isinstance(answer_records, list) or not answer_records:
+        errors.append("The answer contains no source-backed records.")
+        answer_records = []
+
+    for index, record in enumerate(answer_records):
+        if not isinstance(record, dict):
+            errors.append(f"Answer record {index} is not an object.")
+            continue
+
+        result_id = record.get("result_id")
+        if not result_id or result_id not in allowed_ids:
+            errors.append(
+                f"Answer record {index} is not backed by retrieved evidence."
+            )
+
+    return {
+        "valid": not errors,
+        "errors": errors,
+        "record_count": len(answer_records),
+    }
+</file>
+
+<file path="assistant/queries/intelligence_queries.py">
+import json
+from pathlib import Path
+from typing import Any
+
+
+class IntelligenceDataError(Exception):
+    """Raised when approved intelligence data cannot be used safely."""
+
+
+def _read_json(path: str | Path) -> Any:
+    """Read an approved JSON file and report safe, controlled errors."""
+    path = Path(path)
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError as exc:
+        raise IntelligenceDataError(
+            "Approved intelligence file is missing."
+        ) from exc
+    except (OSError, json.JSONDecodeError) as exc:
+        raise IntelligenceDataError(
+            "Approved intelligence file is unreadable or invalid JSON."
+        ) from exc
+
+
+def load_results(path: str | Path) -> list[dict[str, Any]]:
+    """Load and validate existing intelligence results without recalculating them."""
+    payload = _read_json(path)
+
+    if not isinstance(payload, list):
+        raise IntelligenceDataError(
+            "Intelligence results must be a JSON array."
+        )
+
+    if not all(isinstance(item, dict) for item in payload):
+        raise IntelligenceDataError(
+            "An intelligence result has an invalid structure."
+        )
+
+    required = {
+        "result_id",
+        "group_key",
+        "metric_name",
+        "result_value",
+        "data_version",
+        "method_version",
+    }
+
+    for item in payload:
+        if not required.issubset(item):
+            raise IntelligenceDataError(
+                "An intelligence result is missing required fields."
+            )
+
+    result_ids = [item["result_id"] for item in payload]
+
+    if len(result_ids) != len(set(result_ids)):
+        raise IntelligenceDataError("Duplicate result IDs detected.")
+
+    data_versions = {item["data_version"] for item in payload}
+    method_versions = {item["method_version"] for item in payload}
+
+    if len(data_versions) != 1 or len(method_versions) != 1:
+        raise IntelligenceDataError(
+            "Mixed data or method versions detected."
+        )
+
+    return payload
+
+
+def load_summary(path: str | Path) -> Any:
+    """Load the existing intelligence summary."""
+    return _read_json(path)
+
+
+def get_result_evidence(
+    results: list[dict],
+    result_id: str,
+) -> dict | None:
+    matches = [
+        item for item in results
+        if item.get("result_id") == result_id
+    ]
+    return matches[0] if len(matches) == 1 else None
+
+
+def get_highest_city(
+    results: list[dict],
+    pollutant: str,
+) -> dict | None:
+    """
+    Retrieve the existing rank-1 result for a pollutant.
+    Do not calculate a new ranking here.
+    """
+    normalized = pollutant.strip().casefold()
+
+    matches = [
+        item for item in results
+        if normalized in str(item.get("group_key", "")).casefold()
+        and item.get("priority_rank") == 1
+    ]
+
+    if len(matches) == 1:
+        return matches[0]
+
+    if len(matches) > 1:
+        raise IntelligenceDataError(
+            "Multiple rank-1 results match; a unique result "
+            "cannot be selected safely."
+        )
+
+    return None
+
+
+def compare_cities(
+    results: list[dict],
+    pollutant: str,
+    city_a: str,
+    city_b: str,
+) -> list[dict]:
+    normalized_pollutant = pollutant.strip().casefold()
+    normalized_cities = {
+        city_a.strip().casefold(),
+        city_b.strip().casefold(),
+    }
+
+    if len(normalized_cities) != 2:
+        raise ValueError("Choose two different cities.")
+
+    matches = [
+        item for item in results
+        if normalized_pollutant in str(item.get("group_key", "")).casefold()
+        and str(item.get("entity_id", "")).casefold() in normalized_cities
+    ]
+
+    found_cities = {
+        str(item.get("entity_id", "")).casefold()
+        for item in matches
+    }
+
+    if found_cities != normalized_cities:
+        return []
+
+    metrics = {item.get("metric_name") for item in matches}
+    units = {item.get("result_unit") for item in matches}
+
+    if len(metrics) != 1 or len(units) > 1:
+        raise IntelligenceDataError(
+            "The selected cities do not have safely comparable result metrics."
+        )
+
+    if len(matches) != 2:
+        raise IntelligenceDataError(
+            "Expected exactly two comparable city results."
+        )
+
+    return matches
+
+
+def get_summary_results(
+    results: list[dict],
+    limit: int = 10,
+) -> list[dict]:
+    if not 1 <= limit <= 10:
+        raise ValueError("Summary limit must be between 1 and 10.")
+
+    return results[:limit]
+</file>
+
+<file path="backend/app/assistant/__init__.py">
+"""Grounded data assistant API package."""
+</file>
+
+<file path="backend/app/assistant/router.py">
+"""FastAPI routes for the deterministic grounded data assistant."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+
+from assistant.core.assistant_service import answer_question
+
+
+router = APIRouter(prefix="/api/assistant", tags=["Grounded Data Assistant"])
+
+
+class AssistantQuestion(BaseModel):
+    question: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="A question supported by the approved intelligence outputs.",
+    )
+
+
+class AssistantResponse(BaseModel):
+    status: str
+    answer: str
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    validation: dict[str, Any] = Field(default_factory=dict)
+    details: dict[str, Any] | None = None
+    evidence_package: dict[str, Any] | None = None
+    grounding: dict[str, Any] | None = None
+
+
+@router.post("/ask", response_model=AssistantResponse)
+def ask_grounded_assistant(request: AssistantQuestion) -> dict[str, Any]:
+    """Answer one supported question using approved output files only."""
+    try:
+        return answer_question(request.question)
+    except Exception as exc:
+        # Keep internals and configuration out of the public error response.
+        # The application logging layer can record the exception separately.
+        raise HTTPException(
+            status_code=500,
+            detail="The grounded assistant could not process this request safely.",
+        ) from exc
+
+
+@router.get("/health")
+def assistant_health() -> dict[str, str]:
+    """Report route availability, not the validity of the data files."""
+    return {
+        "status": "available",
+        "mode": "deterministic",
+        "llm_used": "false",
+    }
+</file>
+
+<file path="docs/ASSISTANT_ARCHITECTURE.md">
+# Assistant Architecture
+
+## Existing Application
+
+- Operational View: existing application interface
+- Data Intelligence page: /data-intelligence
+- Intelligence API: /api/intelligence/results
+- Intelligence data: approved Track A JSON outputs
+
+## Assistant Mode
+
+Mode A — Deterministic Guided Assistant. No LLM is used.
+
+## Integration Route / Component
+
+Proposed backend route: POST /api/assistant/query
+
+Proposed frontend component: Data Intelligence assistant panel.
+
+These are new integration points and must be checked against existing routes before implementation.
+
+## Request Flow
+
+1. Validate request type and input length.
+2. Reject unsafe or out-of-scope requests.
+3. Match an allowlisted intent.
+4. Validate all required parameters.
+5. Execute the corresponding deterministic query.
+6. Build a structured evidence package.
+7. Validate evidence, versions, quality, and limitations.
+8. Return a templated response.
+
+## Query Catalog
+
+Only the five intents in SUPPORTED_QUESTION_CATALOG.md are permitted.
+
+## Deterministic Retrieval
+
+Read only the approved intelligence results and approved metadata. Never execute user-provided code, SQL, paths, or expressions.
+
+## Evidence Builder
+
+Every factual answer must include the result IDs or metadata references supporting it.
+
+## Optional LLM Explanation
+
+Not enabled. Reassess only if templates are demonstrably insufficient.
+
+## Response Validation
+
+Check that each answer is derived from retrieved evidence and that version and limitation metadata are present.
+
+## Authentication and Authorization
+
+Reuse existing application authorization. Do not create a public bypass route. Verify behavior in the current deployment before enabling the assistant.
+
+## Logging
+
+Do not log full conversation text by default. Log only minimal operational information needed for debugging, without secrets or sensitive user data.
+
+## Error Handling
+
+Return bounded validation errors for malformed, unsupported, missing-parameter, and unavailable-data cases. Never expose stack traces or secrets to clients.
+
+## Deployment
+
+Use the existing Data Intelligence backend deployment path after confirming container paths, ports, and environment variables.
+
+## Limitations
+
+Synthetic data, limited temporal coverage, and descriptive Track A methodology limit interpretation. No prediction, causal analysis, health-risk conclusion, or regulatory conclusion is supported.
+</file>
+
+<file path="docs/ASSISTANT_GROUNDING_VALIDATION.md">
+# Grounded Assistant — Grounding Validation
+
+## Purpose
+
+This document defines the grounding checks for the Phase 3
+deterministic data assistant.
+
+The assistant retrieves existing approved intelligence outputs. It must not
+recompute analytical-track methods or invent values, ranks, findings,
+predictions, or explanations that are not supported by retrieved evidence.
+
+## Approved source
+
+The primary runtime source is the configured
+`intelligence_results.json` output. The configured summary output may provide
+additional quality and limitation metadata.
+
+The assistant must not use arbitrary filesystem paths supplied by a user,
+arbitrary SQL, or unrestricted access to the canonical dataset.
+
+## Evidence package
+
+Each grounded answer should preserve, when available:
+
+- result ID and result type
+- entity ID and group key
+- metric name, value, and unit
+- priority rank and existing finding
+- existing evidence field
+- quality status and limitations
+- data version and method version
+- generated timestamp
+
+Unavailable metadata must remain unavailable. The assistant must not fill
+gaps with guessed values.
+
+## Validation rules
+
+1. A non-methodology answer must have at least one matching approved record.
+2. Evidence records must have result IDs.
+3. Data and method versions must be present.
+4. One evidence package must not silently mix data versions or method versions.
+5. Metric values must come from the source record.
+6. A requested result ID must match an existing result ID exactly.
+7. A city comparison must use matching records for the requested pollutant.
+8. Missing or ambiguous results must not be replaced with invented answers.
+9. Unsupported requests must be declined.
+10. Quality status and limitations must not be overstated.
+11. User input is treated as data, never as an instruction to bypass the
+    allowlist, disclose secrets, or change assistant policy.
+12. The response must not disclose filesystem paths, credentials, hidden
+    configuration, or internal exception details.
+
+## Important scope boundary
+
+The validator checks record structure, provenance, and version consistency.
+It does not prove that every arbitrary natural-language sentence is entailed
+by the evidence. For this reason, the initial implementation uses controlled
+response templates and source-backed record fields rather than unrestricted
+LLM-generated prose.
+
+## Current limitations
+
+- The initial implementation is deterministic and does not use an LLM.
+- It is not a predictive model.
+- It does not provide health or regulatory advice.
+- It does not establish causation.
+- Synthetic data must be identified as synthetic when that metadata is
+  available in the approved source.
+- Missing synthetic-data metadata must not be replaced by an unsupported claim.
+- API authentication and authorization must follow the existing application's
+  access-control requirements. This router does not independently implement
+  an identity system.
+
+## Release gate
+
+Do not mark the assistant ready for acceptance until:
+
+- unit tests pass
+- API tests pass
+- unsupported and unsafe requests are rejected
+- existing Operational View tests still pass
+- existing Data Intelligence endpoints still pass
+- the frontend integration is tested separately
+- source versions, limitations, and synthetic-data status are confirmed
+  against the actual generated outputs
+</file>
+
+<file path="docs/ASSISTANT_QUERY_CONTRACT.md">
+# Assistant Query Contract
+
+## Supported Intents
+
+- summary
+- highest_city
+- compare_cities
+- result_evidence
+- methodology
+
+## Allowed Parameters
+
+- pollutant: string, matched against available result group keys
+- city_a: string, matched against available result entities
+- city_b: string, matched against available result entities
+- result_id: string, exact known result ID
+
+## Parameter Types and Limits
+
+- Request text: maximum 500 characters
+- Pollutant: must match an available approved result
+- City: must match an available approved entity
+- Result ID: must match exactly one approved result
+- Comparison: both cities must have comparable results for the same pollutant and metric
+
+## Query Functions
+
+- get_summary()
+- get_highest_city(pollutant)
+- compare_cities(pollutant, city_a, city_b)
+- get_result_evidence(result_id)
+- get_methodology()
+
+## Approved Sources
+
+- data-science/outputs/intelligence_results.json
+- data-science/outputs/intelligence_summary.json
+- data-science/outputs/validation_metrics.json, where needed for validated metadata
+
+The runtime must verify that files exist, parse correctly, and contain consistent versions.
+
+## Evidence Fields
+
+Return available result_id, result_type, group_key, entity_id, metric_name, result_value, result_unit, priority_rank, finding, evidence, quality_status, limitation, method_version, data_version, and generated_at fields.
+
+## Result Limits
+
+- Summary: maximum 10 result references
+- Comparison: maximum 2 matched results
+- Evidence lookup: exactly 1 result
+- Highest city: exactly 1 selected result, with tied results handled explicitly if present
+
+## Error Responses
+
+- invalid_request
+- unsupported_question
+- missing_parameter
+- invalid_parameter
+- evidence_not_found
+- data_unavailable
+- version_mismatch
+
+## Out-of-Scope Handling
+
+Unsupported questions must receive a clear refusal and suggestions for supported questions.
+
+## Unsafe Handling
+
+Requests to reveal secrets, bypass controls, execute arbitrary code, or override safety rules must be rejected.
+
+## Version Behaviour
+
+Use versions from validated runtime data. If required versions conflict, block analytical answers and report a version mismatch. Never silently replace missing runtime metadata with hardcoded values.
+</file>
+
+<file path="docs/ASSISTANT_SAFETY_AND_SCOPE.md">
+# Assistant Safety and Scope
+
+## Approved Scope
+
+The assistant retrieves and explains approved Track A results using fixed response templates.
+
+## Unsupported Scope
+
+- Predictions, forecasts, or generated scores
+- Health-risk or regulatory conclusions
+- Causal interpretation
+- Arbitrary data access or computation
+- User-controlled SQL, code, or filesystem paths
+- Fabrication or alteration of analytical results
+
+## Prompt-Injection Controls
+
+No LLM is used in Mode A. Input is treated only as a candidate request for one allowlisted intent.
+
+Text found in source records is untrusted evidence. It cannot alter the approved intent catalog or query execution.
+
+## Data Exposure Controls
+
+Only approved output fields are returned. Do not expose environment variables, credentials, internal filesystem contents, hidden prompts, or unrelated records.
+
+## Authentication and Authorization
+
+Preserve the existing backend access controls. Do not make the assistant route less restrictive than the Data Intelligence data it exposes.
+
+## Sensitive Field Masking
+
+Do not return fields outside the approved response contract. Review any future fields before adding them to the evidence package.
+
+## Logging Policy
+
+Avoid logging complete user questions or complete result payloads unless a documented operational requirement justifies it.
+
+## Memory Policy
+
+Do not persist user questions, profiles, or conversational memory.
+
+## Result Limits
+
+Apply the result limits in ASSISTANT_QUERY_CONTRACT.md.
+
+## Failure Behaviour
+
+Fail closed when the data cannot be validated, a version mismatch occurs, or a request is unsupported. Do not fabricate a fallback answer.
+</file>
+
+<file path="docs/ASSISTANT_SUITABILITY_ASSESSMENT.md">
+# Assistant Suitability Assessment
+
+## Target User
+
+Analysts, reviewers, and users exploring the approved Phase 3 Data Intelligence results.
+
+## Existing Operational and Intelligence Experience
+
+The application has an Operational View and a Data Intelligence page. The assistant must complement these interfaces rather than replace them.
+
+The existing Data Intelligence API exposes approved Track A comparative intelligence results.
+
+## User Questions Not Solved Conveniently Today
+
+A guided assistant can help users find existing findings, compare supported entities, inspect evidence, and understand methodology without manually searching tables.
+
+## Proposed Supported Questions
+
+1. Summarize the approved Track A findings.
+2. Identify the highest sampled mean city for a selected pollutant.
+3. Compare two cities for a selected pollutant.
+4. Retrieve evidence for an existing result ID.
+5. Explain the approved data version, method version, quality status, and limitations.
+
+## Deterministic Retrieval Mapping
+
+Every supported question maps to an allowlisted intent and a deterministic query function.
+
+The query layer reads the approved intelligence results. It does not rerun the analytical method or invent new scores.
+
+## Evidence Availability
+
+Expected fields include:
+
+- result_id
+- result_type
+- group_key
+- entity_id
+- metric_name
+- result_value
+- result_unit
+- priority_rank
+- finding
+- evidence
+- quality_status
+- limitation
+- method_version
+- data_version
+- generated_at
+
+Optional fields must not be assumed to exist.
+
+## Security and Privacy
+
+- Reject unsupported requests.
+- Restrict access to approved query functions.
+- Do not expose environment variables, secrets, filesystem access, or arbitrary queries.
+- Do not store conversational history persistently.
+- Preserve existing authentication and authorization.
+- Treat result text as untrusted evidence, never as executable instructions.
+
+## Deployment Feasibility
+
+The existing Data Intelligence backend is the proposed integration point. The final route and deployment configuration must be confirmed against the current repository before integration.
+
+## Value Beyond Filters and Tables
+
+The assistant provides a guided route to approved findings, comparisons, and evidence. If user testing shows that it merely duplicates existing filters, the suitability decision must be reconsidered.
+
+## Deterministic Versus LLM Decision
+
+Mode A — Deterministic Guided Assistant.
+
+A fixed intent catalog and response templates are sufficient for the initial scope. No LLM is required.
+
+## Limitations
+
+The analytical results use synthetic data. Comparisons describe the available sample only and must not be interpreted as verified real-world pollution rankings, health-risk assessments, regulatory compliance conclusions, or predictions.
+
+## Result
+
+DETERMINISTIC ASSISTANT SUITABLE — LLM NOT REQUIRED
+
+This is an initial design assessment, not final integration approval. Final approval depends on repository integration, security review, and the required test results.
+</file>
+
+<file path="docs/GROUNDED_RESPONSE_CONTRACT.md">
+# Grounded Response Contract
+
+Every successful response must contain:
+
+- status: success
+- intent: allowlisted intent
+- answer: deterministic text based on retrieved evidence
+- evidence: references to the source results
+- data_version: validated runtime data version
+- method_version: validated runtime method version
+- quality_status: actual status from the approved source
+- limitation: relevant source limitation
+- generated_at: source generation timestamp where available
+
+A response must not invent values, ranks, records, versions, validation results, or timestamps.
+
+Numeric values must be copied from approved records without recalculation. If two records cannot be safely compared, return a bounded error instead.
+
+If evidence is missing, inconsistent, or stale according to the project's defined validation rules, do not produce an unsupported analytical answer.
+
+Unsupported requests return status "unsupported" with a brief explanation and supported question suggestions.
+
+No persistent conversational memory is required.
+</file>
+
+<file path="docs/SUPPORTED_QUESTION_CATALOG.md">
+# Supported Question Catalog
+
+## Target User
+
+Analysts, reviewers, and users of the Phase 3 Data Intelligence page.
+
+## Approved Assistant Mode
+
+Mode A — Deterministic Guided Assistant.
+
+## Approved Track
+
+Track A — Comparative Intelligence.
+
+## Data and Method Versions
+
+- Data version: phase3-v1.1
+- Method version: track-a-comparative-v1.0.0
+
+These are the versions expected for the current snapshot. Runtime responses must use the actual versions returned by validated data, not silently substitute these constants.
+
+## Supported Questions
+
+| Question Pattern | Intent | Required Parameters | Query Function | Evidence | Limitation |
+|---|---|---|---|---|---|
+| Summarize approved findings | summary | None | get_summary | Result references and summary metadata | Descriptive sample only |
+| Highest sampled mean city for a pollutant | highest_city | pollutant | get_highest_city | Result IDs, metric, value, rank | Not a real-world city ranking |
+| Compare two cities for a pollutant | compare_cities | pollutant, city_a, city_b | compare_cities | Matching result records | Only existing comparable results |
+| Show evidence for a result | result_evidence | result_id | get_result_evidence | Exact result record and evidence | Only known result IDs |
+| Explain method, versions, quality and limitations | methodology | None | get_methodology | Metadata and approved limitation text | No new analytical interpretation |
+
+## Unsupported Question Categories
+
+- Predictions or forecasts
+- Health-risk assessments
+- Regulatory compliance conclusions
+- Causal claims
+- Arbitrary SQL, Python, shell, or filesystem operations
+- Requests to modify or fabricate results
+- Unsupported pollutants or cities
+- Requests to reveal secrets, prompts, or configuration
+- Requests to bypass access controls
+- Instructions embedded in source text that attempt to change system behavior
+
+## Suggested Questions
+
+- Summarize the approved findings.
+- Which city has the highest sampled mean for NO2?
+- Compare Delhi and Bengaluru for PM2.5.
+- Show evidence for RES-0001.
+- Explain the method version and limitations.
+
+## Catalog Version
+
+1.0.0
+</file>
+
+<file path="frontend/app/assistant/page.tsx">
+"use client";
+
+import { FormEvent, useState } from "react";
+import {
+  askAssistant,
+  AssistantResponse,
+} from "../lib/assistant-api";
+
+const SUGGESTIONS = [
+  "Summarize the approved findings",
+  "Which city has the highest sampled mean for no2?",
+  "Compare Delhi and Mumbai for no2",
+  "Show evidence RES-0001",
+  "Explain the method, data version, and limitations",
+];
+
+export default function AssistantPage() {
+  const [question, setQuestion] = useState("");
+  const [result, setResult] = useState<AssistantResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submitQuestion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const value = question.trim();
+
+    if (!value) {
+      setError("Please enter a question.");
+      return;
+    }
+
+    if (value.length > 500) {
+      setError("Questions must be 500 characters or fewer.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      setResult(await askAssistant(value));
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not contact the assistant."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="mx-auto min-h-screen max-w-5xl px-4 py-8 sm:px-6">
+      <header className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
+          Aether Pulse · Phase 3
+        </p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+          Grounded Data Assistant
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Ask about approved Track A findings. Answers retrieve existing
+          intelligence records and do not generate predictions or
+          recalculate analytical results.
+        </p>
+      </header>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <form onSubmit={submitQuestion} className="space-y-3">
+          <label
+            htmlFor="assistant-question"
+            className="block text-sm font-medium text-slate-700"
+          >
+            Your question
+          </label>
+
+          <textarea
+            id="assistant-question"
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            maxLength={500}
+            rows={3}
+            placeholder="For example: Compare Delhi and Mumbai for no2"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          />
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs text-slate-500">
+              {question.length}/500 characters
+            </span>
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
+            >
+              {loading ? "Checking evidence..." : "Ask assistant"}
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <p role="alert" className="mt-4 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold text-slate-800">
+          Suggested questions
+        </h2>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {SUGGESTIONS.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => {
+                setQuestion(suggestion);
+                setError("");
+              }}
+              className="rounded-full border border-slate-300 bg-white px-3 py-2 text-left text-sm text-slate-700 hover:border-sky-400 hover:bg-sky-50"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {result && (
+        <section
+          aria-live="polite"
+          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Assistant response
+            </h2>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+              {result.status}
+            </span>
+          </div>
+
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+            {result.answer}
+          </p>
+
+          {result.grounding && (
+            <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+              <p>Mode: {result.grounding.mode ?? "Not provided"}</p>
+              <p>
+                LLM used:{" "}
+                {result.grounding.llm_used === undefined
+                  ? "Not provided"
+                  : result.grounding.llm_used
+                    ? "Yes"
+                    : "No"}
+              </p>
+              <p>
+                Generated findings:{" "}
+                {result.grounding.generated_findings === undefined
+                  ? "Not provided"
+                  : result.grounding.generated_findings
+                    ? "Yes"
+                    : "No"}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Supporting evidence ({result.evidence?.length ?? 0})
+            </h3>
+
+            {result.evidence?.length ? (
+              <div className="mt-3 space-y-3">
+                {result.evidence.map((record, index) => (
+                  <details
+                    key={record.result_id ?? `record-${index}`}
+                    className="rounded-xl border border-slate-200"
+                  >
+                    <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-800">
+                      {record.result_id ?? `Evidence ${index + 1}`}
+                      {record.entity_id ? ` · ${record.entity_id}` : ""}
+                      {record.metric_name ? ` · ${record.metric_name}` : ""}
+                    </summary>
+
+                    <div className="space-y-3 border-t border-slate-200 px-4 py-3 text-sm">
+                      {record.finding && (
+                        <p className="leading-6 text-slate-700">
+                          {record.finding}
+                        </p>
+                      )}
+
+                      {record.result_value !== undefined && (
+                        <p className="text-slate-700">
+                          Recorded value: {record.result_value}{" "}
+                          {record.result_unit ?? ""}
+                        </p>
+                      )}
+
+                      {record.priority_rank !== undefined && (
+                        <p className="text-slate-700">
+                          Recorded rank: {record.priority_rank}
+                        </p>
+                      )}
+
+                      {record.data_version && (
+                        <p className="text-slate-700">
+                          Data version: {record.data_version}
+                        </p>
+                      )}
+
+                      {record.method_version && (
+                        <p className="text-slate-700">
+                          Method version: {record.method_version}
+                        </p>
+                      )}
+
+                      {record.quality_status && (
+                        <p className="text-slate-700">
+                          Quality status: {record.quality_status}
+                        </p>
+                      )}
+
+                      {record.limitation && (
+                        <p className="rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+                          Limitation: {record.limitation}
+                        </p>
+                      )}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">
+                No supporting evidence was returned.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      <footer className="mt-8 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
+        The data is synthetic and intended for descriptive comparison only.
+        It is not a verified real-world measurement, health-risk assessment,
+        regulatory assessment, or prediction.
+      </footer>
+    </main>
+  );
+}
+</file>
+
+<file path="frontend/app/lib/assistant-api.ts">
+const ASSISTANT_API_URL =
+  process.env.NEXT_PUBLIC_ASSISTANT_API_URL ||
+  "http://localhost:8003";
+
+export type AssistantEvidence = {
+  result_id?: string;
+  result_type?: string;
+  entity_id?: string;
+  group_key?: string;
+  metric_name?: string;
+  result_value?: number;
+  result_unit?: string;
+  priority_rank?: number;
+  finding?: string;
+  quality_status?: string;
+  limitation?: string;
+  data_version?: string;
+  method_version?: string;
+  [key: string]: unknown;
+};
+
+export type AssistantResponse = {
+  status: string;
+  answer: string;
+  evidence: AssistantEvidence[];
+  validation?: {
+    valid?: boolean;
+    errors?: string[];
+    warnings?: string[];
+    record_count?: number;
+  };
+  grounding?: {
+    mode?: string;
+    llm_used?: boolean;
+    generated_findings?: boolean;
+    source?: string;
+  };
+};
+
+export async function askAssistant(
+  question: string
+): Promise<AssistantResponse> {
+  const response = await fetch(
+    `${ASSISTANT_API_URL}/api/assistant/ask`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question }),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Assistant request failed with HTTP ${response.status}.`
+    );
+  }
+
+  return response.json();
+}
+</file>
+
+<file path="tests/assistant/test_assistant_service.py">
+from assistant.core import assistant_service
+
+
+def sample_record():
+    return {
+        "result_id": "RES-0001",
+        "result_type": "comparative_intelligence",
+        "record_id": "REC-0001",
+        "entity_id": "delhi",
+        "group_key": "delhi::no2::µg/m³",
+        "metric_name": "no2_mean",
+        "result_value": 52.89333333333334,
+        "result_unit": "µg/m³",
+        "priority_rank": 1,
+        "finding": "Existing source finding.",
+        "evidence": "Existing source evidence.",
+        "data_version": "phase3-v1.1",
+        "method_version": "track-a-comparative-v1.0.0",
+        "generated_at": "2026-01-01T00:00:00Z",
+        "quality_status": "reviewed",
+        "limitation": "Synthetic data with limited temporal coverage.",
+    }
+
+
+def test_result_evidence_question_returns_source_record(monkeypatch):
+    record = sample_record()
+
+    monkeypatch.setattr(assistant_service, "check_question", lambda question: True)
+    monkeypatch.setattr(
+        assistant_service,
+        "classify_question",
+        lambda question: {
+            "intent": "result_evidence",
+            "parameters": {"result_id": "RES-0001"},
+        },
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "load_results",
+        lambda path: [record],
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "load_summary",
+        lambda path: {},
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "get_result_evidence",
+        lambda results, result_id: (
+            record if result_id == "RES-0001" else None
+        ),
+    )
+
+    response = assistant_service.answer_question("Show evidence RES-0001")
+
+    assert response["status"] == "ok"
+    assert response["grounding"]["llm_used"] is False
+    assert response["evidence"][0]["result_id"] == "RES-0001"
+    assert response["evidence"][0]["result_value"] == record["result_value"]
+
+
+def test_unsupported_question_is_not_answered(monkeypatch):
+    monkeypatch.setattr(assistant_service, "check_question", lambda question: True)
+    monkeypatch.setattr(
+        assistant_service,
+        "classify_question",
+        lambda question: None,
+    )
+
+    response = assistant_service.answer_question(
+        "Predict next month's pollution and its health impact"
+    )
+
+    assert response["status"] == "unsupported"
+    assert response["evidence"] == []
+    assert response["validation"]["valid"] is False
+
+
+def test_empty_question_is_rejected():
+    response = assistant_service.answer_question("   ")
+
+    assert response["status"] == "refused"
+    assert response["evidence"] == []
+
+
+def test_overlong_question_is_rejected():
+    response = assistant_service.answer_question("x" * 501)
+
+    assert response["status"] == "refused"
+    assert response["evidence"] == []
+</file>
+
+<file path="tests/assistant/test_grounding.py">
+from assistant.core.evidence_builder import build_evidence_package
+from assistant.core.response_validator import (
+    validate_answer_records,
+    validate_evidence_package,
+)
+
+
+def sample_record():
+    return {
+        "result_id": "RES-0001",
+        "result_type": "comparative_intelligence",
+        "entity_id": "delhi",
+        "group_key": "delhi::no2::µg/m³",
+        "metric_name": "no2_mean",
+        "result_value": 52.89333333333334,
+        "result_unit": "µg/m³",
+        "priority_rank": 1,
+        "finding": "Example finding from an existing approved result.",
+        "evidence": "Example source evidence.",
+        "data_version": "phase3-v1.1",
+        "method_version": "track-a-comparative-v1.0.0",
+        "generated_at": "2026-01-01T00:00:00Z",
+        "quality_status": "reviewed",
+        "limitation": "Synthetic data; limited temporal coverage.",
+    }
+
+
+def test_valid_record_produces_valid_evidence_package():
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[sample_record()],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is True
+    assert result["record_count"] == 1
+    assert package["source"]["result_ids"] == ["RES-0001"]
+    assert package["source"]["data_versions"] == ["phase3-v1.1"]
+    assert package["source"]["method_versions"] == [
+        "track-a-comparative-v1.0.0"
+    ]
+
+
+def test_empty_evidence_is_rejected():
+    package = build_evidence_package(
+        question="Show evidence RES-9999",
+        intent="result_evidence",
+        result_records=[],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("No approved evidence" in error for error in result["errors"])
+
+
+def test_mixed_data_versions_are_rejected():
+    first = sample_record()
+    second = sample_record()
+    second["result_id"] = "RES-0002"
+    second["data_version"] = "different-version"
+
+    package = build_evidence_package(
+        question="Compare records",
+        intent="summary",
+        result_records=[first, second],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("inconsistent data versions" in error for error in result["errors"])
+
+
+def test_missing_method_version_is_rejected():
+    record = sample_record()
+    record["method_version"] = None
+
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[record],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("Method version is missing" in error for error in result["errors"])
+
+
+def test_answer_record_must_belong_to_evidence_package():
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[sample_record()],
+    )
+
+    good = validate_answer_records(
+        [{"result_id": "RES-0001"}],
+        package,
+    )
+    bad = validate_answer_records(
+        [{"result_id": "RES-9999"}],
+        package,
+    )
+
+    assert good["valid"] is True
+    assert bad["valid"] is False
+    assert any("not backed" in error for error in bad["errors"])
+
+
+def test_boolean_is_not_accepted_as_a_metric_value():
+    record = sample_record()
+    record["result_value"] = True
+
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[record],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("non-numeric metric value" in error for error in result["errors"])
+
+
+def test_quality_metadata_can_be_required():
+    record = sample_record()
+    record.pop("quality_status")
+
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[record],
+    )
+
+    result = validate_evidence_package(
+        package,
+        require_quality_metadata=True,
+    )
+
+    assert result["valid"] is False
+    assert any("quality metadata is unavailable" in error for error in result["errors"])
+</file>
 
 <file path="architecture/ARCHITECTURE.md">
 # Aether Pulse — Architecture
@@ -3243,39 +5647,6 @@ The existing Air Quality dashboard, map, population data, and API requests must 
 * Loading and error states are handled.
 * Synthetic-data and conditional-quality notices remain visible.
 * The existing Air Quality dashboard continues to work.
-</file>
-
-<file path="docs/DATA_INTELLIGENCE_UAT.md">
-## 3. Test cases
-
-| ID     | Test                            | Expected result                                            | Actual result                                                                                              | Status |
-| ------ | ------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
-| UAT-01 | Open the Data Intelligence page | Page loads without a fatal error                           | Page opened successfully                                                                                   | PASS   |
-| UAT-02 | Request the intelligence API    | Valid response containing a results array                  | API returned a successful response                                                                         | PASS   |
-| UAT-03 | Check result count              | Displayed count matches returned records                   | Displayed count matched the API response                                                                   | PASS   |
-| UAT-04 | Filter by pollutant             | Results match the selected pollutant                       | Filter behaved as expected                                                                                 | PASS   |
-| UAT-05 | Filter by city                  | Results match the selected city                            | Filter behaved as expected                                                                                 | PASS   |
-| UAT-06 | Search results                  | Search narrows results correctly                           | Search behaved as expected                                                                                 | PASS   |
-| UAT-07 | Check loading behavior          | Loading state appears while the request is pending         | Loading state behaved as expected during testing | PASS |
-| UAT-08 | Check API error behavior        | Error message and Retry action work                        | Error state and Retry recovery worked during testing                                                       | PASS   |
-| UAT-09 | Check data-quality notice       | Synthetic-data and conditional-quality notices are visible | Warning was visible and understandable                                                                     | PASS   |
-| UAT-10 | Open the existing dashboard     | Dashboard loads                                            | Dashboard opened successfully                                                                              | PASS   |
-| UAT-11 | Check the existing map and data | Map and existing data requests work                        | Map and air-quality data loaded successfully after the API configuration correction                        | PASS   |
-
-## 4. Execution notes
-
-The Data Intelligence API, result count, pollutant filter, city filter, search, data-quality warning, and error/Retry behavior passed the reported checks. The Air Quality dashboard, map, and data retrieval worked after the frontend API configuration was corrected. The loading-state check remains failed pending investigation and retesting.
-
-## 5. Acceptance criteria
-
-The Data Intelligence page must load, retrieve valid results, apply filters and search, handle request errors, display data limitations, and provide appropriate loading behavior. Existing Air Quality functionality must remain operational.
-
-## 6. Final result
-
-* Confirmed passing test cases: 11
-* Confirmed failing test cases: 0
-* Pending test cases: 0
-* Overall status: PASS
 </file>
 
 <file path="docs/DATA_INTELLIGENCE_UI_SPEC.md">
@@ -13375,6 +15746,103 @@ The canonical dataset has the expected 96-row, 20-column structure and includes 
 s
 </file>
 
+<file path="docs/DATA_INTELLIGENCE_UAT.md">
+# Data Intelligence — User Acceptance Testing (UAT)
+
+## 1. Objective
+
+Verify that the Phase 3 Data Intelligence page displays approved comparative intelligence results, validates the results contract before rendering, provides filtering and search, exposes methodology and data provenance, and preserves the existing Operational View functionality.
+
+## 2. Test environment and scope
+
+**Project:** Aether Pulse — Air Quality Heatmap
+**Phase:** Phase 3 — Data Science and Decision Intelligence
+**Feature branch:** `feature/data-intelligence-page`
+**Target integration branch:** `main`
+
+### Local application URLs
+
+* Operational View: `http://localhost:3002`
+* Data Intelligence page: `http://localhost:3002/data-intelligence`
+* Intelligence results API: `http://localhost:8000/api/intelligence/results`
+* Intelligence summary API: `http://localhost:8000/api/intelligence/summary`
+
+### Approved analytical output
+
+* Canonical dataset: 96 records and 20 columns
+* Data version: `phase3-v1.1`
+* Analytical method: `track-a-comparative-v1.0.0`
+* Published intelligence results: 32
+* Expected city coverage: 8 cities
+* Expected pollutant coverage: 4 pollutants
+* Data type: Controlled synthetic air-quality data
+* Primary analytical track: Track A — Comparative Intelligence
+
+### Test scope
+
+This UAT covers the local application, intelligence API contracts, published analytical output, page completeness, and regression of the existing Operational View. Public deployment verification is recorded separately and is not inferred from successful local tests.
+
+## 3. Test cases
+
+| ID     | Test                                        | Expected result                                                                                      | Actual result                                                                                                                            | Status |
+| ------ | ------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| UAT-01 | Open the Data Intelligence page             | Page loads without a fatal error                                                                     | Local Data Intelligence page opened successfully and displayed the results                                                               | PASS   |
+| UAT-02 | Request the intelligence APIs               | Results and summary endpoints return successful responses                                            | Both local endpoints returned HTTP 200                                                                                                   | PASS   |
+| UAT-03 | Check result count and versions             | Result count matches the approved summary; data and method versions are consistent                   | 32 results; data version `phase3-v1.1`; method version `track-a-comparative-v1.0.0`                                                      | PASS   |
+| UAT-04 | Filter by pollutant                         | Results match the selected pollutant                                                                 | Pollutant filter behaved as expected during testing                                                                                      | PASS   |
+| UAT-05 | Filter by city                              | Results match the selected city                                                                      | City filter behaved as expected during testing                                                                                           | PASS   |
+| UAT-06 | Search results                              | Search narrows results correctly                                                                     | Search behaved as expected during testing                                                                                                | PASS   |
+| UAT-07 | Check loading behavior                      | Loading state appears while the request is pending                                                   | Loading state passed the reported test                                                                                                   | PASS   |
+| UAT-08 | Check API error behavior                    | Error message and Retry action work                                                                  | Error state and Retry recovery passed the reported test                                                                                  | PASS   |
+| UAT-09 | Check data-quality notice                   | Synthetic-data and conditional-quality notices are visible                                           | Synthetic-data warning was visible on the page                                                                                           | PASS   |
+| UAT-10 | Open the existing Operational View          | Existing dashboard loads                                                                             | Operational dashboard opened successfully during local regression testing                                                                | PASS   |
+| UAT-11 | Check the existing map and data             | Map and existing data requests continue to work                                                      | Map and air-quality data loaded after the API configuration correction                                                                   | PASS   |
+| UAT-12 | Check analytical contract and export        | Required output contract, versions, counts, evidence, and approved results pass validation           | Analytical validation reported 24 successful checks, no failed checks, and no reported issues; export verification passed for 32 results | PASS   |
+| UAT-13 | Check methodology and provenance            | Approved track, data version, method version, analytical question, and decision scope are accessible | Methodology and provenance section displayed on the local Data Intelligence page                                                         | PASS   |
+| UAT-14 | Check timestamp, freshness, and limitations | Generated timestamp, freshness status, and analytical limitations are accessible                     | Timestamp, freshness information, and limitations were displayed on the local page                                                       | PASS   |
+| UAT-15 | Check Operational View navigation           | A navigation link back to the Operational View is available                                          | Operational View navigation link was visible on the Data Intelligence page                                                               | PASS   |
+
+## 4. Execution notes
+
+The analytical validation script completed with `validation_result: PASS`, 24 successful checks, no failed checks, and no reported issues. Export verification passed for 32 records using data version `phase3-v1.1` and method version `track-a-comparative-v1.0.0`. The local results and summary API endpoints both returned HTTP 200. The Data Intelligence page displayed the published results, filters, methodology, timestamp, freshness status, limitations, and Operational View navigation link. The Operational View and map were also visually checked after the frontend API configuration was corrected.
+
+The backend and frontend implement contract checks for required fields, data and method versions, count consistency, timestamps, unique result identifiers, quality status, synthetic-data flags, and evidence. The successful analytical validation and local rendering establish the valid-data path; a separate deliberately malformed-payload test is not claimed by this record.
+
+## 5. Acceptance criteria
+
+The feature is accepted for the local environment when:
+
+1. The Data Intelligence page opens and retrieves both approved API responses.
+2. The frontend validates the summary and results contracts before displaying approved results.
+3. Result counts, data versions, method versions, timestamps, and required result fields are consistent.
+4. City and pollutant filters and text search behave as expected.
+5. Loading and API error/retry states behave as expected.
+6. Synthetic-data warnings and analytical limitations are visible.
+7. Methodology, generated timestamp, freshness status, and provenance are accessible.
+8. Navigation back to the existing Operational View is available.
+9. The existing Operational dashboard, map, and data retrieval remain operational.
+10. Analytical validation and export verification pass for the approved output.
+
+## 6. Final result
+
+**Local Data Intelligence UAT:** PASS
+
+* Confirmed passing test cases: 15
+* Confirmed failing test cases: 0
+* Pending local UAT cases: 0
+* Analytical validation: PASS
+* Export verification: PASS
+* Local results API: HTTP 200
+* Local summary API: HTTP 200
+* Local page rendering: PASS
+
+**Public deployment status:** Separate verification required.
+
+The Render Data Intelligence service was previously suspended. Public availability must not be considered verified until the deployed service is available and the public Data Intelligence page and its API endpoints have been tested successfully.
+
+**Overall local acceptance:** PASS, based on the recorded local test results.
+</file>
+
 <file path="docs/INTELLIGENCE_OUTPUT_CONTRACT.md">
 # Intelligence Output Contract
 
@@ -16374,17 +18842,21 @@ WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
 COPY backend/requirements.txt .
 
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 COPY backend/app ./app
 COPY backend/data ./data
+COPY assistant ./assistant
+
 COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
 COPY data-science/outputs/intelligence_summary.json ./data-science/outputs/intelligence_summary.json
+
 ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
+ENV INTELLIGENCE_SUMMARY_FILE=/app/data-science/outputs/intelligence_summary.json
 
 EXPOSE 8000 8001
 
@@ -20377,9 +22849,9 @@ from app.services.intelligence import (
     get_intelligence_summary,
 )
 load_dotenv()
-
+from app.assistant.router import router as assistant_router
 app = FastAPI(title="Air Quality Intelligence API")
-
+app.include_router(assistant_router)
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
     "http://localhost:3000",
