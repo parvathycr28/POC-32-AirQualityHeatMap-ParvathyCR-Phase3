@@ -223,6 +223,441 @@ VAR_REPORT
 <files>
 This section contains the contents of the repository's files.
 
+<file path="architecture/ARCHITECTURE.md">
+# Aether Pulse — Architecture
+
+## Project
+
+**PoC:** 32  
+**Name:** Air Quality Heatmap  
+**Dashboard:** Aether Pulse  
+**Rail:** Data & Intelligence
+
+---
+
+## 1. Architecture Overview
+
+Aether Pulse is a production-style air-quality intelligence dashboard.
+
+The system follows a three-layer architecture:
+
+1. Data & Intelligence Layer
+2. FastAPI Backend Layer
+3. Next.js Visualization Layer
+
+```text
+OpenAQ ───────────────┐
+                      │
+WorldPop ─────────────┤
+                      ▼
+              Data Adapters
+                      │
+                      ▼
+             FastAPI Backend
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+   Air Quality    Exposure      Comparison
+     Service       Scoring        Service
+        │             │             │
+        └─────────────┼─────────────┘
+                      │
+                 JSON / GeoJSON
+                      │
+                      ▼
+              Next.js Frontend
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+        ▼             ▼             ▼
+      Map          Charts       Intelligence
+                                  Sidebar
+                        
+2. Frontend
+Technology
+Next.js 14+
+App Router
+TypeScript
+Tailwind CSS
+shadcn/ui
+Leaflet / React Leaflet
+Recharts
+Responsibilities
+
+The frontend is responsible for:
+
+Dashboard presentation
+Interactive map
+Pollutant selection
+City comparison
+Search and filtering
+Time-series visualization
+Exposure-score presentation
+Intelligence explanations
+Downloading sample data
+Loading/error/fallback states
+
+The frontend does not perform the primary data processing.
+
+3. Backend
+Technology
+Python
+FastAPI
+Pandas
+GeoPandas where required
+Responsibilities
+
+The backend is responsible for:
+
+Data ingestion
+Data normalization
+Air-quality processing
+Exposure scoring
+City comparison
+GeoJSON generation
+API responses
+Fallback handling
+
+Primary API:
+
+GET /health
+
+GET /api/air-quality?pollutant=pm25
+4. Data Sources
+OpenAQ
+
+Primary source for air-quality observations.
+
+Used for:
+
+Pollutant measurements
+Monitoring locations
+Time-series observations
+Location metadata
+WorldPop
+
+Population data source.
+
+Used for:
+
+Population context
+Exposure estimation
+Population-weighted intelligence
+5. Data Adapter Pattern
+
+External sources are accessed through dedicated adapters.
+
+backend/
+└── app/
+    └── adapters/
+        ├── openaq.py
+        └── worldpop.py
+
+Adapters isolate external API logic from business logic.
+
+This allows the dashboard to continue operating if an external provider changes its API.
+
+6. Services
+
+Business logic is separated from external data access.
+
+backend/app/services/
+
+air_quality.py
+comparison.py
+exposure.py
+Air Quality Service
+
+Responsible for:
+
+Pollutant processing
+Observation normalization
+Map-ready records
+Exposure Service
+
+Responsible for:
+
+Population context
+Exposure scoring
+Risk-oriented insights
+Comparison Service
+
+Responsible for:
+
+City comparison
+Regional averages
+Relative differences
+7. API Response
+
+The map uses GeoJSON-compatible data.
+
+Each feature represents an air-quality observation or location.
+
+Conceptually:
+
+{
+  "type": "FeatureCollection",
+  "data_source": "OpenAQ",
+  "fallback": false,
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [longitude, latitude]
+      },
+      "properties": {
+        "city": "Example City",
+        "pollutant": "pm25",
+        "value": 42.5,
+        "unit": "µg/m³",
+        "population": 1000000,
+        "exposure_score": 68.4,
+        "source": "OpenAQ"
+      }
+    }
+  ]
+}
+8. Fallback Architecture
+
+The application must remain usable when a live data source fails.
+
+             Live API
+                │
+          ┌─────┴─────┐
+          │            │
+        Success       Error
+          │            │
+          ▼            ▼
+      Live Data    mock_data.json
+          │            │
+          └─────┬──────┘
+                ▼
+          FastAPI Response
+                │
+                ▼
+           Next.js UI
+
+Fallback data must be clearly identified in the interface.
+
+The user should never mistake synthetic fallback data for live observations.
+
+9. Frontend Layout
+
+The primary dashboard layout follows the Real Rails requirement:
+
+┌──────────────────────────────────────────────────────────────┐
+│                         AETHER PULSE                         │
+├───────────────────────────────────────┬──────────────────────┤
+│                                       │                      │
+│                                       │  Intelligence        │
+│                                       │  Sidebar             │
+│                                       │                      │
+│              AIR QUALITY MAP           │  • Key Metric       │
+│                                       │  • Why It Matters    │
+│                                       │  • Who Controls Rail │
+│                                       │  • Filters           │
+│                                       │  • Download Data     │
+│                                       │                      │
+│               70%                     │       30%            │
+│                                       │                      │
+├───────────────────────────────────────┴──────────────────────┤
+│                    Supporting Analytics                       │
+└──────────────────────────────────────────────────────────────┘
+
+The main visualization area occupies approximately 70% of the dashboard.
+
+The intelligence sidebar occupies 30%.
+
+10. Intelligence Sidebar
+
+The sidebar communicates meaning rather than simply displaying raw data.
+
+A — Primary Intelligence
+
+Examples:
+
+Current PM2.5 level
+Exposure score
+Locations monitored
+Population affected
+B — Why This Matters
+
+Explains the public-interest significance of the data.
+
+C — Who Controls the Rail
+
+Explains the institutions and infrastructure involved in collecting and operating air-quality intelligence.
+
+D — Controls
+
+Includes:
+
+Pollutant selector
+City search
+City comparison
+Relevant filters
+Interactive tooltips
+E — Sample Data
+
+Allows users to download representative data.
+
+11. Visual System
+
+Aether Pulse follows the Real Rails visual identity.
+
+Colors
+Background:       #030712
+Surface:          #0B1117
+Primary Accent:   #38BDF8
+Secondary Accent: #818CF8
+Border:           #1F2937
+Typography
+
+Preferred:
+
+Inter
+Geist Sans
+Visual Style
+High-end fintech terminal
+Real-time intelligence aesthetic
+Dark interface
+Subtle glassmorphism
+Minimal borders
+Cyan active-state glow
+Dense but readable information hierarchy
+12. Geospatial Rules
+
+Geographical coordinates must not be manually calculated with custom SVG or mathematical projection logic.
+
+Use professional geospatial/map libraries.
+
+Preferred implementation:
+
+Leaflet / React Leaflet
+GeoJSON
+GeoPandas
+Turf.js where spatial calculations are required
+13. Interaction Flow
+User selects pollutant
+        │
+        ▼
+Next.js requests API
+        │
+        ▼
+FastAPI processes data
+        │
+        ▼
+GeoJSON + intelligence data
+        │
+        ▼
+Map updates
+        │
+        ├──► Charts update
+        │
+        ├──► Exposure score updates
+        │
+        └──► Sidebar insights update
+
+The page should not require a full refresh when filters change.
+
+14. Error Handling
+
+The UI supports three primary states:
+
+Loading
+
+Clearly communicate that data is being retrieved.
+
+Live Data
+
+Indicate that the dashboard is using live source data.
+
+Fallback Data
+
+Indicate that live data was unavailable and local fallback data is being displayed.
+
+Users should also have a retry mechanism when live data fails.
+
+15. Security
+
+API credentials must never be hardcoded.
+
+Use environment variables:
+
+.env
+.env.example
+
+External API keys belong only in environment configuration.
+
+16. Repository Structure
+POC-32-AirQualityHeatmap-ParvathyCR/
+│
+├── architecture/
+│   └── ARCHITECTURE.md
+│
+├── backend/
+│   ├── app/
+│   │   ├── adapters/
+│   │   │   ├── openaq.py
+│   │   │   └── worldpop.py
+│   │   │
+│   │   ├── models/
+│   │   │   └── schemas.py
+│   │   │
+│   │   ├── services/
+│   │   │   ├── air_quality.py
+│   │   │   ├── comparison.py
+│   │   │   └── exposure.py
+│   │   │
+│   │   ├── utils/
+│   │   │   └── fallback.py
+│   │   │
+│   │   ├── config.py
+│   │   └── main.py
+│   │
+│   ├── data/
+│   │   └── mock_data.json
+│   │
+│   ├── .env
+│   ├── .env.example
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── app/
+│   │   ├── components/
+│   │   │   ├── air-quality-dashboard.tsx
+│   │   │   ├── city-search-select.tsx
+│   │   │   ├── intelligence-sidebar.tsx
+│   │   │   └── leaflet-map.tsx
+│   │   │
+│   │   ├── lib/
+│   │   │   └── api.ts
+│   │   │
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   │
+│   └── package.json
+│
+└── README.md
+17. Architecture Principle
+
+Aether Pulse follows one core principle:
+
+Turn environmental data into actionable intelligence.
+
+The map shows where.
+
+The charts show how conditions change.
+
+The exposure score explains who may be affected.
+
+The intelligence sidebar explains why the information matters.
+
+The architecture therefore connects raw data, spatial visualization, analytics, and human-readable intelligence into one coherent Data & Intelligence experience.
+</file>
+
 <file path="assistant/config/intents.json">
 {
   "catalog_version": "1.0.0",
@@ -355,6 +790,7 @@ def _normalise_intent(intent: str | None) -> str | None:
         "result_evidence": "result_evidence",
         "evidence": "result_evidence",
         "highest_city": "highest_city",
+	"highest_city_mean": "highest_city",
         "highest_sampled_mean": "highest_city",
         "compare_cities": "compare_cities",
         "city_comparison": "compare_cities",
@@ -1099,119 +1535,177 @@ def build_evidence_package(
 <file path="assistant/core/intent_router.py">
 import re
 
-SUPPORTED_QUESTIONS = [
-    "Summarize the approved findings",
-    "Which city has the highest sampled mean for a pollutant?",
-    "Compare two cities for a pollutant",
-    "Show evidence for a result ID",
-    "Explain the method, versions, quality, and limitations",
-]
 
-UNSAFE_PATTERNS = [
-    r"\b(ignore|override|bypass)\b.{0,50}\b(instructions|security|rules|authorization)\b",
-    r"\b(show|reveal|print|dump)\b.{0,50}\b(secret|token|password|api key|system prompt|environment variables)\b",
-    r"\b(exec|execute|run)\b.{0,50}\b(sql|python|shell|command|code)\b",
-]
+def classify_question(question: str):
+    """
+    Classify a question into an explicitly supported assistant intent.
 
-
-def check_question(question: str) -> str | None:
+    This router only identifies supported question patterns.
+    It does not calculate metrics or generate findings.
+    """
     if not isinstance(question, str):
-        return "Please enter a text question."
+        return None
 
-    if not question.strip():
-        return "Please enter a question."
+    text = " ".join(question.strip().split())
 
-    if len(question) > 500:
-        return "The question is too long. Limit it to 500 characters."
+    if not text:
+        return None
 
-    for pattern in UNSAFE_PATTERNS:
-        if re.search(pattern, question, flags=re.IGNORECASE):
-            return (
-                "I can't help with requests to bypass security, expose secrets, "
-                "or execute arbitrary commands."
-            )
-
-    return None
-
-
-def classify_question(question: str) -> dict:
-    """Recognize only supported questions and extract explicit parameters."""
-    text = re.sub(r"\s+", " ", question.strip())
-    text = re.sub(r"[.!]+$", "", text)
-
-    # Summary
-    if re.fullmatch(
-        r"(summari[sz]e (the )?(approved )?(track a )?(findings|results)"
-        r"|what are the approved findings|give me a summary"
-        r"|summari[sz]e the track a findings)",
-        text,
-        flags=re.IGNORECASE,
-    ):
-        return {"intent": "summary", "parameters": {}}
-
-    # Method, versions, quality, and limitations
-    if re.fullmatch(
-        r"(explain|show|tell me about|describe)"
-        r" (the )?(methodology|method|data version|method version|"
-        r"limitations|quality status|"
-        r"the method,? (data version|versions?)"
-        r"(,? quality)?(,? and limitations)?|"
-        r"the data version,? method version,? quality,? and limitations)",
-        text,
-        flags=re.IGNORECASE,
-    ):
-        return {"intent": "methodology", "parameters": {}}
-
-    # Evidence for an existing result ID
+    # 1. Evidence for an existing result ID
     evidence_match = re.fullmatch(
-        r"(show|get|explain|retrieve) evidence (for )?"
+        r"(show|get|explain|retrieve)?\s*"
+        r"(the\s+)?evidence\s+"
+        r"(for\s+)?(result\s+)?"
         r"(RES-[A-Za-z0-9_-]+)",
         text,
         flags=re.IGNORECASE,
     )
+
     if evidence_match:
         return {
             "intent": "result_evidence",
-            "parameters": {"result_id": evidence_match.group(3).upper()},
-        }
-
-    # Highest sampled mean
-    highest_match = re.fullmatch(
-        r"(which city has the highest sampled mean for|"
-        r"which city ranks first for|"
-        r"which city has the highest mean for)"
-        r" ([A-Za-z0-9. -]+)\??",
-        text,
-        flags=re.IGNORECASE,
-    )
-    if highest_match:
-        return {
-            "intent": "highest_city",
-            "parameters": {"pollutant": highest_match.group(2).strip()},
-        }
-
-    # Compare two cities for a pollutant
-    compare_match = re.fullmatch(
-        r"compare ([A-Za-z .'-]+) and ([A-Za-z .'-]+) for "
-        r"([A-Za-z0-9. -]+)\??",
-        text,
-        flags=re.IGNORECASE,
-    )
-    if compare_match:
-        return {
-            "intent": "compare_cities",
             "parameters": {
-                "city_a": compare_match.group(1).strip(),
-                "city_b": compare_match.group(2).strip(),
-                "pollutant": compare_match.group(3).strip(),
+                "result_id": evidence_match.group(5).upper()
             },
         }
 
-    return {
-        "intent": "unsupported",
-        "parameters": {},
-        "suggestions": SUPPORTED_QUESTIONS,
-    }
+    # 2. Methodology and limitations
+    methodology_patterns = [
+        r"(explain|describe|summarize|outline)\s+"
+        r"(the\s+)?(method|methodology)\s+"
+        r"(and\s+)?(the\s+)?limitations",
+        r"(explain|describe|summarize|outline)\s+"
+        r"(the\s+)?limitations",
+        r"(explain|describe|summarize|outline)\s+"
+        r"(the\s+)?(method|methodology)",
+        r"what\s+are\s+(the\s+)?"
+        r"(methodological\s+)?limitations",
+        r"what\s+(is|are)\s+the\s+"
+        r"(method|methodology|limitations)",
+        r"tell\s+me\s+about\s+(the\s+)?"
+        r"(method|methodology|limitations)",
+    ]
+
+    if any(
+        re.fullmatch(pattern, text, flags=re.IGNORECASE)
+        for pattern in methodology_patterns
+    ):
+        return {
+            "intent": "methodology",
+            "parameters": {},
+        }
+
+    # 3. Summarize existing Track A findings
+    summary_patterns = [
+        r"summarize\s+(the\s+)?track\s+a\s+findings",
+        r"(summarize|summary\s+of)\s+"
+        r"(the\s+)?(track\s+a\s+)?findings",
+        r"give\s+me\s+(a\s+)?summary\s+"
+        r"(of\s+)?(the\s+)?(track\s+a\s+)?findings",
+    ]
+
+    if any(
+        re.fullmatch(pattern, text, flags=re.IGNORECASE)
+        for pattern in summary_patterns
+    ):
+        return {
+            "intent": "summary",
+            "parameters": {},
+        }
+
+    # 4. Highest sampled mean for a specified pollutant
+    highest_match = re.fullmatch(
+        r"(which\s+city\s+has\s+)?"
+        r"(the\s+)?(highest|maximum|max)\s+"
+        r"(sampled\s+)?mean\s+"
+        r"(for\s+)?"
+        r"(the\s+)?"
+        r"(NO2|O3|PM10|PM2\.5)"
+        r"(\s+pollutant)?"
+        r"(\s+pollution)?"
+        r"(\s+mean)?"
+        r"(\s+value)?"
+        r"(\s+among\s+cities)?"
+        r"\??",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    if highest_match:
+        pollutant = next(
+            (
+                group
+                for group in highest_match.groups()
+                if group and group.upper() in {
+                    "NO2", "O3", "PM10", "PM2.5"
+                }
+            ),
+            None,
+        )
+
+        if pollutant:
+            return {
+                "intent": "highest_city_mean",
+                "parameters": {
+                    "pollutant": pollutant.lower(),
+                },
+            }
+
+    # Also support: "Which city has the highest NO2 mean?"
+    highest_match = re.fullmatch(
+        r"which\s+city\s+has\s+the\s+highest\s+"
+        r"(NO2|O3|PM10|PM2\.5)"
+        r"\s+(sampled\s+)?mean\??",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    if highest_match:
+        return {
+            "intent": "highest_city_mean",
+            "parameters": {
+                "pollutant": highest_match.group(1).lower(),
+            },
+        }
+
+    # 5. Compare two named cities for a specified pollutant
+    comparison_match = re.fullmatch(
+        r"compare\s+"
+        r"([A-Za-z][A-Za-z .'-]*?)\s+and\s+"
+        r"([A-Za-z][A-Za-z .'-]*?)\s+"
+        r"for\s+(NO2|O3|PM10|PM2\.5)\??",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    if comparison_match:
+        return {
+            "intent": "city_comparison",
+            "parameters": {
+                "city_a": comparison_match.group(1).strip().lower(),
+                "city_b": comparison_match.group(2).strip().lower(),
+                "pollutant": comparison_match.group(3).lower(),
+            },
+        }
+
+    return None
+
+def check_question(question: str) -> bool:
+    """
+    Validate the basic question requirements before intent classification.
+    """
+    if not isinstance(question, str):
+        return False
+
+    text = question.strip()
+
+    if not text:
+        return False
+
+    if len(text) > 500:
+        return False
+
+    return True
 </file>
 
 <file path="assistant/core/response_validator.py">
@@ -1511,1529 +2005,6 @@ def get_summary_results(
     return results[:limit]
 </file>
 
-<file path="backend/app/assistant/__init__.py">
-"""Grounded data assistant API package."""
-</file>
-
-<file path="backend/app/assistant/router.py">
-"""FastAPI routes for the deterministic grounded data assistant."""
-
-from __future__ import annotations
-
-from typing import Any
-
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
-
-from assistant.core.assistant_service import answer_question
-
-
-router = APIRouter(prefix="/api/assistant", tags=["Grounded Data Assistant"])
-
-
-class AssistantQuestion(BaseModel):
-    question: str = Field(
-        ...,
-        min_length=1,
-        max_length=500,
-        description="A question supported by the approved intelligence outputs.",
-    )
-
-
-class AssistantResponse(BaseModel):
-    status: str
-    answer: str
-    evidence: list[dict[str, Any]] = Field(default_factory=list)
-    validation: dict[str, Any] = Field(default_factory=dict)
-    details: dict[str, Any] | None = None
-    evidence_package: dict[str, Any] | None = None
-    grounding: dict[str, Any] | None = None
-
-
-@router.post("/ask", response_model=AssistantResponse)
-def ask_grounded_assistant(request: AssistantQuestion) -> dict[str, Any]:
-    """Answer one supported question using approved output files only."""
-    try:
-        return answer_question(request.question)
-    except Exception as exc:
-        # Keep internals and configuration out of the public error response.
-        # The application logging layer can record the exception separately.
-        raise HTTPException(
-            status_code=500,
-            detail="The grounded assistant could not process this request safely.",
-        ) from exc
-
-
-@router.get("/health")
-def assistant_health() -> dict[str, str]:
-    """Report route availability, not the validity of the data files."""
-    return {
-        "status": "available",
-        "mode": "deterministic",
-        "llm_used": "false",
-    }
-</file>
-
-<file path="docs/ASSISTANT_ARCHITECTURE.md">
-# Assistant Architecture
-
-## Existing Application
-
-- Operational View: existing application interface
-- Data Intelligence page: /data-intelligence
-- Intelligence API: /api/intelligence/results
-- Intelligence data: approved Track A JSON outputs
-
-## Assistant Mode
-
-Mode A — Deterministic Guided Assistant. No LLM is used.
-
-## Integration Route / Component
-
-Proposed backend route: POST /api/assistant/query
-
-Proposed frontend component: Data Intelligence assistant panel.
-
-These are new integration points and must be checked against existing routes before implementation.
-
-## Request Flow
-
-1. Validate request type and input length.
-2. Reject unsafe or out-of-scope requests.
-3. Match an allowlisted intent.
-4. Validate all required parameters.
-5. Execute the corresponding deterministic query.
-6. Build a structured evidence package.
-7. Validate evidence, versions, quality, and limitations.
-8. Return a templated response.
-
-## Query Catalog
-
-Only the five intents in SUPPORTED_QUESTION_CATALOG.md are permitted.
-
-## Deterministic Retrieval
-
-Read only the approved intelligence results and approved metadata. Never execute user-provided code, SQL, paths, or expressions.
-
-## Evidence Builder
-
-Every factual answer must include the result IDs or metadata references supporting it.
-
-## Optional LLM Explanation
-
-Not enabled. Reassess only if templates are demonstrably insufficient.
-
-## Response Validation
-
-Check that each answer is derived from retrieved evidence and that version and limitation metadata are present.
-
-## Authentication and Authorization
-
-Reuse existing application authorization. Do not create a public bypass route. Verify behavior in the current deployment before enabling the assistant.
-
-## Logging
-
-Do not log full conversation text by default. Log only minimal operational information needed for debugging, without secrets or sensitive user data.
-
-## Error Handling
-
-Return bounded validation errors for malformed, unsupported, missing-parameter, and unavailable-data cases. Never expose stack traces or secrets to clients.
-
-## Deployment
-
-Use the existing Data Intelligence backend deployment path after confirming container paths, ports, and environment variables.
-
-## Limitations
-
-Synthetic data, limited temporal coverage, and descriptive Track A methodology limit interpretation. No prediction, causal analysis, health-risk conclusion, or regulatory conclusion is supported.
-</file>
-
-<file path="docs/ASSISTANT_GROUNDING_VALIDATION.md">
-# Grounded Assistant — Grounding Validation
-
-## Purpose
-
-This document defines the grounding checks for the Phase 3
-deterministic data assistant.
-
-The assistant retrieves existing approved intelligence outputs. It must not
-recompute analytical-track methods or invent values, ranks, findings,
-predictions, or explanations that are not supported by retrieved evidence.
-
-## Approved source
-
-The primary runtime source is the configured
-`intelligence_results.json` output. The configured summary output may provide
-additional quality and limitation metadata.
-
-The assistant must not use arbitrary filesystem paths supplied by a user,
-arbitrary SQL, or unrestricted access to the canonical dataset.
-
-## Evidence package
-
-Each grounded answer should preserve, when available:
-
-- result ID and result type
-- entity ID and group key
-- metric name, value, and unit
-- priority rank and existing finding
-- existing evidence field
-- quality status and limitations
-- data version and method version
-- generated timestamp
-
-Unavailable metadata must remain unavailable. The assistant must not fill
-gaps with guessed values.
-
-## Validation rules
-
-1. A non-methodology answer must have at least one matching approved record.
-2. Evidence records must have result IDs.
-3. Data and method versions must be present.
-4. One evidence package must not silently mix data versions or method versions.
-5. Metric values must come from the source record.
-6. A requested result ID must match an existing result ID exactly.
-7. A city comparison must use matching records for the requested pollutant.
-8. Missing or ambiguous results must not be replaced with invented answers.
-9. Unsupported requests must be declined.
-10. Quality status and limitations must not be overstated.
-11. User input is treated as data, never as an instruction to bypass the
-    allowlist, disclose secrets, or change assistant policy.
-12. The response must not disclose filesystem paths, credentials, hidden
-    configuration, or internal exception details.
-
-## Important scope boundary
-
-The validator checks record structure, provenance, and version consistency.
-It does not prove that every arbitrary natural-language sentence is entailed
-by the evidence. For this reason, the initial implementation uses controlled
-response templates and source-backed record fields rather than unrestricted
-LLM-generated prose.
-
-## Current limitations
-
-- The initial implementation is deterministic and does not use an LLM.
-- It is not a predictive model.
-- It does not provide health or regulatory advice.
-- It does not establish causation.
-- Synthetic data must be identified as synthetic when that metadata is
-  available in the approved source.
-- Missing synthetic-data metadata must not be replaced by an unsupported claim.
-- API authentication and authorization must follow the existing application's
-  access-control requirements. This router does not independently implement
-  an identity system.
-
-## Release gate
-
-Do not mark the assistant ready for acceptance until:
-
-- unit tests pass
-- API tests pass
-- unsupported and unsafe requests are rejected
-- existing Operational View tests still pass
-- existing Data Intelligence endpoints still pass
-- the frontend integration is tested separately
-- source versions, limitations, and synthetic-data status are confirmed
-  against the actual generated outputs
-</file>
-
-<file path="docs/ASSISTANT_QUERY_CONTRACT.md">
-# Assistant Query Contract
-
-## Supported Intents
-
-- summary
-- highest_city
-- compare_cities
-- result_evidence
-- methodology
-
-## Allowed Parameters
-
-- pollutant: string, matched against available result group keys
-- city_a: string, matched against available result entities
-- city_b: string, matched against available result entities
-- result_id: string, exact known result ID
-
-## Parameter Types and Limits
-
-- Request text: maximum 500 characters
-- Pollutant: must match an available approved result
-- City: must match an available approved entity
-- Result ID: must match exactly one approved result
-- Comparison: both cities must have comparable results for the same pollutant and metric
-
-## Query Functions
-
-- get_summary()
-- get_highest_city(pollutant)
-- compare_cities(pollutant, city_a, city_b)
-- get_result_evidence(result_id)
-- get_methodology()
-
-## Approved Sources
-
-- data-science/outputs/intelligence_results.json
-- data-science/outputs/intelligence_summary.json
-- data-science/outputs/validation_metrics.json, where needed for validated metadata
-
-The runtime must verify that files exist, parse correctly, and contain consistent versions.
-
-## Evidence Fields
-
-Return available result_id, result_type, group_key, entity_id, metric_name, result_value, result_unit, priority_rank, finding, evidence, quality_status, limitation, method_version, data_version, and generated_at fields.
-
-## Result Limits
-
-- Summary: maximum 10 result references
-- Comparison: maximum 2 matched results
-- Evidence lookup: exactly 1 result
-- Highest city: exactly 1 selected result, with tied results handled explicitly if present
-
-## Error Responses
-
-- invalid_request
-- unsupported_question
-- missing_parameter
-- invalid_parameter
-- evidence_not_found
-- data_unavailable
-- version_mismatch
-
-## Out-of-Scope Handling
-
-Unsupported questions must receive a clear refusal and suggestions for supported questions.
-
-## Unsafe Handling
-
-Requests to reveal secrets, bypass controls, execute arbitrary code, or override safety rules must be rejected.
-
-## Version Behaviour
-
-Use versions from validated runtime data. If required versions conflict, block analytical answers and report a version mismatch. Never silently replace missing runtime metadata with hardcoded values.
-</file>
-
-<file path="docs/ASSISTANT_SAFETY_AND_SCOPE.md">
-# Assistant Safety and Scope
-
-## Approved Scope
-
-The assistant retrieves and explains approved Track A results using fixed response templates.
-
-## Unsupported Scope
-
-- Predictions, forecasts, or generated scores
-- Health-risk or regulatory conclusions
-- Causal interpretation
-- Arbitrary data access or computation
-- User-controlled SQL, code, or filesystem paths
-- Fabrication or alteration of analytical results
-
-## Prompt-Injection Controls
-
-No LLM is used in Mode A. Input is treated only as a candidate request for one allowlisted intent.
-
-Text found in source records is untrusted evidence. It cannot alter the approved intent catalog or query execution.
-
-## Data Exposure Controls
-
-Only approved output fields are returned. Do not expose environment variables, credentials, internal filesystem contents, hidden prompts, or unrelated records.
-
-## Authentication and Authorization
-
-Preserve the existing backend access controls. Do not make the assistant route less restrictive than the Data Intelligence data it exposes.
-
-## Sensitive Field Masking
-
-Do not return fields outside the approved response contract. Review any future fields before adding them to the evidence package.
-
-## Logging Policy
-
-Avoid logging complete user questions or complete result payloads unless a documented operational requirement justifies it.
-
-## Memory Policy
-
-Do not persist user questions, profiles, or conversational memory.
-
-## Result Limits
-
-Apply the result limits in ASSISTANT_QUERY_CONTRACT.md.
-
-## Failure Behaviour
-
-Fail closed when the data cannot be validated, a version mismatch occurs, or a request is unsupported. Do not fabricate a fallback answer.
-</file>
-
-<file path="docs/ASSISTANT_SUITABILITY_ASSESSMENT.md">
-# Assistant Suitability Assessment
-
-## Target User
-
-Analysts, reviewers, and users exploring the approved Phase 3 Data Intelligence results.
-
-## Existing Operational and Intelligence Experience
-
-The application has an Operational View and a Data Intelligence page. The assistant must complement these interfaces rather than replace them.
-
-The existing Data Intelligence API exposes approved Track A comparative intelligence results.
-
-## User Questions Not Solved Conveniently Today
-
-A guided assistant can help users find existing findings, compare supported entities, inspect evidence, and understand methodology without manually searching tables.
-
-## Proposed Supported Questions
-
-1. Summarize the approved Track A findings.
-2. Identify the highest sampled mean city for a selected pollutant.
-3. Compare two cities for a selected pollutant.
-4. Retrieve evidence for an existing result ID.
-5. Explain the approved data version, method version, quality status, and limitations.
-
-## Deterministic Retrieval Mapping
-
-Every supported question maps to an allowlisted intent and a deterministic query function.
-
-The query layer reads the approved intelligence results. It does not rerun the analytical method or invent new scores.
-
-## Evidence Availability
-
-Expected fields include:
-
-- result_id
-- result_type
-- group_key
-- entity_id
-- metric_name
-- result_value
-- result_unit
-- priority_rank
-- finding
-- evidence
-- quality_status
-- limitation
-- method_version
-- data_version
-- generated_at
-
-Optional fields must not be assumed to exist.
-
-## Security and Privacy
-
-- Reject unsupported requests.
-- Restrict access to approved query functions.
-- Do not expose environment variables, secrets, filesystem access, or arbitrary queries.
-- Do not store conversational history persistently.
-- Preserve existing authentication and authorization.
-- Treat result text as untrusted evidence, never as executable instructions.
-
-## Deployment Feasibility
-
-The existing Data Intelligence backend is the proposed integration point. The final route and deployment configuration must be confirmed against the current repository before integration.
-
-## Value Beyond Filters and Tables
-
-The assistant provides a guided route to approved findings, comparisons, and evidence. If user testing shows that it merely duplicates existing filters, the suitability decision must be reconsidered.
-
-## Deterministic Versus LLM Decision
-
-Mode A — Deterministic Guided Assistant.
-
-A fixed intent catalog and response templates are sufficient for the initial scope. No LLM is required.
-
-## Limitations
-
-The analytical results use synthetic data. Comparisons describe the available sample only and must not be interpreted as verified real-world pollution rankings, health-risk assessments, regulatory compliance conclusions, or predictions.
-
-## Result
-
-DETERMINISTIC ASSISTANT SUITABLE — LLM NOT REQUIRED
-
-This is an initial design assessment, not final integration approval. Final approval depends on repository integration, security review, and the required test results.
-</file>
-
-<file path="docs/GROUNDED_RESPONSE_CONTRACT.md">
-# Grounded Response Contract
-
-Every successful response must contain:
-
-- status: success
-- intent: allowlisted intent
-- answer: deterministic text based on retrieved evidence
-- evidence: references to the source results
-- data_version: validated runtime data version
-- method_version: validated runtime method version
-- quality_status: actual status from the approved source
-- limitation: relevant source limitation
-- generated_at: source generation timestamp where available
-
-A response must not invent values, ranks, records, versions, validation results, or timestamps.
-
-Numeric values must be copied from approved records without recalculation. If two records cannot be safely compared, return a bounded error instead.
-
-If evidence is missing, inconsistent, or stale according to the project's defined validation rules, do not produce an unsupported analytical answer.
-
-Unsupported requests return status "unsupported" with a brief explanation and supported question suggestions.
-
-No persistent conversational memory is required.
-</file>
-
-<file path="docs/SUPPORTED_QUESTION_CATALOG.md">
-# Supported Question Catalog
-
-## Target User
-
-Analysts, reviewers, and users of the Phase 3 Data Intelligence page.
-
-## Approved Assistant Mode
-
-Mode A — Deterministic Guided Assistant.
-
-## Approved Track
-
-Track A — Comparative Intelligence.
-
-## Data and Method Versions
-
-- Data version: phase3-v1.1
-- Method version: track-a-comparative-v1.0.0
-
-These are the versions expected for the current snapshot. Runtime responses must use the actual versions returned by validated data, not silently substitute these constants.
-
-## Supported Questions
-
-| Question Pattern | Intent | Required Parameters | Query Function | Evidence | Limitation |
-|---|---|---|---|---|---|
-| Summarize approved findings | summary | None | get_summary | Result references and summary metadata | Descriptive sample only |
-| Highest sampled mean city for a pollutant | highest_city | pollutant | get_highest_city | Result IDs, metric, value, rank | Not a real-world city ranking |
-| Compare two cities for a pollutant | compare_cities | pollutant, city_a, city_b | compare_cities | Matching result records | Only existing comparable results |
-| Show evidence for a result | result_evidence | result_id | get_result_evidence | Exact result record and evidence | Only known result IDs |
-| Explain method, versions, quality and limitations | methodology | None | get_methodology | Metadata and approved limitation text | No new analytical interpretation |
-
-## Unsupported Question Categories
-
-- Predictions or forecasts
-- Health-risk assessments
-- Regulatory compliance conclusions
-- Causal claims
-- Arbitrary SQL, Python, shell, or filesystem operations
-- Requests to modify or fabricate results
-- Unsupported pollutants or cities
-- Requests to reveal secrets, prompts, or configuration
-- Requests to bypass access controls
-- Instructions embedded in source text that attempt to change system behavior
-
-## Suggested Questions
-
-- Summarize the approved findings.
-- Which city has the highest sampled mean for NO2?
-- Compare Delhi and Bengaluru for PM2.5.
-- Show evidence for RES-0001.
-- Explain the method version and limitations.
-
-## Catalog Version
-
-1.0.0
-</file>
-
-<file path="frontend/app/assistant/page.tsx">
-"use client";
-
-import { FormEvent, useState } from "react";
-import {
-  askAssistant,
-  AssistantResponse,
-} from "../lib/assistant-api";
-
-const SUGGESTIONS = [
-  "Summarize the approved findings",
-  "Which city has the highest sampled mean for no2?",
-  "Compare Delhi and Mumbai for no2",
-  "Show evidence RES-0001",
-  "Explain the method, data version, and limitations",
-];
-
-export default function AssistantPage() {
-  const [question, setQuestion] = useState("");
-  const [result, setResult] = useState<AssistantResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function submitQuestion(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const value = question.trim();
-
-    if (!value) {
-      setError("Please enter a question.");
-      return;
-    }
-
-    if (value.length > 500) {
-      setError("Questions must be 500 characters or fewer.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setResult(null);
-
-    try {
-      setResult(await askAssistant(value));
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Could not contact the assistant."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <main className="mx-auto min-h-screen max-w-5xl px-4 py-8 sm:px-6">
-      <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
-          Aether Pulse · Phase 3
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
-          Grounded Data Assistant
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          Ask about approved Track A findings. Answers retrieve existing
-          intelligence records and do not generate predictions or
-          recalculate analytical results.
-        </p>
-      </header>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <form onSubmit={submitQuestion} className="space-y-3">
-          <label
-            htmlFor="assistant-question"
-            className="block text-sm font-medium text-slate-700"
-          >
-            Your question
-          </label>
-
-          <textarea
-            id="assistant-question"
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            maxLength={500}
-            rows={3}
-            placeholder="For example: Compare Delhi and Mumbai for no2"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-          />
-
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-xs text-slate-500">
-              {question.length}/500 characters
-            </span>
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
-            >
-              {loading ? "Checking evidence..." : "Ask assistant"}
-            </button>
-          </div>
-        </form>
-
-        {error && (
-          <p role="alert" className="mt-4 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-      </section>
-
-      <section className="mt-6">
-        <h2 className="text-sm font-semibold text-slate-800">
-          Suggested questions
-        </h2>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {SUGGESTIONS.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              onClick={() => {
-                setQuestion(suggestion);
-                setError("");
-              }}
-              className="rounded-full border border-slate-300 bg-white px-3 py-2 text-left text-sm text-slate-700 hover:border-sky-400 hover:bg-sky-50"
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {result && (
-        <section
-          aria-live="polite"
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Assistant response
-            </h2>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              {result.status}
-            </span>
-          </div>
-
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
-            {result.answer}
-          </p>
-
-          {result.grounding && (
-            <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-              <p>Mode: {result.grounding.mode ?? "Not provided"}</p>
-              <p>
-                LLM used:{" "}
-                {result.grounding.llm_used === undefined
-                  ? "Not provided"
-                  : result.grounding.llm_used
-                    ? "Yes"
-                    : "No"}
-              </p>
-              <p>
-                Generated findings:{" "}
-                {result.grounding.generated_findings === undefined
-                  ? "Not provided"
-                  : result.grounding.generated_findings
-                    ? "Yes"
-                    : "No"}
-              </p>
-            </div>
-          )}
-
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Supporting evidence ({result.evidence?.length ?? 0})
-            </h3>
-
-            {result.evidence?.length ? (
-              <div className="mt-3 space-y-3">
-                {result.evidence.map((record, index) => (
-                  <details
-                    key={record.result_id ?? `record-${index}`}
-                    className="rounded-xl border border-slate-200"
-                  >
-                    <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-800">
-                      {record.result_id ?? `Evidence ${index + 1}`}
-                      {record.entity_id ? ` · ${record.entity_id}` : ""}
-                      {record.metric_name ? ` · ${record.metric_name}` : ""}
-                    </summary>
-
-                    <div className="space-y-3 border-t border-slate-200 px-4 py-3 text-sm">
-                      {record.finding && (
-                        <p className="leading-6 text-slate-700">
-                          {record.finding}
-                        </p>
-                      )}
-
-                      {record.result_value !== undefined && (
-                        <p className="text-slate-700">
-                          Recorded value: {record.result_value}{" "}
-                          {record.result_unit ?? ""}
-                        </p>
-                      )}
-
-                      {record.priority_rank !== undefined && (
-                        <p className="text-slate-700">
-                          Recorded rank: {record.priority_rank}
-                        </p>
-                      )}
-
-                      {record.data_version && (
-                        <p className="text-slate-700">
-                          Data version: {record.data_version}
-                        </p>
-                      )}
-
-                      {record.method_version && (
-                        <p className="text-slate-700">
-                          Method version: {record.method_version}
-                        </p>
-                      )}
-
-                      {record.quality_status && (
-                        <p className="text-slate-700">
-                          Quality status: {record.quality_status}
-                        </p>
-                      )}
-
-                      {record.limitation && (
-                        <p className="rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-800">
-                          Limitation: {record.limitation}
-                        </p>
-                      )}
-                    </div>
-                  </details>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-3 text-sm text-slate-500">
-                No supporting evidence was returned.
-              </p>
-            )}
-          </div>
-        </section>
-      )}
-
-      <footer className="mt-8 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
-        The data is synthetic and intended for descriptive comparison only.
-        It is not a verified real-world measurement, health-risk assessment,
-        regulatory assessment, or prediction.
-      </footer>
-    </main>
-  );
-}
-</file>
-
-<file path="frontend/app/lib/assistant-api.ts">
-const ASSISTANT_API_URL =
-  process.env.NEXT_PUBLIC_ASSISTANT_API_URL ||
-  "http://localhost:8003";
-
-export type AssistantEvidence = {
-  result_id?: string;
-  result_type?: string;
-  entity_id?: string;
-  group_key?: string;
-  metric_name?: string;
-  result_value?: number;
-  result_unit?: string;
-  priority_rank?: number;
-  finding?: string;
-  quality_status?: string;
-  limitation?: string;
-  data_version?: string;
-  method_version?: string;
-  [key: string]: unknown;
-};
-
-export type AssistantResponse = {
-  status: string;
-  answer: string;
-  evidence: AssistantEvidence[];
-  validation?: {
-    valid?: boolean;
-    errors?: string[];
-    warnings?: string[];
-    record_count?: number;
-  };
-  grounding?: {
-    mode?: string;
-    llm_used?: boolean;
-    generated_findings?: boolean;
-    source?: string;
-  };
-};
-
-export async function askAssistant(
-  question: string
-): Promise<AssistantResponse> {
-  const response = await fetch(
-    `${ASSISTANT_API_URL}/api/assistant/ask`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ question }),
-      cache: "no-store",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Assistant request failed with HTTP ${response.status}.`
-    );
-  }
-
-  return response.json();
-}
-</file>
-
-<file path="tests/assistant/test_assistant_service.py">
-from assistant.core import assistant_service
-
-
-def sample_record():
-    return {
-        "result_id": "RES-0001",
-        "result_type": "comparative_intelligence",
-        "record_id": "REC-0001",
-        "entity_id": "delhi",
-        "group_key": "delhi::no2::µg/m³",
-        "metric_name": "no2_mean",
-        "result_value": 52.89333333333334,
-        "result_unit": "µg/m³",
-        "priority_rank": 1,
-        "finding": "Existing source finding.",
-        "evidence": "Existing source evidence.",
-        "data_version": "phase3-v1.1",
-        "method_version": "track-a-comparative-v1.0.0",
-        "generated_at": "2026-01-01T00:00:00Z",
-        "quality_status": "reviewed",
-        "limitation": "Synthetic data with limited temporal coverage.",
-    }
-
-
-def test_result_evidence_question_returns_source_record(monkeypatch):
-    record = sample_record()
-
-    monkeypatch.setattr(assistant_service, "check_question", lambda question: True)
-    monkeypatch.setattr(
-        assistant_service,
-        "classify_question",
-        lambda question: {
-            "intent": "result_evidence",
-            "parameters": {"result_id": "RES-0001"},
-        },
-    )
-    monkeypatch.setattr(
-        assistant_service,
-        "load_results",
-        lambda path: [record],
-    )
-    monkeypatch.setattr(
-        assistant_service,
-        "load_summary",
-        lambda path: {},
-    )
-    monkeypatch.setattr(
-        assistant_service,
-        "get_result_evidence",
-        lambda results, result_id: (
-            record if result_id == "RES-0001" else None
-        ),
-    )
-
-    response = assistant_service.answer_question("Show evidence RES-0001")
-
-    assert response["status"] == "ok"
-    assert response["grounding"]["llm_used"] is False
-    assert response["evidence"][0]["result_id"] == "RES-0001"
-    assert response["evidence"][0]["result_value"] == record["result_value"]
-
-
-def test_unsupported_question_is_not_answered(monkeypatch):
-    monkeypatch.setattr(assistant_service, "check_question", lambda question: True)
-    monkeypatch.setattr(
-        assistant_service,
-        "classify_question",
-        lambda question: None,
-    )
-
-    response = assistant_service.answer_question(
-        "Predict next month's pollution and its health impact"
-    )
-
-    assert response["status"] == "unsupported"
-    assert response["evidence"] == []
-    assert response["validation"]["valid"] is False
-
-
-def test_empty_question_is_rejected():
-    response = assistant_service.answer_question("   ")
-
-    assert response["status"] == "refused"
-    assert response["evidence"] == []
-
-
-def test_overlong_question_is_rejected():
-    response = assistant_service.answer_question("x" * 501)
-
-    assert response["status"] == "refused"
-    assert response["evidence"] == []
-</file>
-
-<file path="tests/assistant/test_grounding.py">
-from assistant.core.evidence_builder import build_evidence_package
-from assistant.core.response_validator import (
-    validate_answer_records,
-    validate_evidence_package,
-)
-
-
-def sample_record():
-    return {
-        "result_id": "RES-0001",
-        "result_type": "comparative_intelligence",
-        "entity_id": "delhi",
-        "group_key": "delhi::no2::µg/m³",
-        "metric_name": "no2_mean",
-        "result_value": 52.89333333333334,
-        "result_unit": "µg/m³",
-        "priority_rank": 1,
-        "finding": "Example finding from an existing approved result.",
-        "evidence": "Example source evidence.",
-        "data_version": "phase3-v1.1",
-        "method_version": "track-a-comparative-v1.0.0",
-        "generated_at": "2026-01-01T00:00:00Z",
-        "quality_status": "reviewed",
-        "limitation": "Synthetic data; limited temporal coverage.",
-    }
-
-
-def test_valid_record_produces_valid_evidence_package():
-    package = build_evidence_package(
-        question="Show evidence RES-0001",
-        intent="result_evidence",
-        result_records=[sample_record()],
-    )
-
-    result = validate_evidence_package(package)
-
-    assert result["valid"] is True
-    assert result["record_count"] == 1
-    assert package["source"]["result_ids"] == ["RES-0001"]
-    assert package["source"]["data_versions"] == ["phase3-v1.1"]
-    assert package["source"]["method_versions"] == [
-        "track-a-comparative-v1.0.0"
-    ]
-
-
-def test_empty_evidence_is_rejected():
-    package = build_evidence_package(
-        question="Show evidence RES-9999",
-        intent="result_evidence",
-        result_records=[],
-    )
-
-    result = validate_evidence_package(package)
-
-    assert result["valid"] is False
-    assert any("No approved evidence" in error for error in result["errors"])
-
-
-def test_mixed_data_versions_are_rejected():
-    first = sample_record()
-    second = sample_record()
-    second["result_id"] = "RES-0002"
-    second["data_version"] = "different-version"
-
-    package = build_evidence_package(
-        question="Compare records",
-        intent="summary",
-        result_records=[first, second],
-    )
-
-    result = validate_evidence_package(package)
-
-    assert result["valid"] is False
-    assert any("inconsistent data versions" in error for error in result["errors"])
-
-
-def test_missing_method_version_is_rejected():
-    record = sample_record()
-    record["method_version"] = None
-
-    package = build_evidence_package(
-        question="Show evidence RES-0001",
-        intent="result_evidence",
-        result_records=[record],
-    )
-
-    result = validate_evidence_package(package)
-
-    assert result["valid"] is False
-    assert any("Method version is missing" in error for error in result["errors"])
-
-
-def test_answer_record_must_belong_to_evidence_package():
-    package = build_evidence_package(
-        question="Show evidence RES-0001",
-        intent="result_evidence",
-        result_records=[sample_record()],
-    )
-
-    good = validate_answer_records(
-        [{"result_id": "RES-0001"}],
-        package,
-    )
-    bad = validate_answer_records(
-        [{"result_id": "RES-9999"}],
-        package,
-    )
-
-    assert good["valid"] is True
-    assert bad["valid"] is False
-    assert any("not backed" in error for error in bad["errors"])
-
-
-def test_boolean_is_not_accepted_as_a_metric_value():
-    record = sample_record()
-    record["result_value"] = True
-
-    package = build_evidence_package(
-        question="Show evidence RES-0001",
-        intent="result_evidence",
-        result_records=[record],
-    )
-
-    result = validate_evidence_package(package)
-
-    assert result["valid"] is False
-    assert any("non-numeric metric value" in error for error in result["errors"])
-
-
-def test_quality_metadata_can_be_required():
-    record = sample_record()
-    record.pop("quality_status")
-
-    package = build_evidence_package(
-        question="Show evidence RES-0001",
-        intent="result_evidence",
-        result_records=[record],
-    )
-
-    result = validate_evidence_package(
-        package,
-        require_quality_metadata=True,
-    )
-
-    assert result["valid"] is False
-    assert any("quality metadata is unavailable" in error for error in result["errors"])
-</file>
-
-<file path="architecture/ARCHITECTURE.md">
-# Aether Pulse — Architecture
-
-## Project
-
-**PoC:** 32  
-**Name:** Air Quality Heatmap  
-**Dashboard:** Aether Pulse  
-**Rail:** Data & Intelligence
-
----
-
-## 1. Architecture Overview
-
-Aether Pulse is a production-style air-quality intelligence dashboard.
-
-The system follows a three-layer architecture:
-
-1. Data & Intelligence Layer
-2. FastAPI Backend Layer
-3. Next.js Visualization Layer
-
-```text
-OpenAQ ───────────────┐
-                      │
-WorldPop ─────────────┤
-                      ▼
-              Data Adapters
-                      │
-                      ▼
-             FastAPI Backend
-                      │
-        ┌─────────────┼─────────────┐
-        │             │             │
-   Air Quality    Exposure      Comparison
-     Service       Scoring        Service
-        │             │             │
-        └─────────────┼─────────────┘
-                      │
-                 JSON / GeoJSON
-                      │
-                      ▼
-              Next.js Frontend
-                      │
-        ┌─────────────┼─────────────┐
-        │             │             │
-        ▼             ▼             ▼
-      Map          Charts       Intelligence
-                                  Sidebar
-                        
-2. Frontend
-Technology
-Next.js 14+
-App Router
-TypeScript
-Tailwind CSS
-shadcn/ui
-Leaflet / React Leaflet
-Recharts
-Responsibilities
-
-The frontend is responsible for:
-
-Dashboard presentation
-Interactive map
-Pollutant selection
-City comparison
-Search and filtering
-Time-series visualization
-Exposure-score presentation
-Intelligence explanations
-Downloading sample data
-Loading/error/fallback states
-
-The frontend does not perform the primary data processing.
-
-3. Backend
-Technology
-Python
-FastAPI
-Pandas
-GeoPandas where required
-Responsibilities
-
-The backend is responsible for:
-
-Data ingestion
-Data normalization
-Air-quality processing
-Exposure scoring
-City comparison
-GeoJSON generation
-API responses
-Fallback handling
-
-Primary API:
-
-GET /health
-
-GET /api/air-quality?pollutant=pm25
-4. Data Sources
-OpenAQ
-
-Primary source for air-quality observations.
-
-Used for:
-
-Pollutant measurements
-Monitoring locations
-Time-series observations
-Location metadata
-WorldPop
-
-Population data source.
-
-Used for:
-
-Population context
-Exposure estimation
-Population-weighted intelligence
-5. Data Adapter Pattern
-
-External sources are accessed through dedicated adapters.
-
-backend/
-└── app/
-    └── adapters/
-        ├── openaq.py
-        └── worldpop.py
-
-Adapters isolate external API logic from business logic.
-
-This allows the dashboard to continue operating if an external provider changes its API.
-
-6. Services
-
-Business logic is separated from external data access.
-
-backend/app/services/
-
-air_quality.py
-comparison.py
-exposure.py
-Air Quality Service
-
-Responsible for:
-
-Pollutant processing
-Observation normalization
-Map-ready records
-Exposure Service
-
-Responsible for:
-
-Population context
-Exposure scoring
-Risk-oriented insights
-Comparison Service
-
-Responsible for:
-
-City comparison
-Regional averages
-Relative differences
-7. API Response
-
-The map uses GeoJSON-compatible data.
-
-Each feature represents an air-quality observation or location.
-
-Conceptually:
-
-{
-  "type": "FeatureCollection",
-  "data_source": "OpenAQ",
-  "fallback": false,
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [longitude, latitude]
-      },
-      "properties": {
-        "city": "Example City",
-        "pollutant": "pm25",
-        "value": 42.5,
-        "unit": "µg/m³",
-        "population": 1000000,
-        "exposure_score": 68.4,
-        "source": "OpenAQ"
-      }
-    }
-  ]
-}
-8. Fallback Architecture
-
-The application must remain usable when a live data source fails.
-
-             Live API
-                │
-          ┌─────┴─────┐
-          │            │
-        Success       Error
-          │            │
-          ▼            ▼
-      Live Data    mock_data.json
-          │            │
-          └─────┬──────┘
-                ▼
-          FastAPI Response
-                │
-                ▼
-           Next.js UI
-
-Fallback data must be clearly identified in the interface.
-
-The user should never mistake synthetic fallback data for live observations.
-
-9. Frontend Layout
-
-The primary dashboard layout follows the Real Rails requirement:
-
-┌──────────────────────────────────────────────────────────────┐
-│                         AETHER PULSE                         │
-├───────────────────────────────────────┬──────────────────────┤
-│                                       │                      │
-│                                       │  Intelligence        │
-│                                       │  Sidebar             │
-│                                       │                      │
-│              AIR QUALITY MAP           │  • Key Metric       │
-│                                       │  • Why It Matters    │
-│                                       │  • Who Controls Rail │
-│                                       │  • Filters           │
-│                                       │  • Download Data     │
-│                                       │                      │
-│               70%                     │       30%            │
-│                                       │                      │
-├───────────────────────────────────────┴──────────────────────┤
-│                    Supporting Analytics                       │
-└──────────────────────────────────────────────────────────────┘
-
-The main visualization area occupies approximately 70% of the dashboard.
-
-The intelligence sidebar occupies 30%.
-
-10. Intelligence Sidebar
-
-The sidebar communicates meaning rather than simply displaying raw data.
-
-A — Primary Intelligence
-
-Examples:
-
-Current PM2.5 level
-Exposure score
-Locations monitored
-Population affected
-B — Why This Matters
-
-Explains the public-interest significance of the data.
-
-C — Who Controls the Rail
-
-Explains the institutions and infrastructure involved in collecting and operating air-quality intelligence.
-
-D — Controls
-
-Includes:
-
-Pollutant selector
-City search
-City comparison
-Relevant filters
-Interactive tooltips
-E — Sample Data
-
-Allows users to download representative data.
-
-11. Visual System
-
-Aether Pulse follows the Real Rails visual identity.
-
-Colors
-Background:       #030712
-Surface:          #0B1117
-Primary Accent:   #38BDF8
-Secondary Accent: #818CF8
-Border:           #1F2937
-Typography
-
-Preferred:
-
-Inter
-Geist Sans
-Visual Style
-High-end fintech terminal
-Real-time intelligence aesthetic
-Dark interface
-Subtle glassmorphism
-Minimal borders
-Cyan active-state glow
-Dense but readable information hierarchy
-12. Geospatial Rules
-
-Geographical coordinates must not be manually calculated with custom SVG or mathematical projection logic.
-
-Use professional geospatial/map libraries.
-
-Preferred implementation:
-
-Leaflet / React Leaflet
-GeoJSON
-GeoPandas
-Turf.js where spatial calculations are required
-13. Interaction Flow
-User selects pollutant
-        │
-        ▼
-Next.js requests API
-        │
-        ▼
-FastAPI processes data
-        │
-        ▼
-GeoJSON + intelligence data
-        │
-        ▼
-Map updates
-        │
-        ├──► Charts update
-        │
-        ├──► Exposure score updates
-        │
-        └──► Sidebar insights update
-
-The page should not require a full refresh when filters change.
-
-14. Error Handling
-
-The UI supports three primary states:
-
-Loading
-
-Clearly communicate that data is being retrieved.
-
-Live Data
-
-Indicate that the dashboard is using live source data.
-
-Fallback Data
-
-Indicate that live data was unavailable and local fallback data is being displayed.
-
-Users should also have a retry mechanism when live data fails.
-
-15. Security
-
-API credentials must never be hardcoded.
-
-Use environment variables:
-
-.env
-.env.example
-
-External API keys belong only in environment configuration.
-
-16. Repository Structure
-POC-32-AirQualityHeatmap-ParvathyCR/
-│
-├── architecture/
-│   └── ARCHITECTURE.md
-│
-├── backend/
-│   ├── app/
-│   │   ├── adapters/
-│   │   │   ├── openaq.py
-│   │   │   └── worldpop.py
-│   │   │
-│   │   ├── models/
-│   │   │   └── schemas.py
-│   │   │
-│   │   ├── services/
-│   │   │   ├── air_quality.py
-│   │   │   ├── comparison.py
-│   │   │   └── exposure.py
-│   │   │
-│   │   ├── utils/
-│   │   │   └── fallback.py
-│   │   │
-│   │   ├── config.py
-│   │   └── main.py
-│   │
-│   ├── data/
-│   │   └── mock_data.json
-│   │
-│   ├── .env
-│   ├── .env.example
-│   └── requirements.txt
-│
-├── frontend/
-│   ├── app/
-│   │   ├── components/
-│   │   │   ├── air-quality-dashboard.tsx
-│   │   │   ├── city-search-select.tsx
-│   │   │   ├── intelligence-sidebar.tsx
-│   │   │   └── leaflet-map.tsx
-│   │   │
-│   │   ├── lib/
-│   │   │   └── api.ts
-│   │   │
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   │
-│   └── package.json
-│
-└── README.md
-17. Architecture Principle
-
-Aether Pulse follows one core principle:
-
-Turn environmental data into actionable intelligence.
-
-The map shows where.
-
-The charts show how conditions change.
-
-The exposure score explains who may be affected.
-
-The intelligence sidebar explains why the information matters.
-
-The architecture therefore connects raw data, spatial visualization, analytics, and human-readable intelligence into one coherent Data & Intelligence experience.
-</file>
-
 <file path="backend/app/adapters/__init__.py">
 
 </file>
@@ -3154,6 +2125,69 @@ class WorldPopAdapter:
             time.sleep(1)
 
         raise TimeoutError("WorldPop task timed out")
+</file>
+
+<file path="backend/app/assistant/__init__.py">
+"""Grounded data assistant API package."""
+</file>
+
+<file path="backend/app/assistant/router.py">
+"""FastAPI routes for the deterministic grounded data assistant."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+
+from assistant.core.assistant_service import answer_question
+
+
+router = APIRouter(prefix="/api/assistant", tags=["Grounded Data Assistant"])
+
+
+class AssistantQuestion(BaseModel):
+    question: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="A question supported by the approved intelligence outputs.",
+    )
+
+
+class AssistantResponse(BaseModel):
+    status: str
+    answer: str
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    validation: dict[str, Any] = Field(default_factory=dict)
+    details: dict[str, Any] | None = None
+    evidence_package: dict[str, Any] | None = None
+    grounding: dict[str, Any] | None = None
+
+
+@router.post("/ask", response_model=AssistantResponse)
+def ask_grounded_assistant(request: AssistantQuestion) -> dict[str, Any]:
+    """Answer one supported question using approved output files only."""
+    try:
+        return answer_question(request.question)
+    except Exception as exc:
+        # Keep internals and configuration out of the public error response.
+        # The application logging layer can record the exception separately.
+        raise HTTPException(
+            status_code=500,
+            detail="The grounded assistant could not process this request safely.",
+        ) from exc
+
+
+@router.get("/health")
+def assistant_health() -> dict[str, str]:
+    """Report route availability, not the validity of the data files."""
+    return {
+        "status": "available",
+        "mode": "deterministic",
+        "llm_used": "false",
+    }
 </file>
 
 <file path="backend/app/models/__init__.py">
@@ -5555,6 +4589,383 @@ The input is synthetic and has limited temporal coverage. A passing implementati
 The current scripted validation result is `PASS` for the checks implemented and recorded in the validation output. Formal analytical-track approval remains a separate review decision.
 </file>
 
+<file path="docs/ASSISTANT_ARCHITECTURE.md">
+# Assistant Architecture
+
+## Existing Application
+
+- Operational View: existing application interface
+- Data Intelligence page: /data-intelligence
+- Intelligence API: /api/intelligence/results
+- Intelligence data: approved Track A JSON outputs
+
+## Assistant Mode
+
+Mode A — Deterministic Guided Assistant. No LLM is used.
+
+## Integration Route / Component
+
+Proposed backend route: POST /api/assistant/query
+
+Proposed frontend component: Data Intelligence assistant panel.
+
+These are new integration points and must be checked against existing routes before implementation.
+
+## Request Flow
+
+1. Validate request type and input length.
+2. Reject unsafe or out-of-scope requests.
+3. Match an allowlisted intent.
+4. Validate all required parameters.
+5. Execute the corresponding deterministic query.
+6. Build a structured evidence package.
+7. Validate evidence, versions, quality, and limitations.
+8. Return a templated response.
+
+## Query Catalog
+
+Only the five intents in SUPPORTED_QUESTION_CATALOG.md are permitted.
+
+## Deterministic Retrieval
+
+Read only the approved intelligence results and approved metadata. Never execute user-provided code, SQL, paths, or expressions.
+
+## Evidence Builder
+
+Every factual answer must include the result IDs or metadata references supporting it.
+
+## Optional LLM Explanation
+
+Not enabled. Reassess only if templates are demonstrably insufficient.
+
+## Response Validation
+
+Check that each answer is derived from retrieved evidence and that version and limitation metadata are present.
+
+## Authentication and Authorization
+
+Reuse existing application authorization. Do not create a public bypass route. Verify behavior in the current deployment before enabling the assistant.
+
+## Logging
+
+Do not log full conversation text by default. Log only minimal operational information needed for debugging, without secrets or sensitive user data.
+
+## Error Handling
+
+Return bounded validation errors for malformed, unsupported, missing-parameter, and unavailable-data cases. Never expose stack traces or secrets to clients.
+
+## Deployment
+
+Use the existing Data Intelligence backend deployment path after confirming container paths, ports, and environment variables.
+
+## Limitations
+
+Synthetic data, limited temporal coverage, and descriptive Track A methodology limit interpretation. No prediction, causal analysis, health-risk conclusion, or regulatory conclusion is supported.
+</file>
+
+<file path="docs/ASSISTANT_GROUNDING_VALIDATION.md">
+# Grounded Assistant — Grounding Validation
+
+## Purpose
+
+This document defines the grounding checks for the Phase 3
+deterministic data assistant.
+
+The assistant retrieves existing approved intelligence outputs. It must not
+recompute analytical-track methods or invent values, ranks, findings,
+predictions, or explanations that are not supported by retrieved evidence.
+
+## Approved source
+
+The primary runtime source is the configured
+`intelligence_results.json` output. The configured summary output may provide
+additional quality and limitation metadata.
+
+The assistant must not use arbitrary filesystem paths supplied by a user,
+arbitrary SQL, or unrestricted access to the canonical dataset.
+
+## Evidence package
+
+Each grounded answer should preserve, when available:
+
+- result ID and result type
+- entity ID and group key
+- metric name, value, and unit
+- priority rank and existing finding
+- existing evidence field
+- quality status and limitations
+- data version and method version
+- generated timestamp
+
+Unavailable metadata must remain unavailable. The assistant must not fill
+gaps with guessed values.
+
+## Validation rules
+
+1. A non-methodology answer must have at least one matching approved record.
+2. Evidence records must have result IDs.
+3. Data and method versions must be present.
+4. One evidence package must not silently mix data versions or method versions.
+5. Metric values must come from the source record.
+6. A requested result ID must match an existing result ID exactly.
+7. A city comparison must use matching records for the requested pollutant.
+8. Missing or ambiguous results must not be replaced with invented answers.
+9. Unsupported requests must be declined.
+10. Quality status and limitations must not be overstated.
+11. User input is treated as data, never as an instruction to bypass the
+    allowlist, disclose secrets, or change assistant policy.
+12. The response must not disclose filesystem paths, credentials, hidden
+    configuration, or internal exception details.
+
+## Important scope boundary
+
+The validator checks record structure, provenance, and version consistency.
+It does not prove that every arbitrary natural-language sentence is entailed
+by the evidence. For this reason, the initial implementation uses controlled
+response templates and source-backed record fields rather than unrestricted
+LLM-generated prose.
+
+## Current limitations
+
+- The initial implementation is deterministic and does not use an LLM.
+- It is not a predictive model.
+- It does not provide health or regulatory advice.
+- It does not establish causation.
+- Synthetic data must be identified as synthetic when that metadata is
+  available in the approved source.
+- Missing synthetic-data metadata must not be replaced by an unsupported claim.
+- API authentication and authorization must follow the existing application's
+  access-control requirements. This router does not independently implement
+  an identity system.
+
+## Release gate
+
+Do not mark the assistant ready for acceptance until:
+
+- unit tests pass
+- API tests pass
+- unsupported and unsafe requests are rejected
+- existing Operational View tests still pass
+- existing Data Intelligence endpoints still pass
+- the frontend integration is tested separately
+- source versions, limitations, and synthetic-data status are confirmed
+  against the actual generated outputs
+</file>
+
+<file path="docs/ASSISTANT_QUERY_CONTRACT.md">
+# Assistant Query Contract
+
+## Supported Intents
+
+- summary
+- highest_city
+- compare_cities
+- result_evidence
+- methodology
+
+## Allowed Parameters
+
+- pollutant: string, matched against available result group keys
+- city_a: string, matched against available result entities
+- city_b: string, matched against available result entities
+- result_id: string, exact known result ID
+
+## Parameter Types and Limits
+
+- Request text: maximum 500 characters
+- Pollutant: must match an available approved result
+- City: must match an available approved entity
+- Result ID: must match exactly one approved result
+- Comparison: both cities must have comparable results for the same pollutant and metric
+
+## Query Functions
+
+- get_summary()
+- get_highest_city(pollutant)
+- compare_cities(pollutant, city_a, city_b)
+- get_result_evidence(result_id)
+- get_methodology()
+
+## Approved Sources
+
+- data-science/outputs/intelligence_results.json
+- data-science/outputs/intelligence_summary.json
+- data-science/outputs/validation_metrics.json, where needed for validated metadata
+
+The runtime must verify that files exist, parse correctly, and contain consistent versions.
+
+## Evidence Fields
+
+Return available result_id, result_type, group_key, entity_id, metric_name, result_value, result_unit, priority_rank, finding, evidence, quality_status, limitation, method_version, data_version, and generated_at fields.
+
+## Result Limits
+
+- Summary: maximum 10 result references
+- Comparison: maximum 2 matched results
+- Evidence lookup: exactly 1 result
+- Highest city: exactly 1 selected result, with tied results handled explicitly if present
+
+## Error Responses
+
+- invalid_request
+- unsupported_question
+- missing_parameter
+- invalid_parameter
+- evidence_not_found
+- data_unavailable
+- version_mismatch
+
+## Out-of-Scope Handling
+
+Unsupported questions must receive a clear refusal and suggestions for supported questions.
+
+## Unsafe Handling
+
+Requests to reveal secrets, bypass controls, execute arbitrary code, or override safety rules must be rejected.
+
+## Version Behaviour
+
+Use versions from validated runtime data. If required versions conflict, block analytical answers and report a version mismatch. Never silently replace missing runtime metadata with hardcoded values.
+</file>
+
+<file path="docs/ASSISTANT_SAFETY_AND_SCOPE.md">
+# Assistant Safety and Scope
+
+## Approved Scope
+
+The assistant retrieves and explains approved Track A results using fixed response templates.
+
+## Unsupported Scope
+
+- Predictions, forecasts, or generated scores
+- Health-risk or regulatory conclusions
+- Causal interpretation
+- Arbitrary data access or computation
+- User-controlled SQL, code, or filesystem paths
+- Fabrication or alteration of analytical results
+
+## Prompt-Injection Controls
+
+No LLM is used in Mode A. Input is treated only as a candidate request for one allowlisted intent.
+
+Text found in source records is untrusted evidence. It cannot alter the approved intent catalog or query execution.
+
+## Data Exposure Controls
+
+Only approved output fields are returned. Do not expose environment variables, credentials, internal filesystem contents, hidden prompts, or unrelated records.
+
+## Authentication and Authorization
+
+Preserve the existing backend access controls. Do not make the assistant route less restrictive than the Data Intelligence data it exposes.
+
+## Sensitive Field Masking
+
+Do not return fields outside the approved response contract. Review any future fields before adding them to the evidence package.
+
+## Logging Policy
+
+Avoid logging complete user questions or complete result payloads unless a documented operational requirement justifies it.
+
+## Memory Policy
+
+Do not persist user questions, profiles, or conversational memory.
+
+## Result Limits
+
+Apply the result limits in ASSISTANT_QUERY_CONTRACT.md.
+
+## Failure Behaviour
+
+Fail closed when the data cannot be validated, a version mismatch occurs, or a request is unsupported. Do not fabricate a fallback answer.
+</file>
+
+<file path="docs/ASSISTANT_SUITABILITY_ASSESSMENT.md">
+# Assistant Suitability Assessment
+
+## Target User
+
+Analysts, reviewers, and users exploring the approved Phase 3 Data Intelligence results.
+
+## Existing Operational and Intelligence Experience
+
+The application has an Operational View and a Data Intelligence page. The assistant must complement these interfaces rather than replace them.
+
+The existing Data Intelligence API exposes approved Track A comparative intelligence results.
+
+## User Questions Not Solved Conveniently Today
+
+A guided assistant can help users find existing findings, compare supported entities, inspect evidence, and understand methodology without manually searching tables.
+
+## Proposed Supported Questions
+
+1. Summarize the approved Track A findings.
+2. Identify the highest sampled mean city for a selected pollutant.
+3. Compare two cities for a selected pollutant.
+4. Retrieve evidence for an existing result ID.
+5. Explain the approved data version, method version, quality status, and limitations.
+
+## Deterministic Retrieval Mapping
+
+Every supported question maps to an allowlisted intent and a deterministic query function.
+
+The query layer reads the approved intelligence results. It does not rerun the analytical method or invent new scores.
+
+## Evidence Availability
+
+Expected fields include:
+
+- result_id
+- result_type
+- group_key
+- entity_id
+- metric_name
+- result_value
+- result_unit
+- priority_rank
+- finding
+- evidence
+- quality_status
+- limitation
+- method_version
+- data_version
+- generated_at
+
+Optional fields must not be assumed to exist.
+
+## Security and Privacy
+
+- Reject unsupported requests.
+- Restrict access to approved query functions.
+- Do not expose environment variables, secrets, filesystem access, or arbitrary queries.
+- Do not store conversational history persistently.
+- Preserve existing authentication and authorization.
+- Treat result text as untrusted evidence, never as executable instructions.
+
+## Deployment Feasibility
+
+The existing Data Intelligence backend is the proposed integration point. The final route and deployment configuration must be confirmed against the current repository before integration.
+
+## Value Beyond Filters and Tables
+
+The assistant provides a guided route to approved findings, comparisons, and evidence. If user testing shows that it merely duplicates existing filters, the suitability decision must be reconsidered.
+
+## Deterministic Versus LLM Decision
+
+Mode A — Deterministic Guided Assistant.
+
+A fixed intent catalog and response templates are sufficient for the initial scope. No LLM is required.
+
+## Limitations
+
+The analytical results use synthetic data. Comparisons describe the available sample only and must not be interpreted as verified real-world pollution rankings, health-risk assessments, regulatory compliance conclusions, or predictions.
+
+## Result
+
+DETERMINISTIC ASSISTANT SUITABLE — LLM NOT REQUIRED
+
+This is an initial design assessment, not final integration approval. Final approval depends on repository integration, security review, and the required test results.
+</file>
+
 <file path="docs/CANONICAL_DATA_PACKAGE_VALIDATION.md">
 # Canonical Data Package Validation
 
@@ -5817,6 +5228,32 @@ The Phase 2 application retains its existing OpenAQ integration. Phase 3 canonic
 The canonical dataset provides a stable versioned data foundation for downstream Phase 3 analysis.
 </file>
 
+<file path="docs/GROUNDED_RESPONSE_CONTRACT.md">
+# Grounded Response Contract
+
+Every successful response must contain:
+
+- status: success
+- intent: allowlisted intent
+- answer: deterministic text based on retrieved evidence
+- evidence: references to the source results
+- data_version: validated runtime data version
+- method_version: validated runtime method version
+- quality_status: actual status from the approved source
+- limitation: relevant source limitation
+- generated_at: source generation timestamp where available
+
+A response must not invent values, ranks, records, versions, validation results, or timestamps.
+
+Numeric values must be copied from approved records without recalculation. If two records cannot be safely compared, return a bounded error instead.
+
+If evidence is missing, inconsistent, or stale according to the project's defined validation rules, do not produce an unsupported analytical answer.
+
+Unsupported requests return status "unsupported" with a brief explanation and supported question suggestions.
+
+No persistent conversational memory is required.
+</file>
+
 <file path="docs/INTELLIGENCE_API_CONTRACT.md">
 # Intelligence API Contract
 
@@ -5996,6 +5433,64 @@ python data-science/scripts/assess_representativeness.py
 Output: `data-science/outputs/representativeness_assessment.json`.
 </file>
 
+<file path="docs/SUPPORTED_QUESTION_CATALOG.md">
+# Supported Question Catalog
+
+## Target User
+
+Analysts, reviewers, and users of the Phase 3 Data Intelligence page.
+
+## Approved Assistant Mode
+
+Mode A — Deterministic Guided Assistant.
+
+## Approved Track
+
+Track A — Comparative Intelligence.
+
+## Data and Method Versions
+
+- Data version: phase3-v1.1
+- Method version: track-a-comparative-v1.0.0
+
+These are the versions expected for the current snapshot. Runtime responses must use the actual versions returned by validated data, not silently substitute these constants.
+
+## Supported Questions
+
+| Question Pattern | Intent | Required Parameters | Query Function | Evidence | Limitation |
+|---|---|---|---|---|---|
+| Summarize approved findings | summary | None | get_summary | Result references and summary metadata | Descriptive sample only |
+| Highest sampled mean city for a pollutant | highest_city | pollutant | get_highest_city | Result IDs, metric, value, rank | Not a real-world city ranking |
+| Compare two cities for a pollutant | compare_cities | pollutant, city_a, city_b | compare_cities | Matching result records | Only existing comparable results |
+| Show evidence for a result | result_evidence | result_id | get_result_evidence | Exact result record and evidence | Only known result IDs |
+| Explain method, versions, quality and limitations | methodology | None | get_methodology | Metadata and approved limitation text | No new analytical interpretation |
+
+## Unsupported Question Categories
+
+- Predictions or forecasts
+- Health-risk assessments
+- Regulatory compliance conclusions
+- Causal claims
+- Arbitrary SQL, Python, shell, or filesystem operations
+- Requests to modify or fabricate results
+- Unsupported pollutants or cities
+- Requests to reveal secrets, prompts, or configuration
+- Requests to bypass access controls
+- Instructions embedded in source text that attempt to change system behavior
+
+## Suggested Questions
+
+- Summarize the approved findings.
+- Which city has the highest sampled mean for NO2?
+- Compare Delhi and Bengaluru for PM2.5.
+- Show evidence for RES-0001.
+- Explain the method version and limitations.
+
+## Catalog Version
+
+1.0.0
+</file>
+
 <file path="docs/WEAK_CASE_AND_LIMITATION_REVIEW.md">
 # Weak-Case and Limitation Review
 
@@ -6024,6 +5519,262 @@ The machine-readable record `data-science/outputs/weak_case_review.json` contain
 
 ## Required handling
 Retain the sensitivity evidence with the exported results. Do not suppress ranking changes or describe the validation PASS as proof of real-world accuracy. Reassess the method if the canonical input schema, sampling design, or method version changes.
+</file>
+
+<file path="frontend/app/assistant/page.tsx">
+"use client";
+
+import { FormEvent, useState } from "react";
+import {
+  askAssistant,
+  AssistantResponse,
+} from "../lib/assistant-api";
+
+const SUGGESTIONS = [
+  "Summarize the Track A findings",
+  "Which city has the highest sampled mean for no2?",
+  "Compare Delhi and Mumbai for no2",
+  "Show evidence RES-0001",
+  "Explain the method, data version, and limitations",
+];
+
+export default function AssistantPage() {
+  const [question, setQuestion] = useState("");
+  const [result, setResult] = useState<AssistantResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submitQuestion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const value = question.trim();
+
+    if (!value) {
+      setError("Please enter a question.");
+      return;
+    }
+
+    if (value.length > 500) {
+      setError("Questions must be 500 characters or fewer.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      setResult(await askAssistant(value));
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not contact the assistant."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="mx-auto min-h-screen max-w-5xl px-4 py-8 sm:px-6">
+      <header className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
+          Aether Pulse · Phase 3
+        </p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+          Grounded Data Assistant
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Ask about approved Track A findings. Answers retrieve existing
+          intelligence records and do not generate predictions or
+          recalculate analytical results.
+        </p>
+      </header>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <form onSubmit={submitQuestion} className="space-y-3">
+          <label
+            htmlFor="assistant-question"
+            className="block text-sm font-medium text-slate-700"
+          >
+            Your question
+          </label>
+
+          <textarea
+            id="assistant-question"
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            maxLength={500}
+            rows={3}
+            placeholder="For example: Compare Delhi and Mumbai for no2"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          />
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs text-slate-500">
+              {question.length}/500 characters
+            </span>
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
+            >
+              {loading ? "Checking evidence..." : "Ask assistant"}
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <p role="alert" className="mt-4 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold text-slate-800">
+          Suggested questions
+        </h2>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {SUGGESTIONS.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => {
+                setQuestion(suggestion);
+                setError("");
+              }}
+              className="rounded-full border border-slate-300 bg-white px-3 py-2 text-left text-sm text-slate-700 hover:border-sky-400 hover:bg-sky-50"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {result && (
+        <section
+          aria-live="polite"
+          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Assistant response
+            </h2>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+              {result.status}
+            </span>
+          </div>
+
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+            {result.answer}
+          </p>
+
+          {result.grounding && (
+            <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+              <p>Mode: {result.grounding.mode ?? "Not provided"}</p>
+              <p>
+                LLM used:{" "}
+                {result.grounding.llm_used === undefined
+                  ? "Not provided"
+                  : result.grounding.llm_used
+                    ? "Yes"
+                    : "No"}
+              </p>
+              <p>
+                Generated findings:{" "}
+                {result.grounding.generated_findings === undefined
+                  ? "Not provided"
+                  : result.grounding.generated_findings
+                    ? "Yes"
+                    : "No"}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Supporting evidence ({result.evidence?.length ?? 0})
+            </h3>
+
+            {result.evidence?.length ? (
+              <div className="mt-3 space-y-3">
+                {result.evidence.map((record, index) => (
+                  <details
+                    key={record.result_id ?? `record-${index}`}
+                    className="rounded-xl border border-slate-200"
+                  >
+                    <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-800">
+                      {record.result_id ?? `Evidence ${index + 1}`}
+                      {record.entity_id ? ` · ${record.entity_id}` : ""}
+                      {record.metric_name ? ` · ${record.metric_name}` : ""}
+                    </summary>
+
+                    <div className="space-y-3 border-t border-slate-200 px-4 py-3 text-sm">
+                      {record.finding && (
+                        <p className="leading-6 text-slate-700">
+                          {record.finding}
+                        </p>
+                      )}
+
+                      {record.result_value !== undefined && (
+                        <p className="text-slate-700">
+                          Recorded value: {record.result_value}{" "}
+                          {record.result_unit ?? ""}
+                        </p>
+                      )}
+
+                      {record.priority_rank !== undefined && (
+                        <p className="text-slate-700">
+                          Recorded rank: {record.priority_rank}
+                        </p>
+                      )}
+
+                      {record.data_version && (
+                        <p className="text-slate-700">
+                          Data version: {record.data_version}
+                        </p>
+                      )}
+
+                      {record.method_version && (
+                        <p className="text-slate-700">
+                          Method version: {record.method_version}
+                        </p>
+                      )}
+
+                      {record.quality_status && (
+                        <p className="text-slate-700">
+                          Quality status: {record.quality_status}
+                        </p>
+                      )}
+
+                      {record.limitation && (
+                        <p className="rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+                          Limitation: {record.limitation}
+                        </p>
+                      )}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">
+                No supporting evidence was returned.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      <footer className="mt-8 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
+        The data is synthetic and intended for descriptive comparison only.
+        It is not a verified real-world measurement, health-risk assessment,
+        regulatory assessment, or prediction.
+      </footer>
+    </main>
+  );
+}
 </file>
 
 <file path="frontend/app/components/air-quality-map.tsx">
@@ -7518,6 +7269,71 @@ export async function getPopulation(
   return typeof data.population === "number"
     ? data.population
     : null;
+}
+</file>
+
+<file path="frontend/app/lib/assistant-api.ts">
+const ASSISTANT_API_URL =
+  process.env.NEXT_PUBLIC_ASSISTANT_API_URL ||
+  "http://localhost:8003";
+
+export type AssistantEvidence = {
+  result_id?: string;
+  result_type?: string;
+  entity_id?: string;
+  group_key?: string;
+  metric_name?: string;
+  result_value?: number;
+  result_unit?: string;
+  priority_rank?: number;
+  finding?: string;
+  quality_status?: string;
+  limitation?: string;
+  data_version?: string;
+  method_version?: string;
+  [key: string]: unknown;
+};
+
+export type AssistantResponse = {
+  status: string;
+  answer: string;
+  evidence: AssistantEvidence[];
+  validation?: {
+    valid?: boolean;
+    errors?: string[];
+    warnings?: string[];
+    record_count?: number;
+  };
+  grounding?: {
+    mode?: string;
+    llm_used?: boolean;
+    generated_findings?: boolean;
+    source?: string;
+  };
+};
+
+export async function askAssistant(
+  question: string
+): Promise<AssistantResponse> {
+  const response = await fetch(
+    `${ASSISTANT_API_URL}/api/assistant/ask`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question }),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Assistant request failed with HTTP ${response.status}.`
+    );
+  }
+
+  return response.json();
 }
 </file>
 
@@ -9238,6 +9054,260 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+</file>
+
+<file path="tests/assistant/test_assistant_service.py">
+from assistant.core import assistant_service
+
+
+def sample_record():
+    return {
+        "result_id": "RES-0001",
+        "result_type": "comparative_intelligence",
+        "record_id": "REC-0001",
+        "entity_id": "delhi",
+        "group_key": "delhi::no2::µg/m³",
+        "metric_name": "no2_mean",
+        "result_value": 52.89333333333334,
+        "result_unit": "µg/m³",
+        "priority_rank": 1,
+        "finding": "Existing source finding.",
+        "evidence": "Existing source evidence.",
+        "data_version": "phase3-v1.1",
+        "method_version": "track-a-comparative-v1.0.0",
+        "generated_at": "2026-01-01T00:00:00Z",
+        "quality_status": "reviewed",
+        "limitation": "Synthetic data with limited temporal coverage.",
+    }
+
+
+def test_result_evidence_question_returns_source_record(monkeypatch):
+    record = sample_record()
+
+    monkeypatch.setattr(assistant_service, "check_question", lambda question: True)
+    monkeypatch.setattr(
+        assistant_service,
+        "classify_question",
+        lambda question: {
+            "intent": "result_evidence",
+            "parameters": {"result_id": "RES-0001"},
+        },
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "load_results",
+        lambda path: [record],
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "load_summary",
+        lambda path: {},
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "get_result_evidence",
+        lambda results, result_id: (
+            record if result_id == "RES-0001" else None
+        ),
+    )
+
+    response = assistant_service.answer_question("Show evidence RES-0001")
+
+    assert response["status"] == "ok"
+    assert response["grounding"]["llm_used"] is False
+    assert response["evidence"][0]["result_id"] == "RES-0001"
+    assert response["evidence"][0]["result_value"] == record["result_value"]
+
+
+def test_unsupported_question_is_not_answered(monkeypatch):
+    monkeypatch.setattr(assistant_service, "check_question", lambda question: True)
+    monkeypatch.setattr(
+        assistant_service,
+        "classify_question",
+        lambda question: None,
+    )
+
+    response = assistant_service.answer_question(
+        "Predict next month's pollution and its health impact"
+    )
+
+    assert response["status"] == "unsupported"
+    assert response["evidence"] == []
+    assert response["validation"]["valid"] is False
+
+
+def test_empty_question_is_rejected():
+    response = assistant_service.answer_question("   ")
+
+    assert response["status"] == "refused"
+    assert response["evidence"] == []
+
+
+def test_overlong_question_is_rejected():
+    response = assistant_service.answer_question("x" * 501)
+
+    assert response["status"] == "refused"
+    assert response["evidence"] == []
+
+
+def test_evidence_question_with_the_and_result_is_supported():
+    from assistant.core.intent_router import classify_question
+
+    response = classify_question(
+        "Show the evidence for result RES-0001"
+    )
+
+    assert response["intent"] == "result_evidence"
+    assert response["parameters"]["result_id"] == "RES-0001"
+</file>
+
+<file path="tests/assistant/test_grounding.py">
+from assistant.core.evidence_builder import build_evidence_package
+from assistant.core.response_validator import (
+    validate_answer_records,
+    validate_evidence_package,
+)
+
+
+def sample_record():
+    return {
+        "result_id": "RES-0001",
+        "result_type": "comparative_intelligence",
+        "entity_id": "delhi",
+        "group_key": "delhi::no2::µg/m³",
+        "metric_name": "no2_mean",
+        "result_value": 52.89333333333334,
+        "result_unit": "µg/m³",
+        "priority_rank": 1,
+        "finding": "Example finding from an existing approved result.",
+        "evidence": "Example source evidence.",
+        "data_version": "phase3-v1.1",
+        "method_version": "track-a-comparative-v1.0.0",
+        "generated_at": "2026-01-01T00:00:00Z",
+        "quality_status": "reviewed",
+        "limitation": "Synthetic data; limited temporal coverage.",
+    }
+
+
+def test_valid_record_produces_valid_evidence_package():
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[sample_record()],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is True
+    assert result["record_count"] == 1
+    assert package["source"]["result_ids"] == ["RES-0001"]
+    assert package["source"]["data_versions"] == ["phase3-v1.1"]
+    assert package["source"]["method_versions"] == [
+        "track-a-comparative-v1.0.0"
+    ]
+
+
+def test_empty_evidence_is_rejected():
+    package = build_evidence_package(
+        question="Show evidence RES-9999",
+        intent="result_evidence",
+        result_records=[],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("No approved evidence" in error for error in result["errors"])
+
+
+def test_mixed_data_versions_are_rejected():
+    first = sample_record()
+    second = sample_record()
+    second["result_id"] = "RES-0002"
+    second["data_version"] = "different-version"
+
+    package = build_evidence_package(
+        question="Compare records",
+        intent="summary",
+        result_records=[first, second],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("inconsistent data versions" in error for error in result["errors"])
+
+
+def test_missing_method_version_is_rejected():
+    record = sample_record()
+    record["method_version"] = None
+
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[record],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("Method version is missing" in error for error in result["errors"])
+
+
+def test_answer_record_must_belong_to_evidence_package():
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[sample_record()],
+    )
+
+    good = validate_answer_records(
+        [{"result_id": "RES-0001"}],
+        package,
+    )
+    bad = validate_answer_records(
+        [{"result_id": "RES-9999"}],
+        package,
+    )
+
+    assert good["valid"] is True
+    assert bad["valid"] is False
+    assert any("not backed" in error for error in bad["errors"])
+
+
+def test_boolean_is_not_accepted_as_a_metric_value():
+    record = sample_record()
+    record["result_value"] = True
+
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[record],
+    )
+
+    result = validate_evidence_package(package)
+
+    assert result["valid"] is False
+    assert any("non-numeric metric value" in error for error in result["errors"])
+
+
+def test_quality_metadata_can_be_required():
+    record = sample_record()
+    record.pop("quality_status")
+
+    package = build_evidence_package(
+        question="Show evidence RES-0001",
+        intent="result_evidence",
+        result_records=[record],
+    )
+
+    result = validate_evidence_package(
+        package,
+        require_quality_metadata=True,
+    )
+
+    assert result["valid"] is False
+    assert any("quality metadata is unavailable" in error for error in result["errors"])
 </file>
 
 <file path=".gitignore">
@@ -18835,34 +18905,6 @@ def get_intelligence_results() -> dict[str, Any]:
     }
 </file>
 
-<file path="backend/Dockerfile">
-FROM python:3.12-slim
-
-WORKDIR /app
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
-
-COPY backend/requirements.txt .
-
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
-
-COPY backend/app ./app
-COPY backend/data ./data
-COPY assistant ./assistant
-
-COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
-COPY data-science/outputs/intelligence_summary.json ./data-science/outputs/intelligence_summary.json
-
-ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
-ENV INTELLIGENCE_SUMMARY_FILE=/app/data-science/outputs/intelligence_summary.json
-
-EXPOSE 8000 8001
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
-</file>
-
 <file path="data/quality/validation_report.json">
 {
   "status": "PASS",
@@ -19480,6 +19522,34 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
+</file>
+
+<file path="backend/Dockerfile">
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+COPY backend/requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
+
+COPY backend/app ./app
+COPY backend/data ./data
+COPY assistant ./assistant
+
+COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
+COPY data-science/outputs/intelligence_summary.json ./data-science/outputs/intelligence_summary.json
+
+ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
+ENV INTELLIGENCE_SUMMARY_FILE=/app/data-science/outputs/intelligence_summary.json
+
+EXPOSE 8000 8001
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 </file>
 
 <file path="data-science/outputs/intelligence_results.json">
@@ -22833,6 +22903,66 @@ export default function DataIntelligencePage() {
 }
 </file>
 
+<file path="data-science/outputs/intelligence_summary.json">
+{
+  "project_id": "POC-32",
+  "project_title": "Infocreon Aether Pulse Air Quality Heatmap",
+  "approved_track": "Track A — Comparative Intelligence",
+  "primary_analytical_question": "Within each pollutant, how do sampled city measurements compare with each other and with that pollutant's overall mean?",
+  "decision_to_be_supported": "Explore descriptive differences among synthetic city-pollutant groups; no operational or public-health decision is supported.",
+  "data_version": "phase3-v1.1",
+  "method_version": "track-a-comparative-v1.0.0",
+  "result_count": 32,
+  "key_findings": [
+    {
+      "pollutant": "no2",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 52.89333333333334,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 23.116666666666664,
+      "pollutant_baseline_mean": 36.2075,
+      "finding_scope": "Synthetic descriptive comparison only"
+    },
+    {
+      "pollutant": "o3",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 90.46666666666665,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 42.026666666666664,
+      "pollutant_baseline_mean": 62.29708333333334,
+      "finding_scope": "Synthetic descriptive comparison only"
+    },
+    {
+      "pollutant": "pm10",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 118.64333333333333,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 56.20666666666667,
+      "pollutant_baseline_mean": 81.86291666666666,
+      "finding_scope": "Synthetic descriptive comparison only"
+    },
+    {
+      "pollutant": "pm2.5",
+      "highest_sampled_city_mean": "Delhi",
+      "highest_mean_value": 65.41666666666667,
+      "lowest_sampled_city_mean": "Bengaluru",
+      "lowest_mean_value": 29.42,
+      "pollutant_baseline_mean": 44.90416666666667,
+      "finding_scope": "Synthetic descriptive comparison only"
+    }
+  ],
+  "priority_items": [],
+  "validation_result": "PASS",
+  "important_limitations": [
+    "All observations are synthetic.",
+    "Only three timestamps across one calendar date are represented in the Post #2 evidence.",
+    "Rankings are descriptive and do not establish real-world air-quality conditions or health risk.",
+    "The pollutant-wide mean is a baseline, not a regulatory threshold."
+  ],
+  "generated_at": "2026-10-11T08:55:58.910438+00:00"
+}
+</file>
+
 <file path="backend/app/main.py">
 import json
 import math
@@ -24009,66 +24139,6 @@ async def intelligence_results():
 async def intelligence_summary():
     """Return the validated intelligence summary."""
     return get_intelligence_summary()
-</file>
-
-<file path="data-science/outputs/intelligence_summary.json">
-{
-  "project_id": "POC-32",
-  "project_title": "Infocreon Aether Pulse Air Quality Heatmap",
-  "approved_track": "Track A — Comparative Intelligence",
-  "primary_analytical_question": "Within each pollutant, how do sampled city measurements compare with each other and with that pollutant's overall mean?",
-  "decision_to_be_supported": "Explore descriptive differences among synthetic city-pollutant groups; no operational or public-health decision is supported.",
-  "data_version": "phase3-v1.1",
-  "method_version": "track-a-comparative-v1.0.0",
-  "result_count": 32,
-  "key_findings": [
-    {
-      "pollutant": "no2",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 52.89333333333334,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 23.116666666666664,
-      "pollutant_baseline_mean": 36.2075,
-      "finding_scope": "Synthetic descriptive comparison only"
-    },
-    {
-      "pollutant": "o3",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 90.46666666666665,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 42.026666666666664,
-      "pollutant_baseline_mean": 62.29708333333334,
-      "finding_scope": "Synthetic descriptive comparison only"
-    },
-    {
-      "pollutant": "pm10",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 118.64333333333333,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 56.20666666666667,
-      "pollutant_baseline_mean": 81.86291666666666,
-      "finding_scope": "Synthetic descriptive comparison only"
-    },
-    {
-      "pollutant": "pm2.5",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 65.41666666666667,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 29.42,
-      "pollutant_baseline_mean": 44.90416666666667,
-      "finding_scope": "Synthetic descriptive comparison only"
-    }
-  ],
-  "priority_items": [],
-  "validation_result": "PASS",
-  "important_limitations": [
-    "All observations are synthetic.",
-    "Only three timestamps across one calendar date are represented in the Post #2 evidence.",
-    "Rankings are descriptive and do not establish real-world air-quality conditions or health risk.",
-    "The pollutant-wide mean is a baseline, not a regulatory threshold."
-  ],
-  "generated_at": "2026-10-11T08:55:58.910438+00:00"
-}
 </file>
 
 </files>
