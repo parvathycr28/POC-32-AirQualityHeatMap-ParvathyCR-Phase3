@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 COPY backend/app ./app
 COPY backend/data ./data
 COPY data-science/outputs/intelligence_results.json ./data-science/outputs/intelligence_results.json
-
+COPY data-science/outputs/intelligence_summary.json ./data-science/outputs/intelligence_summary.json
 ENV INTELLIGENCE_RESULTS_FILE=/app/data-science/outputs/intelligence_results.json
 
 EXPOSE 8000 8001
