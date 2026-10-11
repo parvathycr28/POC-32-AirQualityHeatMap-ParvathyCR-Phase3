@@ -1,57 +1,117 @@
 {
-  "project_id": "POC-32",
-  "project_title": "Infocreon Aether Pulse Air Quality Heatmap",
-  "approved_track": "Track A — Comparative Intelligence",
-  "primary_analytical_question": "Within each pollutant, how do sampled city measurements compare with each other and with that pollutant's overall mean?",
-  "decision_to_be_supported": "Explore descriptive differences among synthetic city-pollutant groups; no operational or public-health decision is supported.",
-  "data_version": "phase3-v1.1",
-  "method_version": "track-a-comparative-v1.0.0",
-  "result_count": 32,
-  "key_findings": [
+  "summary_schema_version": "1.0.0",
+  "generated_at_utc": "2026-10-11T02:03:52.795767+00:00",
+  "source": {
+    "file": "data-science/outputs/intelligence_results.json",
+    "source_format": "JSON array of result records"
+  },
+  "versions": {
+    "data_versions": [
+      "phase3-v1.1"
+    ],
+    "method_versions": [
+      "track-a-comparative-v1.0.0"
+    ],
+    "quality_statuses": [
+      "conditional"
+    ]
+  },
+  "quality": {
+    "is_synthetic_values": [
+      true
+    ],
+    "record_count": 32,
+    "contains_conditional_quality": true
+  },
+  "overview": {
+    "result_count": 32,
+    "entity_count": 8,
+    "entities": [
+      "Ahmedabad",
+      "Bengaluru",
+      "Chennai",
+      "Delhi",
+      "Hyderabad",
+      "Kolkata",
+      "Mumbai",
+      "Pune"
+    ],
+    "pollutant_count": 4,
+    "pollutants": [
+      "no2",
+      "o3",
+      "pm10",
+      "pm2.5"
+    ],
+    "result_type_counts": {
+      "ranking": 32
+    },
+    "result_category_counts": {
+      "above_baseline": 16,
+      "below_baseline": 16
+    }
+  },
+  "priority_examples": [
     {
+      "result_id": "RES-0001",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "no2",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 52.89333333333334,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 23.116666666666664,
-      "pollutant_baseline_mean": 36.2075,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "no2_mean",
+      "result_value": 52.89333333333334,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     },
     {
+      "result_id": "RES-0009",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "o3",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 90.46666666666665,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 42.026666666666664,
-      "pollutant_baseline_mean": 62.29708333333334,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "o3_mean",
+      "result_value": 90.46666666666665,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for o3 by sampled mean; its mean is 28.1696 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     },
     {
+      "result_id": "RES-0017",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "pm10",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 118.64333333333333,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 56.20666666666667,
-      "pollutant_baseline_mean": 81.86291666666666,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "pm10_mean",
+      "result_value": 118.64333333333333,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for pm10 by sampled mean; its mean is 36.7804 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     },
     {
+      "result_id": "RES-0025",
+      "result_type": "ranking",
+      "entity_name": "Delhi",
       "pollutant": "pm2.5",
-      "highest_sampled_city_mean": "Delhi",
-      "highest_mean_value": 65.41666666666667,
-      "lowest_sampled_city_mean": "Bengaluru",
-      "lowest_mean_value": 29.42,
-      "pollutant_baseline_mean": 44.90416666666667,
-      "finding_scope": "Synthetic descriptive comparison only"
+      "metric_name": "pm2.5_mean",
+      "result_value": 65.41666666666667,
+      "result_unit": "µg/m³",
+      "priority_rank": 1,
+      "finding": "Delhi ranks 1 for pm2.5 by sampled mean; its mean is 20.5125 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
+    },
+    {
+      "result_id": "RES-0002",
+      "result_type": "ranking",
+      "entity_name": "Ahmedabad",
+      "pollutant": "no2",
+      "metric_name": "no2_mean",
+      "result_value": 41.52,
+      "result_unit": "µg/m³",
+      "priority_rank": 2,
+      "finding": "Ahmedabad ranks 2 for no2 by sampled mean; its mean is 5.3125 µg/m³ relative to the pollutant-wide sample mean baseline.",
+      "limitation": "Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."
     }
   ],
-  "priority_items": [],
-  "validation_result": "PENDING",
-  "important_limitations": [
-    "All observations are synthetic.",
-    "Only three timestamps across one calendar date are represented in the Post #2 evidence.",
-    "Rankings are descriptive and do not establish real-world air-quality conditions or health risk.",
-    "The pollutant-wide mean is a baseline, not a regulatory threshold."
-  ],
-  "generated_at": "2026-10-10T21:38:32.853624+00:00"
+  "limitations": "This summary is derived from the published intelligence result records. Where results are synthetic, they are descriptive comparisons and are not verified real-world measurements, regulatory assessments, health-risk assessments, or predictions."
 }

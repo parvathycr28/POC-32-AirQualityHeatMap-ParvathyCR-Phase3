@@ -1165,3 +1165,26 @@ async def population(
 async def intelligence_results():
     """Return the approved comparative intelligence results."""
     return get_intelligence_results()
+@app.get("/api/intelligence/summary")
+async def intelligence_summary():
+    """Return the generated intelligence summary."""
+    summary_path = (
+        Path(__file__).resolve().parents[2]
+        / "data-science"
+        / "outputs"
+        / "intelligence_summary.json"
+    )
+
+    try:
+        with summary_path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=500,
+            detail="Intelligence summary file is missing.",
+        )
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=500,
+            detail="Intelligence summary file contains invalid JSON.",
+        )
