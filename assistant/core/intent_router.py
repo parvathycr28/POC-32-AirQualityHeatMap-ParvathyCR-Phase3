@@ -36,6 +36,7 @@ def classify_question(question: str):
         }
 
     # 2. Methodology and limitations
+
     methodology_patterns = [
         r"(explain|describe|summarize|outline)\s+"
         r"(the\s+)?(method|methodology)\s+"
@@ -45,12 +46,13 @@ def classify_question(question: str):
         r"(explain|describe|summarize|outline)\s+"
         r"(the\s+)?(method|methodology)",
         r"what\s+are\s+(the\s+)?"
-        r"(methodological\s+)?limitations",
+        r"(methodological\s+)?limitations\??",
         r"what\s+(is|are)\s+the\s+"
         r"(method|methodology|limitations)",
         r"tell\s+me\s+about\s+(the\s+)?"
         r"(method|methodology|limitations)",
     ]
+
 
     if any(
         re.fullmatch(pattern, text, flags=re.IGNORECASE)
@@ -62,13 +64,24 @@ def classify_question(question: str):
         }
 
     # 3. Summarize existing Track A findings
+
+    # 3. Summarize existing Track A findings
     summary_patterns = [
         r"summarize\s+(the\s+)?track\s+a\s+findings",
         r"(summarize|summary\s+of)\s+"
         r"(the\s+)?(track\s+a\s+)?findings",
         r"give\s+me\s+(a\s+)?summary\s+"
         r"(of\s+)?(the\s+)?(track\s+a\s+)?findings",
+        r"(summarize|give\s+me\s+a\s+summary\s+of)\s+"
+        r"(the\s+)?track\s+a\s+"
+        r"(intelligence\s+)?(results|findings)",
+        r"(summarize|give\s+me\s+a\s+summary\s+of)\s+"
+        r"(the\s+)?(intelligence\s+)?results",
+        r"(summarize|give\s+me\s+a\s+summary\s+of)\s+"
+        r"(the\s+)?track\s+a\s+"
+        r"(comparative\s+)?intelligence",
     ]
+
 
     if any(
         re.fullmatch(pattern, text, flags=re.IGNORECASE)
@@ -80,8 +93,9 @@ def classify_question(question: str):
         }
 
     # 4. Highest sampled mean for a specified pollutant
+
     highest_match = re.fullmatch(
-        r"(which\s+city\s+has\s+)?"
+        r"(?:(which\s+city\s+has\s+)?"
         r"(the\s+)?(highest|maximum|max)\s+"
         r"(sampled\s+)?mean\s+"
         r"(for\s+)?"
@@ -92,6 +106,10 @@ def classify_question(question: str):
         r"(\s+mean)?"
         r"(\s+value)?"
         r"(\s+among\s+cities)?"
+        r"|(what\s+is\s+)?"
+        r"(the\s+)?(highest|maximum|max)\s+"
+        r"(sampled\s+)?mean\s+for\s+"
+        r"(the\s+)?(NO2|O3|PM10|PM2\.5))"
         r"\??",
         text,
         flags=re.IGNORECASE,
@@ -116,6 +134,7 @@ def classify_question(question: str):
                     "pollutant": pollutant.lower(),
                 },
             }
+
 
     # Also support: "Which city has the highest NO2 mean?"
     highest_match = re.fullmatch(
