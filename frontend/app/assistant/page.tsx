@@ -148,6 +148,34 @@ export default function AssistantPage() {
             {result.answer}
           </p>
 
+          {result.explanation && (
+            <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-indigo-950">
+                  AI Explanation
+                </h3>
+
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-indigo-700">
+                  {result.explanation.status === "AVAILABLE"
+                    ? "Gemini"
+                    : "Unavailable"}
+                </span>
+              </div>
+
+              {result.explanation.status === "AVAILABLE" &&
+              result.explanation.text ? (
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                  {result.explanation.text}
+                </p>
+              ) : (
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {result.explanation.text ||
+                    "An AI explanation is currently unavailable. The original answer remains available above."}
+                </p>
+              )}
+            </div>
+          )}
+
           {result.grounding && (
             <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">
               <p>Mode: {result.grounding.mode ?? "Not provided"}</p>

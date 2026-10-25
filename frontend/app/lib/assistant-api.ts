@@ -1,7 +1,7 @@
 
 const ASSISTANT_API_URL =
   process.env.NEXT_PUBLIC_ASSISTANT_API_URL ||
-  "http://localhost:8003";
+  "http://127.0.0.1:8004";
 
 export type AssistantEvidence = {
   result_id?: string;
@@ -24,12 +24,26 @@ export type AssistantResponse = {
   status: string;
   answer: string;
   evidence: AssistantEvidence[];
+
+  explanation?: {
+    status?: string;
+    text?: string;
+    reason?: string | null;
+    model?: string;
+    validation?: {
+      valid?: boolean;
+      errors?: string[];
+      warnings?: string[];
+    };
+  };
+
   validation?: {
     valid?: boolean;
     errors?: string[];
     warnings?: string[];
     record_count?: number;
   };
+
   grounding?: {
     mode?: string;
     llm_used?: boolean;

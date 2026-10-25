@@ -1,7 +1,7 @@
 INFOCREON POC-32 - GROUNDED DATA ASSISTANT E2E REPORT
 ============================================================
-Assistant URL: http://localhost:3002/assistant
-Executed: 2026-10-14 14:49:48
+Assistant URL: http://localhost:3000/assistant
+Executed: 2026-10-25 14:03:19
 
 [PASS] Assistant page loads
 [PASS] Supported comparison displays evidence — Supporting evidence (2)

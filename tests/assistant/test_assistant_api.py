@@ -2,7 +2,7 @@ import os
 
 import requests
 
-BASE_URL = os.getenv("ASSISTANT_API_URL", "http://localhost:8003")
+BASE_URL = os.getenv("ASSISTANT_API_URL", "http://127.0.0.1:8004")
 ASK_URL = f"{BASE_URL}/api/assistant/ask"
 HEALTH_URL = f"{BASE_URL}/api/assistant/health"
 

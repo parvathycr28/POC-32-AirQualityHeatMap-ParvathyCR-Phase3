@@ -102,3 +102,59 @@ def test_evidence_question_with_the_and_result_is_supported():
     assert response["intent"] == "result_evidence"
     assert response["parameters"]["result_id"] == "RES-0001"
 
+
+def test_gemini_unavailable_preserves_deterministic_answer(monkeypatch):
+    record = sample_record()
+
+    monkeypatch.setattr(assistant_service, "check_question", lambda question: True)
+    monkeypatch.setattr(
+        assistant_service,
+        "classify_question",
+        lambda question: {
+            "intent": "result_evidence",
+            "parameters": {"result_id": "RES-0001"},
+        },
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "load_results",
+        lambda path: [record],
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "load_summary",
+        lambda path: {},
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "get_result_evidence",
+        lambda results, result_id: record if result_id == "RES-0001" else None,
+    )
+    monkeypatch.setattr(
+        assistant_service,
+        "generate_gemini_explanation",
+        lambda package: {
+            "status": "UNAVAILABLE",
+            "text": (
+                "A Gemini explanation is unavailable. The deterministic answer "
+                "and approved evidence remain available."
+            ),
+            "reason": "Gemini request failed or timed out.",
+            "model": None,
+            "validation": {
+                "valid": False,
+                "errors": ["Gemini request failed or timed out."],
+            },
+        },
+    )
+
+    response = assistant_service.answer_question("Show evidence RES-0001")
+
+    assert response["status"] == "ok"
+    assert response["answer"] == (
+        "Retrieved the approved evidence record for RES-0001."
+    )
+    assert response["evidence"][0]["result_id"] == "RES-0001"
+    assert response["explanation"]["status"] == "UNAVAILABLE"
+    assert response["grounding"]["mode"] == "deterministic"
+    assert response["grounding"]["llm_used"] is False

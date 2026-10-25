@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-BASE_URL = os.getenv("ASSISTANT_URL", "http://localhost:3002/assistant")
+BASE_URL = os.getenv("ASSISTANT_URL", "http://localhost:3000/assistant")
 
 ARTIFACT_DIR = Path(__file__).resolve().parent / "selenium_artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)

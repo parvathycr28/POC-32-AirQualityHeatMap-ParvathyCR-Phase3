@@ -31,6 +31,7 @@ class AssistantResponse(BaseModel):
     details: dict[str, Any] | None = None
     evidence_package: dict[str, Any] | None = None
     grounding: dict[str, Any] | None = None
+    explanation: dict[str, Any] | None = None
 
 
 @router.post("/ask", response_model=AssistantResponse)

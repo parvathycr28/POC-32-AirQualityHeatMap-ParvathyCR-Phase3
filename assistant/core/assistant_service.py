@@ -9,6 +9,7 @@ from assistant.config.settings import RESULTS_FILE, SUMMARY_FILE
 from assistant.core.evidence_builder import build_evidence_package
 from assistant.core.intent_router import check_question, classify_question
 from assistant.core.response_validator import validate_evidence_package
+from assistant.core.gemini_explainer import generate_gemini_explanation
 from assistant.queries.intelligence_queries import (
     compare_cities,
     get_highest_city,
@@ -583,17 +584,22 @@ def answer_question(
                         "errors": ["Methodology response lacks version metadata."],
                     },
                 }
-
+        gemini_result = generate_gemini_explanation(package)
         return {
             "status": "ok",
             "answer": answer,
+            "explanation": gemini_result,
             "details": details,
             "evidence": [_public_record(record) for record in selected],
             "evidence_package": package,
             "validation": validation,
             "grounding": {
-                "mode": "deterministic",
-                "llm_used": False,
+                "mode": (
+                    "deterministic_plus_llm_explanation"
+                    if gemini_result.get("status") == "AVAILABLE"
+                    else "deterministic"
+                ),
+                "llm_used": gemini_result.get("status") == "AVAILABLE",
                 "generated_findings": False,
                 "source": "approved_intelligence_results",
             },
