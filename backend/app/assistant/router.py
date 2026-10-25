@@ -48,11 +48,14 @@ def ask_grounded_assistant(request: AssistantQuestion) -> dict[str, Any]:
         ) from exc
 
 
+
 @router.get("/health")
-def assistant_health() -> dict[str, str]:
-    """Report route availability, not the validity of the data files."""
+def assistant_health() -> dict[str, str | bool]:
+    """Report assistant mode and Gemini configuration status."""
+    import os
+
     return {
         "status": "available",
-        "mode": "deterministic",
-        "llm_used": "false",
+        "mode": "deterministic_plus_llm_explanation",
+        "gemini_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
     }

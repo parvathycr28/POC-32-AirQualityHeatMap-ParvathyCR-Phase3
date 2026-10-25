@@ -67,6 +67,81 @@ def _numeric_tokens(text: str) -> set[str]:
     }
 
 
+def _comparison_consistency_errors(
+    text: str,
+    evidence_package: dict[str, Any],
+) -> list[str]:
+    """Reject explicit higher/lower claims that contradict paired evidence."""
+    if evidence_package.get("intent") != "compare_cities":
+        return []
+
+    records = evidence_package.get("records", [])
+    if not isinstance(records, list):
+        return []
+
+    values: dict[str, float] = {}
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+
+        entity = record.get("entity_id")
+        value = record.get("result_value")
+        metric = record.get("metric_name")
+
+        if (
+            isinstance(entity, str)
+            and isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and isinstance(metric, str)
+        ):
+            values[entity.strip().casefold()] = float(value)
+
+    if len(values) < 2:
+        return []
+
+    # Compare only city pairs that are explicitly named in the explanation.
+    entities = list(values)
+    for index, first in enumerate(entities):
+        for second in entities[index + 1:]:
+            first_value = values[first]
+            second_value = values[second]
+
+            if first_value == second_value:
+                continue
+
+            first_name = re.escape(first.replace("_", " ").replace("-", " "))
+            second_name = re.escape(second.replace("_", " ").replace("-", " "))
+
+            patterns = (
+                (
+                    rf"\b{first_name}\b.{{0,60}}\bhigher\b.{{0,30}}\b{second_name}\b",
+                    first_value > second_value,
+                ),
+                (
+                    rf"\b{first_name}\b.{{0,60}}\blower\b.{{0,30}}\b{second_name}\b",
+                    first_value < second_value,
+                ),
+                (
+                    rf"\b{second_name}\b.{{0,60}}\bhigher\b.{{0,30}}\b{first_name}\b",
+                    second_value > first_value,
+                ),
+                (
+                    rf"\b{second_name}\b.{{0,60}}\blower\b.{{0,30}}\b{first_name}\b",
+                    second_value < first_value,
+                ),
+            )
+
+            for pattern, claim_is_supported in patterns:
+                if re.search(pattern, text, flags=re.IGNORECASE):
+                    if not claim_is_supported:
+                        return [
+                            "Explanation contains a city comparison that "
+                            "contradicts the approved numeric evidence."
+                        ]
+
+    return []
+
+
 def validate_gemini_explanation(
     text: str,
     evidence_package: dict[str, Any],
@@ -90,6 +165,7 @@ def validate_gemini_explanation(
 
     if _contains_forbidden_claim(text):
         errors.append("Explanation contains a prohibited claim category.")
+    errors.extend(_comparison_consistency_errors(text, evidence_package))
 
     allowed_numbers: set[str] = set()
     question = evidence_package.get("question", "")

@@ -109,3 +109,118 @@ def test_prompt_does_not_include_record_keys_diagnostic(monkeypatch, evidence_pa
     assert "EVIDENCE_JSON:" in captured["prompt"]
     assert "42.5" in captured["prompt"]
     assert result["status"] == "AVAILABLE"
+
+def test_reversed_city_comparison_is_rejected(evidence_package):
+    evidence_package["question"] = "Compare Delhi and Mumbai for NO2"
+    evidence_package["intent"] = "compare_cities"
+    evidence_package["records"] = [
+        {
+            "entity_id": "delhi",
+            "metric_name": "no2_mean",
+            "result_value": 52.0,
+            "finding": "Delhi recorded 52.0 µg/m³ for NO2.",
+        },
+        {
+            "entity_id": "mumbai",
+            "metric_name": "no2_mean",
+            "result_value": 35.0,
+            "finding": "Mumbai recorded 35.0 µg/m³ for NO2.",
+        },
+    ]
+
+    result = validate_gemini_explanation(
+        "Mumbai had a higher NO2 value than Delhi: 52.0 versus 35.0.",
+        evidence_package,
+    )
+
+    assert result["valid"] is False
+    assert any(
+        "comparison" in error.lower()
+        for error in result["errors"]
+    )
+
+def test_missing_api_key_returns_safe_fallback(monkeypatch, evidence_package):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+
+    def unexpected_client_call(**kwargs):
+        raise AssertionError("Gemini client must not be created without an API key")
+
+    monkeypatch.setattr(
+        gemini_explainer.genai,
+        "Client",
+        unexpected_client_call,
+    )
+
+    result = gemini_explainer.generate_gemini_explanation(evidence_package)
+
+    assert result["status"] == "UNAVAILABLE"
+    assert "deterministic answer" in result["text"]
+    assert result["reason"] == "Gemini API key is not configured."
+
+
+@pytest.mark.parametrize(
+    ("provider_error", "expected_attempts"),
+    [
+        ("429 RESOURCE_EXHAUSTED", 2),
+        ("503 UNAVAILABLE", 2),
+        ("504 Gateway Timeout", 1),
+        ("request timed out", 1),
+    ],
+)
+def test_provider_errors_return_safe_fallback(
+    monkeypatch,
+    evidence_package,
+    provider_error,
+    expected_attempts,
+):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(gemini_explainer.time, "sleep", lambda seconds: None)
+
+    calls = {"count": 0}
+
+    class FakeModels:
+        def generate_content(self, **kwargs):
+            calls["count"] += 1
+            raise RuntimeError(provider_error)
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            self.models = FakeModels()
+
+    monkeypatch.setattr(gemini_explainer.genai, "Client", FakeClient)
+
+    result = gemini_explainer.generate_gemini_explanation(evidence_package)
+
+    assert result["status"] == "UNAVAILABLE"
+    assert "deterministic answer" in result["text"]
+    assert calls["count"] == expected_attempts
+    assert provider_error not in str(result)
+
+
+def test_invalid_generated_explanation_returns_safe_fallback(
+    monkeypatch,
+    evidence_package,
+):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+
+    class FakeResponse:
+        text = "The observed reading is 42.5 and another reading is 999."
+        candidates = []
+        usage_metadata = None
+
+    class FakeModels:
+        def generate_content(self, **kwargs):
+            return FakeResponse()
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            self.models = FakeModels()
+
+    monkeypatch.setattr(gemini_explainer.genai, "Client", FakeClient)
+
+    result = gemini_explainer.generate_gemini_explanation(evidence_package)
+
+    assert result["status"] == "UNAVAILABLE"
+    assert "deterministic answer" in result["text"]
+    assert result["reason"] == "Generated explanation did not pass validation."
+    assert result["validation"]["valid"] is False

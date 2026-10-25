@@ -593,16 +593,21 @@ def answer_question(
             "evidence": [_public_record(record) for record in selected],
             "evidence_package": package,
             "validation": validation,
+            
             "grounding": {
-                "mode": (
-                    "deterministic_plus_llm_explanation"
-                    if gemini_result.get("status") == "AVAILABLE"
-                    else "deterministic"
-                ),
+                "mode": "deterministic_plus_llm_explanation",
                 "llm_used": gemini_result.get("status") == "AVAILABLE",
+                "explanation_validated": (
+                    gemini_result.get("status") == "AVAILABLE"
+                    and gemini_result.get("validation", {}).get("valid") is True
+                ),
+                "deterministic_fallback_used": (
+                    gemini_result.get("status") != "AVAILABLE"
+                ),
                 "generated_findings": False,
                 "source": "approved_intelligence_results",
             },
+
         }
 
     except (FileNotFoundError, ValueError, TypeError, KeyError) as exc:

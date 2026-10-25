@@ -10,8 +10,11 @@ HEALTH_URL = f"{BASE_URL}/api/assistant/health"
 def test_assistant_health_endpoint():
     response = requests.get(HEALTH_URL, timeout=10)
     assert response.status_code == 200
-    assert response.json() is not None
 
+    body = response.json()
+    assert body["status"] == "available"
+    assert body["mode"] == "deterministic_plus_llm_explanation"
+    assert isinstance(body["gemini_configured"], bool)
 
 def test_supported_city_comparison_returns_grounded_evidence():
     response = requests.post(

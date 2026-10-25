@@ -156,5 +156,24 @@ def test_gemini_unavailable_preserves_deterministic_answer(monkeypatch):
     )
     assert response["evidence"][0]["result_id"] == "RES-0001"
     assert response["explanation"]["status"] == "UNAVAILABLE"
-    assert response["grounding"]["mode"] == "deterministic"
+    assert (
+        response["grounding"]["mode"]
+        == "deterministic_plus_llm_explanation"
+    )
     assert response["grounding"]["llm_used"] is False
+    assert response["grounding"]["explanation_validated"] is False
+    assert response["grounding"]["deterministic_fallback_used"] is True
+    # Approved evidence and its provenance survive Gemini failure.
+    assert response["evidence"][0]["data_version"] == "phase3-v1.1"
+    assert (
+        response["evidence"][0]["method_version"]
+        == "track-a-comparative-v1.0.0"
+    )
+    assert (
+        response["evidence"][0]["limitation"]
+        == "Synthetic data with limited temporal coverage."
+    )
+
+    assert response["evidence_package"]["source"]["data_versions"]
+    assert response["evidence_package"]["source"]["method_versions"]
+    assert response["validation"]["valid"] is True
