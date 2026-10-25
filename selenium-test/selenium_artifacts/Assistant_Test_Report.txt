@@ -1,0 +1,16 @@
+INFOCREON POC-32 - GROUNDED DATA ASSISTANT E2E REPORT
+============================================================
+Assistant URL: http://localhost:3000/assistant
+Executed: 2026-10-25 20:43:27
+
+[PASS] Assistant page loads
+[PASS] Supported comparison displays evidence — Supporting evidence (2)
+RES-0001 · delhi · no2_mean
+RES-0004 · mumbai · no2_mean
+[PASS] Unsupported prediction rejected without evidence — status=unsupported; evidence=0
+[PASS] Responsive layout at 1440, 768, 390, and 320 px — 1440px requested: viewport=1440, document=1440, body=1440, overflow=NO | 768px requested: viewport=768, document=768, body=768, overflow=NO | 390px requested: viewport=390, document=384, body=384, overflow=NO | 320px requested: viewport=320, document=314, body=314, overflow=NO
+
+Passed: 4
+Failed: 0
+Result: PASS
+Screenshot: C:\Users\ACER\Documents\POC-32-AirQualityHeatmap-ParvathyCR1\POC-32-AirQualityHeatMap-ParvathyCR-Phase3\selenium-test\selenium_artifacts\assistant_e2e.png

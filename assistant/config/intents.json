@@ -1,0 +1,33 @@
+
+{
+  "catalog_version": "1.0.0",
+  "mode": "deterministic_guided",
+  "approved_track": "A Comparative Intelligence",
+  "intents": [
+    {
+      "name": "summary",
+      "enabled": true,
+      "required_parameters": []
+    },
+    {
+      "name": "highest_city",
+      "enabled": true,
+      "required_parameters": ["pollutant"]
+    },
+    {
+      "name": "compare_cities",
+      "enabled": true,
+      "required_parameters": ["pollutant", "city_a", "city_b"]
+    },
+    {
+      "name": "result_evidence",
+      "enabled": true,
+      "required_parameters": ["result_id"]
+    },
+    {
+      "name": "methodology",
+      "enabled": true,
+      "required_parameters": []
+    }
+  ]
+}
