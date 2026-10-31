@@ -1,7 +1,7 @@
 
 const ASSISTANT_API_URL =
   process.env.NEXT_PUBLIC_ASSISTANT_API_URL ||
-  "http://127.0.0.1:8004";
+  "http://127.0.0.1:8000";
 
 export type AssistantEvidence = {
   result_id?: string;
@@ -46,7 +46,10 @@ export type AssistantResponse = {
 
   grounding?: {
     mode?: string;
+    gemini_attempted?: boolean;
     llm_used?: boolean;
+    explanation_validated?: boolean;
+    deterministic_fallback_used?: boolean;
     generated_findings?: boolean;
     source?: string;
   };

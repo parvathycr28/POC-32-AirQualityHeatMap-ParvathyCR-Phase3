@@ -70,6 +70,17 @@ from assistant.core.intent_router import classify_question
             "result_evidence",
             {"result_id": "RES-AB_12"},
         ),
+        (
+            "Summarize the approved intelligence results.",
+            "summary",
+            {},
+        ),
+        (
+            "What are the method and limitations?",
+            "methodology",
+            {},
+        ),
+
     ],
 )
 def test_supported_intents_and_parameters(

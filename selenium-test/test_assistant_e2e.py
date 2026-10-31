@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-BASE_URL = os.getenv("ASSISTANT_URL", "http://localhost:3000/assistant")
+BASE_URL = os.getenv("ASSISTANT_URL", "http://localhost:3002/assistant")
 
 ARTIFACT_DIR = Path(__file__).resolve().parent / "selenium_artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
@@ -21,6 +21,31 @@ RESPONSIVE_WIDTHS = (1440, 768, 390, 320)
 
 
 class AssistantE2ETest(unittest.TestCase):
+    def run(self, result=None):
+        if result is None:
+            result = self.defaultTestResult()
+
+        errors_before = len(result.errors)
+        failures_before = len(result.failures)
+
+        outcome = super().run(result)
+
+        for test, traceback in result.errors[errors_before:]:
+            if test is self:
+                detail = traceback.strip().splitlines()[-1]
+                self.__class__.results.append(
+                    f"[FAIL] {self._testMethodName} — unittest error: {detail}"
+                )
+
+        for test, traceback in result.failures[failures_before:]:
+            if test is self:
+                detail = traceback.strip().splitlines()[-1]
+                self.__class__.results.append(
+                    f"[FAIL] {self._testMethodName} — unittest failure: {detail}"
+                )
+
+        return outcome
+
     @classmethod
     def setUpClass(cls):
         options = Options()
@@ -73,6 +98,8 @@ class AssistantE2ETest(unittest.TestCase):
         )
 
     def ask(self, question):
+        self.driver.get(BASE_URL)
+
         field = self.wait.until(
             EC.visibility_of_element_located((By.ID, "assistant-question"))
         )
@@ -121,6 +148,13 @@ class AssistantE2ETest(unittest.TestCase):
     def test_02_supported_comparison_returns_evidence(self):
         response = self.ask("Compare Delhi and Mumbai for no2")
         text = response.text
+        self.assertIn("Mode: deterministic_plus_llm_explanation", text)
+        self.assertIn("Gemini attempted:", text)
+        self.assertIn("LLM used:", text)
+        self.assertIn("Explanation validated:", text)
+        self.assertIn("Deterministic fallback used:", text)
+        self.assertIn("Generated findings:", text)
+        self.assertIn("Source: approved_intelligence_results", text)
         evidence_heading = response.find_element(
             By.XPATH, ".//*[contains(., 'Supporting evidence (')]"
         )
@@ -130,13 +164,12 @@ class AssistantE2ETest(unittest.TestCase):
         self.assertRegex(
             evidence_heading.text, r"Supporting evidence \([1-9]\d*\)"
         )
-
+        self.driver.save_screenshot(str(SCREENSHOT_PATH))
         self.record(
             "Supported comparison displays evidence",
             True,
             evidence_heading.text
         )
-        self.driver.save_screenshot(str(SCREENSHOT_PATH))
 
     def test_03_unsupported_prediction_is_rejected(self):
         response = self.ask("Predict tomorrow's NO2 level in Delhi")
@@ -213,7 +246,7 @@ class AssistantE2ETest(unittest.TestCase):
                     f"Responsive check failed at {width}px: "
                     f"{dimensions}; expected viewport={width}"
                 )
-
+            self.driver.save_screenshot(str(SCREENSHOT_PATH))
             self.record(
                 "Responsive layout at 1440, 768, 390, and 320 px",
                 True,
@@ -223,8 +256,6 @@ class AssistantE2ETest(unittest.TestCase):
             self.driver.execute_cdp_cmd(
                 "Emulation.clearDeviceMetricsOverride", {}
             )
-
-        self.driver.save_screenshot(str(SCREENSHOT_PATH))
 
 
 if __name__ == "__main__":

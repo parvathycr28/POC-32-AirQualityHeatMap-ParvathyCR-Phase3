@@ -52,7 +52,23 @@ def test_result_evidence_question_returns_source_record(monkeypatch):
             record if result_id == "RES-0001" else None
         ),
     )
-
+    monkeypatch.setattr(
+        assistant_service,
+        "generate_gemini_explanation",
+        lambda package: {
+            "status": "UNAVAILABLE",
+            "text": (
+                "A Gemini explanation is unavailable. The deterministic answer "
+                "and approved evidence remain available."
+            ),
+            "reason": "Gemini API key is not configured.",
+            "model": None,
+            "validation": {
+                "valid": False,
+                "errors": ["Gemini API key is not configured."],
+            },
+        },
+    )
     response = assistant_service.answer_question("Show evidence RES-0001")
 
     assert response["status"] == "ok"

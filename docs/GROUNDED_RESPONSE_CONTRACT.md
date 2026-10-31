@@ -16,7 +16,7 @@ The LLM must not replace deterministic retrieval, independently establish analyt
 
 Every successful response must contain:
 
-- `status`: `"success"`
+- `status`: `"ok"`
 - `intent`: allowlisted intent
 - `answer`: grounded response text based on retrieved evidence
 - `evidence`: references to the source results
@@ -30,20 +30,23 @@ The response must preserve the original deterministic result and its supporting 
 
 ### Mode B Explanation Metadata
 
-When an LLM explanation is generated, the response must also communicate the explanation's status.
+Mode B means deterministic retrieval and answer construction are authoritative, with an optional LLM explanation layer. Gemini is not required to succeed for every question.
 
-The implementation may expose this through the existing `grounding` response object.
+The response-level `grounding` object reports the execution status for each question:
 
-The metadata must accurately indicate:
+- `mode`: configured assistant mode, currently `deterministic_plus_llm_explanation`.
+- `gemini_attempted`: `true` when a request was made to the Gemini provider; `false` when Gemini was not attempted, such as when the API key is missing or the evidence is insufficient.
+- `llm_used`: `true` only when the explanation provider returns an `AVAILABLE` result.
+- `explanation_validated`: `true` only when an available explanation passes the implemented validation checks.
+- `deterministic_fallback_used`: `true` when the generated explanation is unavailable or fails validation and the deterministic answer is retained.
+- `generated_findings`: remains `false`; the LLM must not create new analytical findings.
+- `source`: identifies the approved deterministic source used for the response.
 
-- Whether an LLM was used
-- Whether an explanation was generated
-- Whether the generated explanation passed validation
-- Whether the explanation is available or unavailable
+The health endpoint's `gemini_configured` field indicates whether a non-empty `GEMINI_API_KEY` is configured. It does not prove that a Gemini request succeeded, that a particular question used Gemini, or that an explanation passed validation.
 
-The exact field names and allowed values must follow the backend's implemented response schema.
+An unavailable or invalid LLM explanation must not invalidate an otherwise valid deterministic answer. The response must retain its approved answer, evidence, data and method versions, quality status, and relevant limitations. The explanation and fallback status must accurately describe what happened for that particular question.
 
-A successful deterministic result must not be marked invalid solely because the LLM explanation is unavailable.
+Passing the implemented explanation validator means only that its configured checks passed; it is not a guarantee that every natural-language claim is semantically entailed by the evidence.
 
 ---
 

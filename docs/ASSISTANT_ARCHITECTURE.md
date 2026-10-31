@@ -13,19 +13,32 @@
 
 **Mode B — Deterministic Retrieval + LLM Explanation**
 
-The assistant retrieves approved Track A results and builds a structured evidence package deterministically. An optional Gemini explanation layer may explain that evidence in natural language.
+The assistant retrieves approved Track A results and builds a structured evidence package deterministically. Gemini is an optional explanation provider; its availability and successful use must be assessed for each question.
 
 The deterministic query results, evidence, metrics, rankings, metadata, and limitations remain the source of truth. The LLM must not create or modify findings, calculate values, infer new rankings, or introduce unsupported facts.
 
-If the LLM is unavailable or its explanation fails validation, the assistant must retain the deterministic result and use a safe fallback response.
+The response-level `grounding` metadata distinguishes the configured mode from actual execution:
+
+- `mode` identifies the configured assistant mode.
+- `llm_used` indicates whether the explanation provider returned an `AVAILABLE` result.
+- `explanation_validated` indicates whether that available explanation passed the implemented validation checks.
+- `deterministic_fallback_used` indicates whether the explanation provider returned a non-available result.
+- `generated_findings` must remain `false`.
+
+The health endpoint's `gemini_configured` field indicates whether a non-empty Gemini API key is configured. It does not prove that a request succeeded or that an explanation passed validation.
+
+If Gemini is unavailable or its explanation fails validation, the assistant must preserve the valid deterministic answer, approved evidence, data and method versions, quality metadata, and source limitations. Validation success must not be represented as proof that every natural-language claim is semantically correct.
 
 ## Integration Route / Component
 
-- **Proposed backend route:** `POST /api/assistant/query`
-- **Proposed frontend component:** Data Intelligence assistant panel.
-- **Existing integration:** `/api/intelligence/results`
+- **Assistant API:** `POST /api/assistant/ask`
+- **Assistant health:** `GET /api/assistant/health`
+- **Frontend routes:** `/assistant` and `/data-intelligence`
+- **Assistant implementation:** `assistant/core/assistant_service.py`
+- **Gemini explanation layer:** `assistant/core/gemini_explainer.py`
+- **Approved intelligence source:** Track A outputs with their validated data and method versions.
 
-These are proposed integration points. Confirm the existing backend routes, frontend component structure, authentication middleware, and deployment configuration before adding or enabling them.
+The assistant API and health endpoint are implemented. The health endpoint reports the configured assistant mode and whether a Gemini API key is configured; individual question responses report actual explanation availability, validation, and fallback status.
 
 ## Request Flow
 

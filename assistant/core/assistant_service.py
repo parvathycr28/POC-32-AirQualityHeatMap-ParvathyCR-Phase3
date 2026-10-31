@@ -1,6 +1,4 @@
-
-"""Deterministic, evidence-grounded assistant service. No LLM is used."""
-
+"""Evidence-grounded assistant with deterministic answers and optional LLM explanations."""
 from __future__ import annotations
 
 from typing import Any
@@ -596,6 +594,7 @@ def answer_question(
             
             "grounding": {
                 "mode": "deterministic_plus_llm_explanation",
+                "gemini_attempted": gemini_result.get("provider_attempted", False),
                 "llm_used": gemini_result.get("status") == "AVAILABLE",
                 "explanation_validated": (
                     gemini_result.get("status") == "AVAILABLE"

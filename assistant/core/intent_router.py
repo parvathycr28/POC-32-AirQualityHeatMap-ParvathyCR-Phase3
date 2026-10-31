@@ -51,6 +51,7 @@ def classify_question(question: str):
         r"(method|methodology|limitations)",
         r"tell\s+me\s+about\s+(the\s+)?"
         r"(method|methodology|limitations)",
+        r"what\s+are\s+(the\s+)?method\s+and\s+limitations\??",
     ]
 
 
@@ -80,6 +81,9 @@ def classify_question(question: str):
         r"(summarize|give\s+me\s+a\s+summary\s+of)\s+"
         r"(the\s+)?track\s+a\s+"
         r"(comparative\s+)?intelligence",
+        r"(summarize|give\s+me\s+a\s+summary\s+of)\s+"
+        r"(the\s+)?(approved\s+)?(intelligence\s+)?results\.?",
+
     ]
 
 

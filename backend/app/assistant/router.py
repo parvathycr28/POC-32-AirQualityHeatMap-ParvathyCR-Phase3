@@ -1,6 +1,4 @@
-
-"""FastAPI routes for the deterministic grounded data assistant."""
-
+"""FastAPI routes for the evidence-grounded assistant with optional LLM explanations."""
 from __future__ import annotations
 
 from typing import Any

@@ -11,7 +11,7 @@ from google import genai
 from google.genai import types
 
 
-MODEL_DEFAULT = "gemini-2.5-flash"
+MODEL_DEFAULT = "gemini-3.8-flash"
 EXPLANATION_UNAVAILABLE = (
     "A Gemini explanation is unavailable. The deterministic answer and "
     "approved evidence remain available."
@@ -37,13 +37,17 @@ NUMBER_PATTERN = re.compile(
 )
 
 
-def _unavailable(reason: str) -> dict[str, Any]:
+def _unavailable(
+    reason: str,
+    provider_attempted: bool = False,
+) -> dict[str, Any]:
     """Return a safe, non-sensitive explanation failure result."""
     return {
         "status": "UNAVAILABLE",
         "text": EXPLANATION_UNAVAILABLE,
         "reason": reason,
         "model": None,
+        "provider_attempted": provider_attempted,
         "validation": {
             "valid": False,
             "errors": [reason],
@@ -222,9 +226,9 @@ def validate_gemini_explanation(
     print(
         "GEMINI_NUMERIC_CHECK:",
         {
-            "allowed_numbers": sorted(allowed_numbers),
-            "generated_numbers": sorted(_numeric_tokens(text)),
-            "unsupported_numbers": sorted(unsupported_numbers),
+            "allowed_number_count": len(allowed_numbers),
+            "generated_number_count": len(_numeric_tokens(text)),
+            "unsupported_number_count": len(unsupported_numbers),
         },
         flush=True,
     )
@@ -315,12 +319,16 @@ EVIDENCE_JSON:
 """.strip()
 
     model = os.getenv("GEMINI_MODEL", MODEL_DEFAULT).strip() or MODEL_DEFAULT
+    provider_attempted = False
 
     try:
-        client = genai.Client(api_key=api_key)
-
+        client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=10000),
+        )
         for attempt in range(2):
             try:
+                provider_attempted = True
                 response = client.models.generate_content(
                     model=model,
                     contents=prompt,
@@ -354,7 +362,8 @@ EVIDENCE_JSON:
 
                 if finish_reason == types.FinishReason.MAX_TOKENS:
                     return _unavailable(
-                        "Gemini explanation was truncated by the output-token limit."
+                        "Gemini explanation was truncated by the output-token limit.",
+                        provider_attempted=True,
                     )
                 break
             except Exception as exc:
@@ -382,14 +391,18 @@ EVIDENCE_JSON:
 
         text = getattr(response, "text", None)
         if not isinstance(text, str) or not text.strip():
-            return _unavailable("Gemini returned no explanation.")
+            return _unavailable(
+                "Gemini returned no explanation.",
+                provider_attempted=True,
+            )
 
         validation = validate_gemini_explanation(text, evidence_package)
         print(
             "GEMINI_VALIDATION:",
             {
-                "text": text,
-                "validation": validation,
+                "model": model,
+                "valid": validation["valid"],
+                "errors": validation["errors"],
             },
             flush=True,
         )
@@ -400,6 +413,7 @@ EVIDENCE_JSON:
                 "reason": "Generated explanation did not pass validation.",
                 "model": model,
                 "validation": validation,
+                "provider_attempted": True,
             }
 
         return {
@@ -408,13 +422,16 @@ EVIDENCE_JSON:
             "reason": None,
             "model": model,
             "validation": validation,
+            "provider_attempted": True,
         }
 
     except Exception as exc:
-    # Log the provider error in the backend terminal only.
-    # Never return provider error details to the client.
+        # Log only the exception type; do not expose provider error details.
         print(
-            f"GEMINI_ERROR: {type(exc).__name__}: {exc}",
+            f"GEMINI_ERROR: {type(exc).__name__}",
             flush=True,
         )
-        return _unavailable("Gemini request failed or timed out.")
+        return _unavailable(
+            "Gemini request failed or timed out.",
+            provider_attempted=provider_attempted,
+        )

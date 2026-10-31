@@ -2,7 +2,7 @@ import os
 
 import requests
 
-BASE_URL = os.getenv("ASSISTANT_API_URL", "http://127.0.0.1:8004")
+BASE_URL = os.getenv("ASSISTANT_API_URL", "http://127.0.0.1:8000")
 ASK_URL = f"{BASE_URL}/api/assistant/ask"
 HEALTH_URL = f"{BASE_URL}/api/assistant/health"
 
@@ -29,6 +29,23 @@ def test_supported_city_comparison_returns_grounded_evidence():
     assert body["evidence"]
     assert "phase3-v1.1" in response.text
     assert "track-a-comparative-v1.0.0" in response.text
+    grounding = body["grounding"]
+
+    assert grounding["mode"] == "deterministic_plus_llm_explanation"
+    assert isinstance(grounding["gemini_attempted"], bool)
+    assert isinstance(grounding["llm_used"], bool)
+    assert isinstance(grounding["explanation_validated"], bool)
+    assert isinstance(grounding["deterministic_fallback_used"], bool)
+    assert grounding["generated_findings"] is False
+    assert grounding["source"] == "approved_intelligence_results"
+
+    if grounding["llm_used"]:
+        assert grounding["explanation_validated"] is True
+        assert grounding["deterministic_fallback_used"] is False
+        assert grounding["gemini_attempted"] is True
+    else:
+        assert grounding["explanation_validated"] is False
+        assert grounding["deterministic_fallback_used"] is True
 
 
 def test_prompt_injection_is_rejected():

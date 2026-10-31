@@ -156,7 +156,17 @@ def compare_cities(
             "Expected exactly two comparable city results."
         )
 
-    return matches
+    requested_order = {
+        city_a.strip().casefold(): 0,
+        city_b.strip().casefold(): 1,
+    }
+
+    return sorted(
+        matches,
+        key=lambda item: requested_order[
+            str(item.get("entity_id", "")).casefold()
+        ],
+    )
 
 
 def get_summary_results(

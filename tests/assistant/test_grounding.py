@@ -1,4 +1,3 @@
-
 from assistant.core.evidence_builder import build_evidence_package
 from assistant.core.response_validator import (
     validate_answer_records,

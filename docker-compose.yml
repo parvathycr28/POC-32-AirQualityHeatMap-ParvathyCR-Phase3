@@ -22,9 +22,11 @@ services:
         NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
         NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8003"
         NEXT_PUBLIC_API_URL: "http://localhost:8003"
+        NEXT_PUBLIC_ASSISTANT_API_URL: "http://localhost:8000"
     environment:
       NEXT_PUBLIC_DATA_INTELLIGENCE_API_URL: "http://localhost:8000"
       NEXT_PUBLIC_INTELLIGENCE_PANEL_API_URL: "http://localhost:8003"
+      NEXT_PUBLIC_ASSISTANT_API_URL: "http://localhost:8000"
     ports:
       - "3002:3000"
     depends_on:
@@ -47,6 +49,7 @@ services:
     environment:
       INTELLIGENCE_RESULTS_FILE: /app/data-science/outputs/intelligence_results.json
       INTELLIGENCE_SUMMARY_FILE: /app/data-science/outputs/intelligence_summary.json
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     ports:
       - "8000:8000"
     restart: unless-stopped

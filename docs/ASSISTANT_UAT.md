@@ -11,10 +11,10 @@ The final validation includes improved explanation readability, an explicit synt
 ## 2. Test Environment
 
 - **Project:** POC-32 Aether Pulse Air Quality Heatmap — Phase 3
-- **Assistant frontend:** http://localhost:3000/assistant
-- **Dashboard:** http://localhost:3000/
-- **Data Intelligence frontend:** http://localhost:3000/data-intelligence
-- **Assistant backend:** http://localhost:8004
+- **Assistant frontend:** http://localhost:3002/assistant
+- **Dashboard:** http://localhost:3002/
+- **Data Intelligence frontend:** http://localhost:3002/data-intelligence
+- **Assistant backend:** http://localhost:8000
 - **Data Intelligence backend:** http://localhost:8000
 - **Dataset version:** `phase3-v1.1`
 - **Analytical method version:** `track-a-comparative-v1.0.0`

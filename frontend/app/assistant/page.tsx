@@ -180,10 +180,34 @@ export default function AssistantPage() {
             <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">
               <p>Mode: {result.grounding.mode ?? "Not provided"}</p>
               <p>
+                Gemini attempted:{" "}
+                {result.grounding.gemini_attempted === undefined
+                  ? "Not provided"
+                  : result.grounding.gemini_attempted
+                    ? "Yes"
+                    : "No"}
+              </p>
+              <p>
                 LLM used:{" "}
                 {result.grounding.llm_used === undefined
                   ? "Not provided"
                   : result.grounding.llm_used
+                    ? "Yes"
+                    : "No"}
+              </p>
+              <p>
+                Explanation validated:{" "}
+                {result.grounding.explanation_validated === undefined
+                  ? "Not provided"
+                  : result.grounding.explanation_validated
+                    ? "Yes"
+                    : "No"}
+              </p>
+              <p>
+                Deterministic fallback used:{" "}
+                {result.grounding.deterministic_fallback_used === undefined
+                  ? "Not provided"
+                  : result.grounding.deterministic_fallback_used
                     ? "Yes"
                     : "No"}
               </p>
@@ -195,6 +219,7 @@ export default function AssistantPage() {
                     ? "Yes"
                     : "No"}
               </p>
+              <p>Source: {result.grounding.source ?? "Not provided"}</p>
             </div>
           )}
 
