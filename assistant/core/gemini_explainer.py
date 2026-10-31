@@ -8,7 +8,7 @@ import time
 from typing import Any
 
 from google import genai
-from google.genai import types
+from google.genai import errors, types
 
 
 MODEL_DEFAULT = "gemini-3.8-flash"
@@ -426,11 +426,25 @@ EVIDENCE_JSON:
         }
 
     except Exception as exc:
-        # Log only the exception type; do not expose provider error details.
-        print(
-            f"GEMINI_ERROR: {type(exc).__name__}",
-            flush=True,
-        )
+        if isinstance(exc, errors.APIError):
+            print(
+                "GEMINI_ERROR:",
+                {
+                    "exception_type": type(exc).__name__,
+                    "http_status": exc.code,
+                    "provider_status": exc.status,
+                },
+                flush=True,
+            )
+        else:
+            print(
+                "GEMINI_ERROR:",
+                {
+                    "exception_type": type(exc).__name__,
+                },
+                flush=True,
+            )
+
         return _unavailable(
             "Gemini request failed or timed out.",
             provider_attempted=provider_attempted,
