@@ -426,12 +426,30 @@ EVIDENCE_JSON:
 
     except Exception as exc:
         if isinstance(exc, errors.APIError):
+            provider_message = getattr(exc, "message", None) or str(exc)
+            provider_details = getattr(exc, "details", None)
+
+            # Redact the API key if it appears in an error message.
+            secret = locals().get("api_key")
+            if secret:
+                provider_message = provider_message.replace(secret, "[REDACTED]")
+                if provider_details is not None:
+                    provider_details = str(provider_details).replace(
+                        secret, "[REDACTED]"
+                    )
+
             print(
                 "GEMINI_ERROR:",
                 {
                     "exception_type": type(exc).__name__,
                     "http_status": exc.code,
                     "provider_status": exc.status,
+                    "provider_message": str(provider_message)[:1000],
+                    "provider_details": (
+                        str(provider_details)[:1000]
+                        if provider_details is not None
+                        else None
+                    ),
                 },
                 flush=True,
             )
