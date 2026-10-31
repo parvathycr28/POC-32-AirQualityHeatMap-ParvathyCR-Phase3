@@ -1,130 +1,240 @@
-# Assistant User Acceptance Test (UAT) Report
-**Project:** POC-32 — Aether Pulse Air Quality Heatmap, Phase 3
-**Final status:** **PASS — Assistant UAT**
+# Grounded Data Assistant — User Acceptance Testing (UAT) Report
+
+**Project:** PoC 32 — Aether Pulse Air Quality Heatmap (Phase 3)  
+**Component:** Grounded Data Assistant  
+**Environment:** Render deployment  
+**Backend service:** `poc32-phase3-intelligence-api`  
+**Backend URL:** `https://poc32-phase3-intelligence-api.onrender.com`  
+**Assistant health endpoint:** `https://poc32-phase3-intelligence-api.onrender.com/api/assistant/health`  
+**Data version:** `phase3-v1.1`  
+**Analytical method version:** `track-a-comparative-v1.0.0`  
+**Configured Gemini model:** `gemini-3.8-flash`  
+**Latest diagnostic commit:** `596019b`  
+**Last updated:** 31 October 2026
+
+---
 
 ## 1. Purpose
 
-Validate the Aether Pulse Air Quality Heatmap Assistant for supported questions, evidence grounding, safety boundaries, API behavior, browser end-to-end behavior, responsive layout, and optional Gemini-generated explanations.
+This document records the latest user acceptance and deployment validation of the Phase 3 Grounded Data Assistant.
 
-The final validation includes improved explanation readability, an explicit synthetic-data caveat, deterministic fallback behavior, and a complete automated test run after the prompt modification.
+The assistant retrieves approved, existing Track A intelligence results and supporting evidence for supported questions. It uses deterministic retrieval and response construction before attempting an optional Gemini-generated explanation.
 
-## 2. Test Environment
+The assistant must not independently generate numerical findings, rankings, predictions, or unsupported evidence.
 
-- **Project:** POC-32 Aether Pulse Air Quality Heatmap — Phase 3
-- **Assistant frontend:** http://localhost:3002/assistant
-- **Dashboard:** http://localhost:3002/
-- **Data Intelligence frontend:** http://localhost:3002/data-intelligence
-- **Assistant backend:** http://localhost:8000
-- **Data Intelligence backend:** http://localhost:8000
-- **Dataset version:** `phase3-v1.1`
-- **Analytical method version:** `track-a-comparative-v1.0.0`
-- **Dataset type:** Synthetic, sparse sample; not verified real-world observations
-- **Optional explanation provider:** Google Gemini
+The canonical dataset is synthetic and sparse. Results describe the available sample only and must not be interpreted as verified real-world air-quality observations, health-risk assessments, regulatory conclusions, causal findings, or predictions.
 
-## 3. UAT Results
+## 2. Test environment
 
-| ID | Test | Result | Evidence |
+| Item | Configuration |
+|---|---|
+| Project | PoC 32 — Aether Pulse Air Quality Heatmap |
+| Phase | Phase 3 |
+| Frontend | Deployed Render application |
+| Backend | Render web service |
+| Backend framework | FastAPI |
+| Assistant mode | `deterministic_plus_llm_explanation` |
+| Gemini model setting | `gemini-3.8-flash` |
+| Gemini SDK | `google-genai==2.31.0` |
+| Request timeout | 60 seconds |
+| Dataset version | `phase3-v1.1` |
+| Method version | `track-a-comparative-v1.0.0` |
+| Dataset type | Synthetic, sparse sample |
+
+## 3. Automated test results
+
+**Latest recorded full test suite: PASS**
+
+- Tests passed: 55
+- Tests failed: 0
+- Execution time: 18.93 seconds
+
+The suite includes assistant functionality, Gemini explainer/service/API regression coverage, deterministic grounding, and related validation tests.
+
+The focused Gemini explainer tests also passed after the diagnostic logging change:
+
+- Tests passed: 15
+- Tests failed: 0
+- Execution time: 0.38 seconds
+
+These automated test results validate application behaviour under the tested conditions. They do not establish that Google's live Gemini generation service is currently available.
+
+## 4. UAT results
+
+| ID | Acceptance check | Observed result | Status |
 |---|---|---|---|
-| UAT-01 | Full automated test suite | **PASS** | Latest run: 55 passed, 0 failed in 18.93 seconds. |
-| UAT-02 | Assistant page loads | PASS | Previously recorded Selenium page-load test passed. |
-| UAT-03 | Supported Track A summary question | PASS | Summary API returned status `ok`, intent `summary`, 10 evidence records, and valid evidence validation. |
-| UAT-04 | Dashboard route smoke test | PASS — previously recorded | HTTP 200, non-empty HTML response, and page title. |
-| UAT-05 | Data Intelligence API smoke test | PASS — previously recorded | HTTP 200, OpenAPI 3.1.0, and 7 routes. |
-| UAT-06 | Data Intelligence page smoke test | PASS — previously recorded | HTTP 200, non-empty HTML response, and page title. |
-| UAT-07 | Assistant health endpoint | PASS | Health endpoint and automated health test passed in prior validation. |
-| UAT-08 | Supported city comparison | PASS | Previously recorded Selenium evidence for Delhi and Mumbai NO2 records; automated API test passed. |
-| UAT-09 | Unsupported prediction request | PASS | Selenium test confirmed `unsupported` status and zero evidence. |
-| UAT-10 | Missing question handling | PASS | API returned HTTP 422 in prior validation; automated test passed. |
-| UAT-11 | Evidence metadata and limitations | PASS | Evidence responses preserve dataset and method versions, quality status, limitations, and grounding metadata. |
-| UAT-12 | Prompt injection and secret-disclosure handling | PASS | Focused tests passed in the full automated run. |
-| UAT-13 | Evidence coverage and grounding validation | PASS | Evidence coverage and grounding tests passed in the full automated run. |
-| UAT-14 | Responsive layout | PASS — previously recorded | Selenium showed no horizontal overflow at 1440, 768, 390, and 320 px. |
-| UAT-15 | Selenium end-to-end suite | PASS — previously recorded | 4 passed, 0 failed. Report: `selenium-test/selenium_artifacts/Assistant_Test_Report.txt`; screenshot: `selenium-test/selenium_artifacts/assistant_e2e.png`. |
-| UAT-16 | Gemini explainer regression tests | PASS | 7 passed after the prompt change; included in the latest full suite. |
-| UAT-17 | Assistant service regression tests | PASS | 6 passed after the prompt change; included in the latest full suite. |
-| UAT-18 | Assistant API regression tests | PASS | 6 passed after the prompt change; included in the latest full suite. |
-| UAT-19 | Live Gemini integration | PASS | Explanation status `AVAILABLE`; validation `valid: true`, with no validation errors. |
-| UAT-20 | Explanation readability and synthetic-data caveat | PASS — observed | Live explanation uses natural language and explicitly states that the dataset is synthetic and not verified real-world measurement. |
-| UAT-21 | Frontend explanation display | PASS — user-confirmed | Updated explanation works at `http://localhost:3000/assistant`. |
-| UAT-22 | Deterministic fallback when Gemini is unavailable | PASS | Fallback regression test passed; also included in the latest full suite. |
+| UAT-01 | Complete Python test suite | 55 passed, 0 failed, 18.93 seconds | PASS |
+| UAT-02 | Focused Gemini explainer regression tests | 15 passed, 0 failed | PASS |
+| UAT-03 | Backend Render deployment | Service reports Live | PASS |
+| UAT-04 | Backend health endpoint | HTTP 200; status `available` | PASS |
+| UAT-05 | Gemini configuration check | `gemini_configured: true` | PASS |
+| UAT-06 | Assistant operating mode | `deterministic_plus_llm_explanation` | PASS |
+| UAT-07 | Grounded Assistant page loads | User confirmed successful page load | PASS |
+| UAT-08 | Main dashboard loads | User confirmed successful operation | PASS |
+| UAT-09 | Air-quality data display | User confirmed data appears correctly | PASS |
+| UAT-10 | Charts and heatmap rendering | User confirmed correct rendering | PASS |
+| UAT-11 | City filters | User confirmed correct operation | PASS |
+| UAT-12 | Pollutant filters | User confirmed correct operation | PASS |
+| UAT-13 | Supported NO2 city comparison | Deterministic Delhi and Mumbai values returned | PASS |
+| UAT-14 | Deterministic fallback | Returned successfully when Gemini failed | PASS |
+| UAT-15 | Assistant API response after Gemini failure | POST `/api/assistant/ask` returned HTTP 200 | PASS |
+| UAT-16 | Browser CORS preflight | OPTIONS request returned HTTP 200 | PASS |
+| UAT-17 | Gemini generation with configured model | Google returned HTTP 504 `DEADLINE_EXCEEDED` | FAIL |
+| UAT-18 | Gemini alternative model investigation | `gemini-3.6-flash` also returned 503 in an earlier test | FAIL |
+| UAT-19 | Gemini 2.5 model investigation | `gemini-2.5-flash` returned HTTP 404 `NOT_FOUND` | FAIL |
+| UAT-20 | Provider error diagnostics | HTTP status, provider status, message and details captured in Render logs | PASS |
+| UAT-21 | Diagnostic logging regression | 15 focused tests passed; change deployed successfully | PASS |
+| UAT-22 | Final live Gemini explanation validation | Explanation remains unavailable because of provider deadline error | FAIL |
 
-**Latest full-suite evidence:** `python -m pytest -v` collected 55 tests and completed with `55 passed in 18.93s`. This run occurred after the Gemini prompt modification.
+**Status note:** PASS and FAIL describe the specific observed result. The three Gemini-related failures do not mean that deterministic assistant functionality or the complete application is broken.
 
-## 4. Gemini Explanation Improvement
+## 5. Live deployment evidence
 
-### 4.1 Changes made
+### 5.1 Backend health check
 
-The prompt in `assistant/core/gemini_explainer.py` was updated to instruct Gemini to:
+Command:
 
-- Explain approved evidence in clear, natural language for a general audience.
-- Avoid raw database field names such as `result_value`, `priority_rank`, and `result_category`.
-- Prefer concise sentences instead of repetitive record-by-record descriptions.
-- Explicitly state when the evidence identifies the dataset as synthetic and not verified real-world air-quality measurement.
-- Limit conclusions to the supplied descriptive sample.
-- Avoid inventing findings, calculating metrics, estimating values, or introducing unsupported facts.
-- Preserve the existing response length and numeric validation constraints.
+```bash
+curl -s https://poc32-phase3-intelligence-api.onrender.com/api/assistant/health
+```
 
-The deterministic answer, evidence-selection logic, numeric validator, and fallback implementation were not intentionally changed as part of the prompt update.
+Observed response:
 
-### 4.2 Live integration result
+```json
+{
+  "status": "available",
+  "mode": "deterministic_plus_llm_explanation",
+  "gemini_configured": true
+}
+```
 
-The supported question was:
+Interpretation:
 
-`Summarize the Track A findings`
+- The backend is available.
+- The assistant is operating in the expected mode.
+- Gemini credentials are configured.
+- This endpoint confirms configuration, not successful live text generation.
 
-The live Gemini response returned:
+### 5.2 Deterministic comparison test
 
-- `explanation.status`: `AVAILABLE`
-- `explanation.model`: `gemini-3.6-flash`
-- `explanation.validation.valid`: `true`
-- `explanation.validation.errors`: empty
+Question:
 
-The generated explanation states that the dataset is synthetic, is not a verified real-world air-quality measurement, and supports conclusions limited to the supplied descriptive sample.
+`Compare the average NO2 levels in Delhi and Mumbai.`
 
-The user confirmed that the updated explanation works in the frontend.
+Observed values:
 
-**Validation limitation:** Passing the implemented validator confirms that its configured checks passed. It does not independently prove that every natural-language statement is entailed by the evidence. City and pollutant ranking statements must be supported by the approved records and their definitions.
+| City | NO2 value |
+|---|---:|
+| Delhi | 52.8933 µg/m³ |
+| Mumbai | 40.1067 µg/m³ |
 
-## 5. Grounding and Safety Interpretation
+The values were retrieved from existing approved intelligence results. No new metric was calculated by the assistant.
 
-- The supported summary request retrieves existing approved Track A results.
-- The summary response contains 10 evidence records and passed evidence validation.
-- The live summary response reported `llm_used: true` and `generated_findings: false`.
-- Gemini provides an optional natural-language explanation; it does not replace the deterministic answer or authorize new analytical findings.
-- The deterministic fallback regression test passed when Gemini was unavailable.
-- Gemini explainer, assistant service, and assistant API tests passed in the latest full-suite run.
-- Unsupported prediction requests remain outside the assistant's supported analytical scope.
-- Prompt-injection, secret-disclosure, evidence coverage, and grounding tests passed in the latest full-suite run.
-- The dataset is synthetic and sparse. It must not be represented as verified real-world measurements or used to claim health risk, regulatory compliance, causal effects, or predictions.
+Observed response metadata:
 
-## 6. Final Acceptance Criteria
+- Gemini attempted: Yes
+- LLM used: No
+- Explanation validated: No
+- Deterministic fallback used: Yes
+- Generated findings: No
+- Source: `approved_intelligence_results`
 
-- [x] Full automated test suite passed: 55 passed, 0 failed.
-- [x] Supported summary request returned valid, approved evidence.
-- [x] Supported comparison displayed supporting evidence.
-- [x] Unsupported prediction request was rejected without evidence.
-- [x] Prompt-injection and secret-disclosure tests passed.
-- [x] Evidence coverage, versioning, quality metadata, and limitations tests passed.
-- [x] Previously recorded Assistant Selenium end-to-end tests passed.
-- [x] Previously recorded responsive-layout checks passed at required widths.
-- [x] Previously recorded Dashboard and Data Intelligence HTTP smoke tests passed.
-- [x] Gemini explainer tests passed after the prompt change.
-- [x] Assistant service tests passed after the prompt change.
-- [x] Assistant API tests passed after the prompt change.
-- [x] Live Gemini explanation returned `AVAILABLE` and passed implemented validation.
-- [x] Explanation explicitly communicated the synthetic-data limitation.
-- [x] Updated explanation was confirmed working in the frontend.
-- [x] Deterministic fallback test passed after the prompt change.
-- [x] Complete automated suite rerun after the prompt change.
+The assistant preserved the deterministic answer despite the failed Gemini explanation.
 
-## 7. Final Acceptance Status
+### 5.3 Latest Gemini provider error
 
-**PASS — Assistant UAT.**
+Latest relevant Render log:
 
-The latest full automated test run completed with **55 passed and 0 failed in 18.93 seconds**. The live Gemini integration returned a valid explanation with an explicit synthetic-data caveat, and the user confirmed that the updated explanation works in the frontend at `http://localhost:3000/assistant`.
+```text
+GEMINI_ERROR: {
+  'exception_type': 'ServerError',
+  'http_status': 504,
+  'provider_status': 'DEADLINE_EXCEEDED',
+  'provider_message':
+    'Deadline expired before operation could complete.',
+  'provider_details':
+    "{'error': {'code': 504,
+    'message': 'Deadline expired before operation could complete.',
+    'status': 'DEADLINE_EXCEEDED'}}"
+}
+```
 
-The implementation preserves deterministic grounding and the deterministic answer when Gemini is unavailable, as covered by the automated fallback test.
+The corresponding API request returned:
 
-**Scope note:** The complete automated test suite was rerun after the prompt modification. The separately documented Selenium report and Dashboard/Data Intelligence smoke tests are earlier recorded checks and were not independently rerun as part of this latest command.
+```text
+POST /api/assistant/ask HTTP/1.1 200 OK
+```
 
-**Dataset limitation:** Phase 3 data is synthetic and sparse. Conclusions are restricted to approved descriptive comparative analysis and must not be presented as verified real-world air-quality findings.
+The observed assistant request took approximately 59.35 seconds, close to the configured 60-second timeout.
+
+Interpretation:
+
+Google Gemini returned a structured 504 deadline error. The backend caught the exception and returned its deterministic fallback successfully.
+
+The exact underlying cause of the provider deadline has not been established. It may involve provider-side capacity, processing delays, or other request-specific conditions. The current evidence does not justify attributing it to an incorrect API key or a broken Render deployment.
+
+## 6. Diagnostic improvement
+
+A diagnostic logging improvement was implemented in:
+
+`assistant/core/gemini_explainer.py`
+
+The updated handler captures:
+
+- Exception type
+- HTTP status
+- Provider status
+- Provider error message
+- Provider error details
+
+The logging also includes API-key redaction and limits the logged diagnostic fields to 1,000 characters.
+
+The existing deterministic fallback and retry behaviour were preserved.
+
+**Git evidence:**
+
+- Commit: `596019b`
+- Commit message: `Improve Gemini provider error diagnostics`
+- Branch: `feature/data-intelligence-page`
+- GitHub push: Successful
+- Render deployment: Live
+
+## 7. Final acceptance criteria
+
+| Acceptance criterion | Current status |
+|---|---|
+| Frontend loads | PASS |
+| Backend is deployed and available | PASS |
+| Assistant page loads | PASS |
+| Dashboard functions | PASS |
+| Charts and heatmap render | PASS |
+| City and pollutant filters work | PASS |
+| Deterministic supported answers work | PASS |
+| Approved evidence is retrieved | PASS |
+| Deterministic fallback works | PASS |
+| API handles Gemini failure without failing the request | PASS |
+| Gemini API key is configured | PASS |
+| Gemini-generated explanation is available | FAIL — provider 504 |
+| Gemini provider diagnostics are captured | PASS |
+| Automated test suite | PASS |
+
+## 8. Limitations and outstanding issues
+
+1. Gemini-generated explanations are not currently available because the provider returned HTTP 504 `DEADLINE_EXCEEDED`.
+2. An earlier test with Gemini 3.6 Flash returned HTTP 503 `UNAVAILABLE`.
+3. An earlier test with Gemini 2.5 Flash returned HTTP 404 `NOT_FOUND`.
+4. The exact cause of the live Gemini generation failures remains unresolved.
+5. The dataset is synthetic and sparse; results must not be represented as verified real-world measurements.
+6. The live Gemini generation feature requires a successful provider response and validation before it can receive final acceptance.
+
+## 9. Final UAT assessment
+
+**DETERMINISTIC GROUNDED ASSISTANT — FUNCTIONAL ACCEPTANCE PASSED**
+
+**OPTIONAL GEMINI EXPLANATION — NOT YET ACCEPTED**
+
+The Phase 3 Grounded Data Assistant is deployed and its deterministic functionality has been validated. The dashboard and assistant interface operate correctly, approved intelligence results are retrieved, and the fallback mechanism preserves API availability when Gemini fails.
+
+The optional LLM explanation component remains an outstanding issue. It must not be represented as successfully validated until a live Gemini request completes and its explanation passes the application's validation rules.
+
+**Overall assessment: PARTIAL ACCEPTANCE — DETERMINISTIC FUNCTIONALITY ACCEPTED; GEMINI INTEGRATION PENDING.**
