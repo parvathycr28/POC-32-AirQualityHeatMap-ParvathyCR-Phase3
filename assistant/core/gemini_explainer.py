@@ -324,7 +324,7 @@ EVIDENCE_JSON:
     try:
         client = genai.Client(
             api_key=api_key,
-            http_options=types.HttpOptions(timeout=10000),
+            http_options=types.HttpOptions(timeout=30000),
         )
         for attempt in range(2):
             try:
