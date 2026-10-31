@@ -333,10 +333,9 @@ EVIDENCE_JSON:
                     model=model,
                     contents=prompt,
                     config=types.GenerateContentConfig(
-                        temperature=0,
                         max_output_tokens=2048,
                         thinking_config=types.ThinkingConfig(
-                        thinking_level="low",
+                            thinking_level="low",
                         ),
                     ),
                 )
