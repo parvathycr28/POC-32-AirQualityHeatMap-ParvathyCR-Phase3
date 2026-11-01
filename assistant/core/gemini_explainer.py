@@ -179,7 +179,24 @@ def validate_gemini_explanation(
             {"matched_patterns": matched_forbidden_patterns},
             flush=True,
         )
+
+        matched_forbidden_sentences = [
+            sentence.strip()
+            for sentence in re.split(r"(?<=[.!?])\s+", text.strip())
+            if any(
+                re.search(pattern, sentence, flags=re.IGNORECASE)
+                for pattern in matched_forbidden_patterns
+            )
+        ]
+
+        print(
+            "GEMINI_FORBIDDEN_SENTENCE_CHECK:",
+            {"matched_sentences": matched_forbidden_sentences},
+            flush=True,
+        )
+
         errors.append("Explanation contains a prohibited claim category.")
+
     errors.extend(_comparison_consistency_errors(text, evidence_package))
 
     allowed_numbers: set[str] = set()
