@@ -332,16 +332,15 @@ real-world air-quality measurement. Mention that conclusions are limited
 to the supplied descriptive sample when supported by the evidence.
 Do not omit or contradict the supplied limitations.
 
-Do not introduce any numeric value unless it appears in the supplied
-approved evidence or the user's question.
-Do not calculate or mention differences from baselines.
-Reproduce every numeric value from the approved evidence exactly as supplied.
-Do not round, shorten, approximate, or reformat numeric values.
-Preserve the original decimal precision.
-If you cannot reproduce a numeric value exactly, omit it.
-Do not infer observation counts, trends, or statistics unless explicitly
-provided as approved evidence.
-Do not calculate, derive, round, or estimate values.
+Do not include any numeric values in the explanation.
+The deterministic answer already displays the approved numerical results.
+Keep this explanation strictly qualitative.
+You may describe relative comparisons, such as higher or lower,
+only when that relationship is directly supported by the approved evidence.
+Do not calculate or mention numerical differences, percentages,
+averages, ratios, rankings, or other derived statistics.
+Do not repeat measurements, coordinates, timestamps, counts, or IDs.
+Do not infer observation counts, trends, or statistics.
 If a requested detail is not available, omit it rather than infer it.
 
 Keep the explanation concise (maximum 120 words).
