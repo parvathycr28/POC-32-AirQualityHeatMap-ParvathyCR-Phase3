@@ -21,30 +21,6 @@ RESPONSIVE_WIDTHS = (1440, 768, 390, 320)
 
 
 class AssistantE2ETest(unittest.TestCase):
-    def run(self, result=None):
-        if result is None:
-            result = self.defaultTestResult()
-
-        errors_before = len(result.errors)
-        failures_before = len(result.failures)
-
-        outcome = super().run(result)
-
-        for test, traceback in result.errors[errors_before:]:
-            if test is self:
-                detail = traceback.strip().splitlines()[-1]
-                self.__class__.results.append(
-                    f"[FAIL] {self._testMethodName} — unittest error: {detail}"
-                )
-
-        for test, traceback in result.failures[failures_before:]:
-            if test is self:
-                detail = traceback.strip().splitlines()[-1]
-                self.__class__.results.append(
-                    f"[FAIL] {self._testMethodName} — unittest failure: {detail}"
-                )
-
-        return outcome
 
     @classmethod
     def setUpClass(cls):
