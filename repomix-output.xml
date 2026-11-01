@@ -27048,6 +27048,10 @@ Do not omit or contradict the supplied limitations.
 Do not introduce any numeric value unless it appears in the supplied
 approved evidence or the user's question.
 Do not calculate or mention differences from baselines.
+Reproduce every numeric value from the approved evidence exactly as supplied.
+Do not round, shorten, approximate, or reformat numeric values.
+Preserve the original decimal precision.
+If you cannot reproduce a numeric value exactly, omit it.
 Do not infer observation counts, trends, or statistics unless explicitly
 provided as approved evidence.
 Do not calculate, derive, round, or estimate values.
