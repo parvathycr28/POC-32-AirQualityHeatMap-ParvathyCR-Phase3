@@ -167,7 +167,18 @@ def validate_gemini_explanation(
     if len(text) > 1800:
         errors.append("Gemini explanation exceeds the permitted length.")
 
-    if _contains_forbidden_claim(text):
+    matched_forbidden_patterns = [
+        pattern
+        for pattern in FORBIDDEN_CLAIM_PATTERNS
+        if re.search(pattern, text, flags=re.IGNORECASE)
+    ]
+
+    if matched_forbidden_patterns:
+        print(
+            "GEMINI_FORBIDDEN_PATTERN_CHECK:",
+            {"matched_patterns": matched_forbidden_patterns},
+            flush=True,
+        )
         errors.append("Explanation contains a prohibited claim category.")
     errors.extend(_comparison_consistency_errors(text, evidence_package))
 
@@ -229,6 +240,7 @@ def validate_gemini_explanation(
             "allowed_number_count": len(allowed_numbers),
             "generated_number_count": len(_numeric_tokens(text)),
             "unsupported_number_count": len(unsupported_numbers),
+            "unsupported_numbers": sorted(unsupported_numbers),
         },
         flush=True,
     )
