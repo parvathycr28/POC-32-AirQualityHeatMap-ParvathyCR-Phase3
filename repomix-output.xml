@@ -235,134 +235,6 @@ VAR_REPORT
 <files>
 This section contains the contents of the repository's files.
 
-<file path="assistant_response.json">
-{"status":"ok","answer":"Existing NO2 result records for Delhi and Mumbai: Delhi: 52.8933 µg/m³; Mumbai: 40.1067 µg/m³. These are retrieved values; no new metric was calculated.","evidence":[{"result_id":"RES-0001","result_type":"ranking","record_id":null,"entity_id":"delhi","group_key":"delhi::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":52.89333333333334,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":1,"finding":"Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":52.89333333333334},{"factor":"median_value","value":55.92},{"factor":"minimum_value","value":46.7},{"factor":"maximum_value","value":56.06},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":16.685833333333335},{"factor":"relative_difference","value":0.460839144744413},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"},{"result_id":"RES-0004","result_type":"ranking","record_id":null,"entity_id":"mumbai","group_key":"mumbai::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":40.10666666666666,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":4,"finding":"Mumbai ranks 4 for no2 by sampled mean; its mean is 3.89917 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":40.10666666666666},{"factor":"median_value","value":38.4},{"factor":"minimum_value","value":35.53},{"factor":"maximum_value","value":46.39},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":3.899166666666659},{"factor":"relative_difference","value":0.107689475016686},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"}],"validation":{"valid":true,"errors":[],"warnings":[],"record_count":2},"details":{},"evidence_package":{"evidence_package_version":"grounded-evidence-v1.0.0","created_at":"2026-10-28T09:04:50.069120+00:00","question":"Compare Delhi and Mumbai for NO2","intent":"compare_cities","parameters":{"city_a":"delhi","city_b":"mumbai","pollutant":"no2"},"source":{"name":"approved_intelligence_results","record_count":2,"result_ids":["RES-0001","RES-0004"],"data_versions":["phase3-v1.1"],"method_versions":["track-a-comparative-v1.0.0"],"generated_at_values":["2026-10-11T08:55:58.910438+00:00","2026-10-11T08:55:58.910438+00:00"]},"quality":{"quality_status":"conditional","record_quality_statuses":["conditional","conditional"],"limitations":["Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."],"quality_metadata_available":true},"records":[{"result_id":"RES-0001","result_type":"ranking","record_id":null,"entity_id":"delhi","group_key":"delhi::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":52.89333333333334,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":1,"finding":"Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":52.89333333333334},{"factor":"median_value","value":55.92},{"factor":"minimum_value","value":46.7},{"factor":"maximum_value","value":56.06},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":16.685833333333335},{"factor":"relative_difference","value":0.460839144744413},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"},{"result_id":"RES-0004","result_type":"ranking","record_id":null,"entity_id":"mumbai","group_key":"mumbai::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":40.10666666666666,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":4,"finding":"Mumbai ranks 4 for no2 by sampled mean; its mean is 3.89917 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":40.10666666666666},{"factor":"median_value","value":38.4},{"factor":"minimum_value","value":35.53},{"factor":"maximum_value","value":46.39},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":3.899166666666659},{"factor":"relative_difference","value":0.107689475016686},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"}],"checks":{"has_records":true,"has_result_ids":true,"has_data_version":true,"has_method_version":true,"has_metric_values":true}},"grounding":{"mode":"deterministic_plus_llm_explanation","llm_used":false,"explanation_validated":false,"deterministic_fallback_used":true,"generated_findings":false,"source":"approved_intelligence_results"},"explanation":{"status":"UNAVAILABLE","text":"A Gemini explanation is unavailable. The deterministic answer and approved evidence remain available.","reason":"Gemini request failed or timed out.","model":null,"validation":{"valid":false,"errors":["Gemini request failed or timed out."]}}}
-</file>
-
-<file path="gemini-review.txt">
-diff --git a/assistant/core/gemini_explainer.py b/assistant/core/gemini_explainer.py
-index 7b25447..de6af19 100644
---- a/assistant/core/gemini_explainer.py
-+++ b/assistant/core/gemini_explainer.py
-@@ -11,7 +11,7 @@ from google import genai
- from google.genai import types
- 
- 
--MODEL_DEFAULT = "gemini-2.5-flash"
-+MODEL_DEFAULT = "gemini-3.8-flash"
- EXPLANATION_UNAVAILABLE = (
-     "A Gemini explanation is unavailable. The deterministic answer and "
-     "approved evidence remain available."
-@@ -37,13 +37,17 @@ NUMBER_PATTERN = re.compile(
- )
- 
- 
--def _unavailable(reason: str) -> dict[str, Any]:
-+def _unavailable(
-+    reason: str,
-+    provider_attempted: bool = False,
-+) -> dict[str, Any]:
-     """Return a safe, non-sensitive explanation failure result."""
-     return {
-         "status": "UNAVAILABLE",
-         "text": EXPLANATION_UNAVAILABLE,
-         "reason": reason,
-         "model": None,
-+        "provider_attempted": provider_attempted,
-         "validation": {
-             "valid": False,
-             "errors": [reason],
-@@ -222,9 +226,9 @@ def validate_gemini_explanation(
-     print(
-         "GEMINI_NUMERIC_CHECK:",
-         {
--            "allowed_numbers": sorted(allowed_numbers),
--            "generated_numbers": sorted(_numeric_tokens(text)),
--            "unsupported_numbers": sorted(unsupported_numbers),
-+            "allowed_number_count": len(allowed_numbers),
-+            "generated_number_count": len(_numeric_tokens(text)),
-+            "unsupported_number_count": len(unsupported_numbers),
-         },
-         flush=True,
-     )
-@@ -317,8 +321,10 @@ EVIDENCE_JSON:
-     model = os.getenv("GEMINI_MODEL", MODEL_DEFAULT).strip() or MODEL_DEFAULT
- 
-     try:
--        client = genai.Client(api_key=api_key)
--
-+        client = genai.Client(
-+            api_key=api_key,
-+            http_options=types.HttpOptions(timeout=10000),
-+        )
-         for attempt in range(2):
-             try:
-                 response = client.models.generate_content(
-@@ -354,7 +360,8 @@ EVIDENCE_JSON:
- 
-                 if finish_reason == types.FinishReason.MAX_TOKENS:
-                     return _unavailable(
--                        "Gemini explanation was truncated by the output-token limit."
-+                        "Gemini explanation was truncated by the output-token limit.",
-+                        provider_attempted=True,
-                     )
-                 break
-             except Exception as exc:
-@@ -382,14 +389,18 @@ EVIDENCE_JSON:
- 
-         text = getattr(response, "text", None)
-         if not isinstance(text, str) or not text.strip():
--            return _unavailable("Gemini returned no explanation.")
-+            return _unavailable(
-+                "Gemini returned no explanation.",
-+                provider_attempted=True,
-+            )
- 
-         validation = validate_gemini_explanation(text, evidence_package)
-         print(
-             "GEMINI_VALIDATION:",
-             {
--                "text": text,
--                "validation": validation,
-+                "model": model,
-+                "valid": validation["valid"],
-+                "errors": validation["errors"],
-             },
-             flush=True,
-         )
-@@ -400,6 +411,7 @@ EVIDENCE_JSON:
-                 "reason": "Generated explanation did not pass validation.",
-                 "model": model,
-                 "validation": validation,
-+                "provider_attempted": True,
-             }
- 
-         return {
-@@ -408,13 +420,16 @@ EVIDENCE_JSON:
-             "reason": None,
-             "model": model,
-             "validation": validation,
-+            "provider_attempted": True,
-         }
- 
-     except Exception as exc:
--    # Log the provider error in the backend terminal only.
--    # Never return provider error details to the client.
-+        # Log only the exception type; do not expose provider error details.
-         print(
--            f"GEMINI_ERROR: {type(exc).__name__}: {exc}",
-+            f"GEMINI_ERROR: {type(exc).__name__}",
-             flush=True,
-         )
--        return _unavailable("Gemini request failed or timed out.")
-\ No newline at end of file
-+        return _unavailable(
-+            "Gemini request failed or timed out.",
-+            provider_attempted=True,
-+        )
-\ No newline at end of file
-</file>
-
 <file path="assistant/config/intents.json">
 {
   "catalog_version": "1.0.0",
@@ -7250,6 +7122,134 @@ Thumbs.db
 *.pem
 *.key
 credentials.json
+</file>
+
+<file path="assistant_response.json">
+{"status":"ok","answer":"Existing NO2 result records for Delhi and Mumbai: Delhi: 52.8933 µg/m³; Mumbai: 40.1067 µg/m³. These are retrieved values; no new metric was calculated.","evidence":[{"result_id":"RES-0001","result_type":"ranking","record_id":null,"entity_id":"delhi","group_key":"delhi::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":52.89333333333334,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":1,"finding":"Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":52.89333333333334},{"factor":"median_value","value":55.92},{"factor":"minimum_value","value":46.7},{"factor":"maximum_value","value":56.06},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":16.685833333333335},{"factor":"relative_difference","value":0.460839144744413},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"},{"result_id":"RES-0004","result_type":"ranking","record_id":null,"entity_id":"mumbai","group_key":"mumbai::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":40.10666666666666,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":4,"finding":"Mumbai ranks 4 for no2 by sampled mean; its mean is 3.89917 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":40.10666666666666},{"factor":"median_value","value":38.4},{"factor":"minimum_value","value":35.53},{"factor":"maximum_value","value":46.39},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":3.899166666666659},{"factor":"relative_difference","value":0.107689475016686},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"}],"validation":{"valid":true,"errors":[],"warnings":[],"record_count":2},"details":{},"evidence_package":{"evidence_package_version":"grounded-evidence-v1.0.0","created_at":"2026-10-28T09:04:50.069120+00:00","question":"Compare Delhi and Mumbai for NO2","intent":"compare_cities","parameters":{"city_a":"delhi","city_b":"mumbai","pollutant":"no2"},"source":{"name":"approved_intelligence_results","record_count":2,"result_ids":["RES-0001","RES-0004"],"data_versions":["phase3-v1.1"],"method_versions":["track-a-comparative-v1.0.0"],"generated_at_values":["2026-10-11T08:55:58.910438+00:00","2026-10-11T08:55:58.910438+00:00"]},"quality":{"quality_status":"conditional","record_quality_statuses":["conditional","conditional"],"limitations":["Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction."],"quality_metadata_available":true},"records":[{"result_id":"RES-0001","result_type":"ranking","record_id":null,"entity_id":"delhi","group_key":"delhi::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":52.89333333333334,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":1,"finding":"Delhi ranks 1 for no2 by sampled mean; its mean is 16.6858 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":52.89333333333334},{"factor":"median_value","value":55.92},{"factor":"minimum_value","value":46.7},{"factor":"maximum_value","value":56.06},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":16.685833333333335},{"factor":"relative_difference","value":0.460839144744413},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"},{"result_id":"RES-0004","result_type":"ranking","record_id":null,"entity_id":"mumbai","group_key":"mumbai::no2::µg/m³","period_start":"2026-08-23T00:00:00+00:00","period_end":"2026-08-23T20:00:00+00:00","metric_name":"no2_mean","result_value":40.10666666666666,"result_unit":"µg/m³","result_category":"above_baseline","priority_rank":4,"finding":"Mumbai ranks 4 for no2 by sampled mean; its mean is 3.89917 µg/m³ relative to the pollutant-wide sample mean baseline.","evidence":[{"factor":"observation_count","value":3},{"factor":"mean_value","value":40.10666666666666},{"factor":"median_value","value":38.4},{"factor":"minimum_value","value":35.53},{"factor":"maximum_value","value":46.39},{"factor":"pollutant_baseline_mean","value":36.2075},{"factor":"difference_from_baseline","value":3.899166666666659},{"factor":"relative_difference","value":0.107689475016686},{"factor":"is_synthetic","value":true}],"quality_status":"conditional","limitation":"Synthetic descriptive comparison only; not a verified real-world air-quality measurement, regulatory assessment, health-risk assessment, or prediction.","data_version":"phase3-v1.1","method_version":"track-a-comparative-v1.0.0","generated_at":"2026-10-11T08:55:58.910438+00:00"}],"checks":{"has_records":true,"has_result_ids":true,"has_data_version":true,"has_method_version":true,"has_metric_values":true}},"grounding":{"mode":"deterministic_plus_llm_explanation","llm_used":false,"explanation_validated":false,"deterministic_fallback_used":true,"generated_findings":false,"source":"approved_intelligence_results"},"explanation":{"status":"UNAVAILABLE","text":"A Gemini explanation is unavailable. The deterministic answer and approved evidence remain available.","reason":"Gemini request failed or timed out.","model":null,"validation":{"valid":false,"errors":["Gemini request failed or timed out."]}}}
+</file>
+
+<file path="gemini-review.txt">
+diff --git a/assistant/core/gemini_explainer.py b/assistant/core/gemini_explainer.py
+index 7b25447..de6af19 100644
+--- a/assistant/core/gemini_explainer.py
++++ b/assistant/core/gemini_explainer.py
+@@ -11,7 +11,7 @@ from google import genai
+ from google.genai import types
+ 
+ 
+-MODEL_DEFAULT = "gemini-2.5-flash"
++MODEL_DEFAULT = "gemini-3.8-flash"
+ EXPLANATION_UNAVAILABLE = (
+     "A Gemini explanation is unavailable. The deterministic answer and "
+     "approved evidence remain available."
+@@ -37,13 +37,17 @@ NUMBER_PATTERN = re.compile(
+ )
+ 
+ 
+-def _unavailable(reason: str) -> dict[str, Any]:
++def _unavailable(
++    reason: str,
++    provider_attempted: bool = False,
++) -> dict[str, Any]:
+     """Return a safe, non-sensitive explanation failure result."""
+     return {
+         "status": "UNAVAILABLE",
+         "text": EXPLANATION_UNAVAILABLE,
+         "reason": reason,
+         "model": None,
++        "provider_attempted": provider_attempted,
+         "validation": {
+             "valid": False,
+             "errors": [reason],
+@@ -222,9 +226,9 @@ def validate_gemini_explanation(
+     print(
+         "GEMINI_NUMERIC_CHECK:",
+         {
+-            "allowed_numbers": sorted(allowed_numbers),
+-            "generated_numbers": sorted(_numeric_tokens(text)),
+-            "unsupported_numbers": sorted(unsupported_numbers),
++            "allowed_number_count": len(allowed_numbers),
++            "generated_number_count": len(_numeric_tokens(text)),
++            "unsupported_number_count": len(unsupported_numbers),
+         },
+         flush=True,
+     )
+@@ -317,8 +321,10 @@ EVIDENCE_JSON:
+     model = os.getenv("GEMINI_MODEL", MODEL_DEFAULT).strip() or MODEL_DEFAULT
+ 
+     try:
+-        client = genai.Client(api_key=api_key)
+-
++        client = genai.Client(
++            api_key=api_key,
++            http_options=types.HttpOptions(timeout=10000),
++        )
+         for attempt in range(2):
+             try:
+                 response = client.models.generate_content(
+@@ -354,7 +360,8 @@ EVIDENCE_JSON:
+ 
+                 if finish_reason == types.FinishReason.MAX_TOKENS:
+                     return _unavailable(
+-                        "Gemini explanation was truncated by the output-token limit."
++                        "Gemini explanation was truncated by the output-token limit.",
++                        provider_attempted=True,
+                     )
+                 break
+             except Exception as exc:
+@@ -382,14 +389,18 @@ EVIDENCE_JSON:
+ 
+         text = getattr(response, "text", None)
+         if not isinstance(text, str) or not text.strip():
+-            return _unavailable("Gemini returned no explanation.")
++            return _unavailable(
++                "Gemini returned no explanation.",
++                provider_attempted=True,
++            )
+ 
+         validation = validate_gemini_explanation(text, evidence_package)
+         print(
+             "GEMINI_VALIDATION:",
+             {
+-                "text": text,
+-                "validation": validation,
++                "model": model,
++                "valid": validation["valid"],
++                "errors": validation["errors"],
+             },
+             flush=True,
+         )
+@@ -400,6 +411,7 @@ EVIDENCE_JSON:
+                 "reason": "Generated explanation did not pass validation.",
+                 "model": model,
+                 "validation": validation,
++                "provider_attempted": True,
+             }
+ 
+         return {
+@@ -408,13 +420,16 @@ EVIDENCE_JSON:
+             "reason": None,
+             "model": model,
+             "validation": validation,
++            "provider_attempted": True,
+         }
+ 
+     except Exception as exc:
+-    # Log the provider error in the backend terminal only.
+-    # Never return provider error details to the client.
++        # Log only the exception type; do not expose provider error details.
+         print(
+-            f"GEMINI_ERROR: {type(exc).__name__}: {exc}",
++            f"GEMINI_ERROR: {type(exc).__name__}",
+             flush=True,
+         )
+-        return _unavailable("Gemini request failed or timed out.")
+\ No newline at end of file
++        return _unavailable(
++            "Gemini request failed or timed out.",
++            provider_attempted=True,
++        )
+\ No newline at end of file
 </file>
 
 <file path="README.md">
@@ -19491,249 +19491,6 @@ Consequently:
 Approval is limited to the five allowlisted question types and the approved Track A evidence. Deterministic results remain authoritative; the LLM is an optional, validated explanation layer with a deterministic fallback.
 </file>
 
-<file path="docs/ASSISTANT_UAT.md">
-# Grounded Data Assistant — User Acceptance Testing (UAT) Report
-
-**Project:** PoC 32 — Aether Pulse Air Quality Heatmap (Phase 3)  
-**Component:** Grounded Data Assistant  
-**Environment:** Render deployment  
-**Backend service:** `poc32-phase3-intelligence-api`  
-**Backend URL:** `https://poc32-phase3-intelligence-api.onrender.com`  
-**Assistant health endpoint:** `https://poc32-phase3-intelligence-api.onrender.com/api/assistant/health`  
-**Data version:** `phase3-v1.1`  
-**Analytical method version:** `track-a-comparative-v1.0.0`  
-**Configured Gemini model:** `gemini-3.8-flash`  
-**Latest diagnostic commit:** `596019b`  
-**Last updated:** 31 October 2026
-
----
-
-## 1. Purpose
-
-This document records the latest user acceptance and deployment validation of the Phase 3 Grounded Data Assistant.
-
-The assistant retrieves approved, existing Track A intelligence results and supporting evidence for supported questions. It uses deterministic retrieval and response construction before attempting an optional Gemini-generated explanation.
-
-The assistant must not independently generate numerical findings, rankings, predictions, or unsupported evidence.
-
-The canonical dataset is synthetic and sparse. Results describe the available sample only and must not be interpreted as verified real-world air-quality observations, health-risk assessments, regulatory conclusions, causal findings, or predictions.
-
-## 2. Test environment
-
-| Item | Configuration |
-|---|---|
-| Project | PoC 32 — Aether Pulse Air Quality Heatmap |
-| Phase | Phase 3 |
-| Frontend | Deployed Render application |
-| Backend | Render web service |
-| Backend framework | FastAPI |
-| Assistant mode | `deterministic_plus_llm_explanation` |
-| Gemini model setting | `gemini-3.8-flash` |
-| Gemini SDK | `google-genai==2.31.0` |
-| Request timeout | 60 seconds |
-| Dataset version | `phase3-v1.1` |
-| Method version | `track-a-comparative-v1.0.0` |
-| Dataset type | Synthetic, sparse sample |
-
-## 3. Automated test results
-
-**Latest recorded full test suite: PASS**
-
-- Tests passed: 55
-- Tests failed: 0
-- Execution time: 18.93 seconds
-
-The suite includes assistant functionality, Gemini explainer/service/API regression coverage, deterministic grounding, and related validation tests.
-
-The focused Gemini explainer tests also passed after the diagnostic logging change:
-
-- Tests passed: 15
-- Tests failed: 0
-- Execution time: 0.38 seconds
-
-These automated test results validate application behaviour under the tested conditions. They do not establish that Google's live Gemini generation service is currently available.
-
-## 4. UAT results
-
-| ID | Acceptance check | Observed result | Status |
-|---|---|---|---|
-| UAT-01 | Complete Python test suite | 55 passed, 0 failed, 18.93 seconds | PASS |
-| UAT-02 | Focused Gemini explainer regression tests | 15 passed, 0 failed | PASS |
-| UAT-03 | Backend Render deployment | Service reports Live | PASS |
-| UAT-04 | Backend health endpoint | HTTP 200; status `available` | PASS |
-| UAT-05 | Gemini configuration check | `gemini_configured: true` | PASS |
-| UAT-06 | Assistant operating mode | `deterministic_plus_llm_explanation` | PASS |
-| UAT-07 | Grounded Assistant page loads | User confirmed successful page load | PASS |
-| UAT-08 | Main dashboard loads | User confirmed successful operation | PASS |
-| UAT-09 | Air-quality data display | User confirmed data appears correctly | PASS |
-| UAT-10 | Charts and heatmap rendering | User confirmed correct rendering | PASS |
-| UAT-11 | City filters | User confirmed correct operation | PASS |
-| UAT-12 | Pollutant filters | User confirmed correct operation | PASS |
-| UAT-13 | Supported NO2 city comparison | Deterministic Delhi and Mumbai values returned | PASS |
-| UAT-14 | Deterministic fallback | Returned successfully when Gemini failed | PASS |
-| UAT-15 | Assistant API response after Gemini failure | POST `/api/assistant/ask` returned HTTP 200 | PASS |
-| UAT-16 | Browser CORS preflight | OPTIONS request returned HTTP 200 | PASS |
-| UAT-17 | Gemini generation with configured model | Google returned HTTP 504 `DEADLINE_EXCEEDED` | FAIL |
-| UAT-18 | Gemini alternative model investigation | `gemini-3.6-flash` also returned 503 in an earlier test | FAIL |
-| UAT-19 | Gemini 2.5 model investigation | `gemini-2.5-flash` returned HTTP 404 `NOT_FOUND` | FAIL |
-| UAT-20 | Provider error diagnostics | HTTP status, provider status, message and details captured in Render logs | PASS |
-| UAT-21 | Diagnostic logging regression | 15 focused tests passed; change deployed successfully | PASS |
-| UAT-22 | Final live Gemini explanation validation | Explanation remains unavailable because of provider deadline error | FAIL |
-
-**Status note:** PASS and FAIL describe the specific observed result. The three Gemini-related failures do not mean that deterministic assistant functionality or the complete application is broken.
-
-## 5. Live deployment evidence
-
-### 5.1 Backend health check
-
-Command:
-
-```bash
-curl -s https://poc32-phase3-intelligence-api.onrender.com/api/assistant/health
-```
-
-Observed response:
-
-```json
-{
-  "status": "available",
-  "mode": "deterministic_plus_llm_explanation",
-  "gemini_configured": true
-}
-```
-
-Interpretation:
-
-- The backend is available.
-- The assistant is operating in the expected mode.
-- Gemini credentials are configured.
-- This endpoint confirms configuration, not successful live text generation.
-
-### 5.2 Deterministic comparison test
-
-Question:
-
-`Compare the average NO2 levels in Delhi and Mumbai.`
-
-Observed values:
-
-| City | NO2 value |
-|---|---:|
-| Delhi | 52.8933 µg/m³ |
-| Mumbai | 40.1067 µg/m³ |
-
-The values were retrieved from existing approved intelligence results. No new metric was calculated by the assistant.
-
-Observed response metadata:
-
-- Gemini attempted: Yes
-- LLM used: No
-- Explanation validated: No
-- Deterministic fallback used: Yes
-- Generated findings: No
-- Source: `approved_intelligence_results`
-
-The assistant preserved the deterministic answer despite the failed Gemini explanation.
-
-### 5.3 Latest Gemini provider error
-
-Latest relevant Render log:
-
-```text
-GEMINI_ERROR: {
-  'exception_type': 'ServerError',
-  'http_status': 504,
-  'provider_status': 'DEADLINE_EXCEEDED',
-  'provider_message':
-    'Deadline expired before operation could complete.',
-  'provider_details':
-    "{'error': {'code': 504,
-    'message': 'Deadline expired before operation could complete.',
-    'status': 'DEADLINE_EXCEEDED'}}"
-}
-```
-
-The corresponding API request returned:
-
-```text
-POST /api/assistant/ask HTTP/1.1 200 OK
-```
-
-The observed assistant request took approximately 59.35 seconds, close to the configured 60-second timeout.
-
-Interpretation:
-
-Google Gemini returned a structured 504 deadline error. The backend caught the exception and returned its deterministic fallback successfully.
-
-The exact underlying cause of the provider deadline has not been established. It may involve provider-side capacity, processing delays, or other request-specific conditions. The current evidence does not justify attributing it to an incorrect API key or a broken Render deployment.
-
-## 6. Diagnostic improvement
-
-A diagnostic logging improvement was implemented in:
-
-`assistant/core/gemini_explainer.py`
-
-The updated handler captures:
-
-- Exception type
-- HTTP status
-- Provider status
-- Provider error message
-- Provider error details
-
-The logging also includes API-key redaction and limits the logged diagnostic fields to 1,000 characters.
-
-The existing deterministic fallback and retry behaviour were preserved.
-
-**Git evidence:**
-
-- Commit: `596019b`
-- Commit message: `Improve Gemini provider error diagnostics`
-- Branch: `feature/data-intelligence-page`
-- GitHub push: Successful
-- Render deployment: Live
-
-## 7. Final acceptance criteria
-
-| Acceptance criterion | Current status |
-|---|---|
-| Frontend loads | PASS |
-| Backend is deployed and available | PASS |
-| Assistant page loads | PASS |
-| Dashboard functions | PASS |
-| Charts and heatmap render | PASS |
-| City and pollutant filters work | PASS |
-| Deterministic supported answers work | PASS |
-| Approved evidence is retrieved | PASS |
-| Deterministic fallback works | PASS |
-| API handles Gemini failure without failing the request | PASS |
-| Gemini API key is configured | PASS |
-| Gemini-generated explanation is available | FAIL — provider 504 |
-| Gemini provider diagnostics are captured | PASS |
-| Automated test suite | PASS |
-
-## 8. Limitations and outstanding issues
-
-1. Gemini-generated explanations are not currently available because the provider returned HTTP 504 `DEADLINE_EXCEEDED`.
-2. An earlier test with Gemini 3.6 Flash returned HTTP 503 `UNAVAILABLE`.
-3. An earlier test with Gemini 2.5 Flash returned HTTP 404 `NOT_FOUND`.
-4. The exact cause of the live Gemini generation failures remains unresolved.
-5. The dataset is synthetic and sparse; results must not be represented as verified real-world measurements.
-6. The live Gemini generation feature requires a successful provider response and validation before it can receive final acceptance.
-
-## 9. Final UAT assessment
-
-**DETERMINISTIC GROUNDED ASSISTANT — FUNCTIONAL ACCEPTANCE PASSED**
-
-**OPTIONAL GEMINI EXPLANATION — NOT YET ACCEPTED**
-
-The Phase 3 Grounded Data Assistant is deployed and its deterministic functionality has been validated. The dashboard and assistant interface operate correctly, approved intelligence results are retrieved, and the fallback mechanism preserves API availability when Gemini fails.
-
-The optional LLM explanation component remains an outstanding issue. It must not be represented as successfully validated until a live Gemini request completes and its explanation passes the application's validation rules.
-
-**Overall assessment: PARTIAL ACCEPTANCE — DETERMINISTIC FUNCTIONALITY ACCEPTED; GEMINI INTEGRATION PENDING.**
-</file>
-
 <file path="docs/GROUNDED_RESPONSE_CONTRACT.md">
 # Grounded Response Contract
 
@@ -24075,6 +23832,249 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 ]
 </file>
 
+<file path="docs/ASSISTANT_UAT.md">
+# Grounded Data Assistant — User Acceptance Testing (UAT) Report
+
+**Project:** PoC 32 — Aether Pulse Air Quality Heatmap (Phase 3)  
+**Component:** Grounded Data Assistant  
+**Environment:** Render deployment  
+**Backend service:** `poc32-phase3-intelligence-api`  
+**Backend URL:** `https://poc32-phase3-intelligence-api.onrender.com`  
+**Assistant health endpoint:** `https://poc32-phase3-intelligence-api.onrender.com/api/assistant/health`  
+**Data version:** `phase3-v1.1`  
+**Analytical method version:** `track-a-comparative-v1.0.0`  
+**Configured Gemini model:** `gemini-3.8-flash`  
+**Latest diagnostic commit:** `596019b`  
+**Last updated:** 31 October 2026
+
+---
+
+## 1. Purpose
+
+This document records the latest user acceptance and deployment validation of the Phase 3 Grounded Data Assistant.
+
+The assistant retrieves approved, existing Track A intelligence results and supporting evidence for supported questions. It uses deterministic retrieval and response construction before attempting an optional Gemini-generated explanation.
+
+The assistant must not independently generate numerical findings, rankings, predictions, or unsupported evidence.
+
+The canonical dataset is synthetic and sparse. Results describe the available sample only and must not be interpreted as verified real-world air-quality observations, health-risk assessments, regulatory conclusions, causal findings, or predictions.
+
+## 2. Test environment
+
+| Item | Configuration |
+|---|---|
+| Project | PoC 32 — Aether Pulse Air Quality Heatmap |
+| Phase | Phase 3 |
+| Frontend | Deployed Render application |
+| Backend | Render web service |
+| Backend framework | FastAPI |
+| Assistant mode | `deterministic_plus_llm_explanation` |
+| Gemini model setting | `gemini-3.8-flash` |
+| Gemini SDK | `google-genai==2.31.0` |
+| Request timeout | 60 seconds |
+| Dataset version | `phase3-v1.1` |
+| Method version | `track-a-comparative-v1.0.0` |
+| Dataset type | Synthetic, sparse sample |
+
+## 3. Automated test results
+
+**Latest recorded full test suite: PASS**
+
+- Tests passed: 55
+- Tests failed: 0
+- Execution time: 18.93 seconds
+
+The suite includes assistant functionality, Gemini explainer/service/API regression coverage, deterministic grounding, and related validation tests.
+
+The focused Gemini explainer tests also passed after the diagnostic logging change:
+
+- Tests passed: 15
+- Tests failed: 0
+- Execution time: 0.38 seconds
+
+These automated test results validate application behaviour under the tested conditions. They do not establish that Google's live Gemini generation service is currently available.
+
+## 4. UAT results
+
+| ID | Acceptance check | Observed result | Status |
+|---|---|---|---|
+| UAT-01 | Complete Python test suite | 55 passed, 0 failed, 18.93 seconds | PASS |
+| UAT-02 | Focused Gemini explainer regression tests | 15 passed, 0 failed | PASS |
+| UAT-03 | Backend Render deployment | Service reports Live | PASS |
+| UAT-04 | Backend health endpoint | HTTP 200; status `available` | PASS |
+| UAT-05 | Gemini configuration check | `gemini_configured: true` | PASS |
+| UAT-06 | Assistant operating mode | `deterministic_plus_llm_explanation` | PASS |
+| UAT-07 | Grounded Assistant page loads | User confirmed successful page load | PASS |
+| UAT-08 | Main dashboard loads | User confirmed successful operation | PASS |
+| UAT-09 | Air-quality data display | User confirmed data appears correctly | PASS |
+| UAT-10 | Charts and heatmap rendering | User confirmed correct rendering | PASS |
+| UAT-11 | City filters | User confirmed correct operation | PASS |
+| UAT-12 | Pollutant filters | User confirmed correct operation | PASS |
+| UAT-13 | Supported NO2 city comparison | Deterministic Delhi and Mumbai values returned | PASS |
+| UAT-14 | Deterministic fallback | Returned successfully when Gemini failed | PASS |
+| UAT-15 | Assistant API response after Gemini failure | POST `/api/assistant/ask` returned HTTP 200 | PASS |
+| UAT-16 | Browser CORS preflight | OPTIONS request returned HTTP 200 | PASS |
+| UAT-17 | Gemini generation with configured model | Google returned HTTP 504 `DEADLINE_EXCEEDED` | FAIL |
+| UAT-18 | Gemini alternative model investigation | `gemini-3.6-flash` also returned 503 in an earlier test | FAIL |
+| UAT-19 | Gemini 2.5 model investigation | `gemini-2.5-flash` returned HTTP 404 `NOT_FOUND` | FAIL |
+| UAT-20 | Provider error diagnostics | HTTP status, provider status, message and details captured in Render logs | PASS |
+| UAT-21 | Diagnostic logging regression | 15 focused tests passed; change deployed successfully | PASS |
+| UAT-22 | Final live Gemini explanation validation | Explanation remains unavailable because of provider deadline error | FAIL |
+
+**Status note:** PASS and FAIL describe the specific observed result. The three Gemini-related failures do not mean that deterministic assistant functionality or the complete application is broken.
+
+## 5. Live deployment evidence
+
+### 5.1 Backend health check
+
+Command:
+
+```bash
+curl -s https://poc32-phase3-intelligence-api.onrender.com/api/assistant/health
+```
+
+Observed response:
+
+```json
+{
+  "status": "available",
+  "mode": "deterministic_plus_llm_explanation",
+  "gemini_configured": true
+}
+```
+
+Interpretation:
+
+- The backend is available.
+- The assistant is operating in the expected mode.
+- Gemini credentials are configured.
+- This endpoint confirms configuration, not successful live text generation.
+
+### 5.2 Deterministic comparison test
+
+Question:
+
+`Compare the average NO2 levels in Delhi and Mumbai.`
+
+Observed values:
+
+| City | NO2 value |
+|---|---:|
+| Delhi | 52.8933 µg/m³ |
+| Mumbai | 40.1067 µg/m³ |
+
+The values were retrieved from existing approved intelligence results. No new metric was calculated by the assistant.
+
+Observed response metadata:
+
+- Gemini attempted: Yes
+- LLM used: No
+- Explanation validated: No
+- Deterministic fallback used: Yes
+- Generated findings: No
+- Source: `approved_intelligence_results`
+
+The assistant preserved the deterministic answer despite the failed Gemini explanation.
+
+### 5.3 Latest Gemini provider error
+
+Latest relevant Render log:
+
+```text
+GEMINI_ERROR: {
+  'exception_type': 'ServerError',
+  'http_status': 504,
+  'provider_status': 'DEADLINE_EXCEEDED',
+  'provider_message':
+    'Deadline expired before operation could complete.',
+  'provider_details':
+    "{'error': {'code': 504,
+    'message': 'Deadline expired before operation could complete.',
+    'status': 'DEADLINE_EXCEEDED'}}"
+}
+```
+
+The corresponding API request returned:
+
+```text
+POST /api/assistant/ask HTTP/1.1 200 OK
+```
+
+The observed assistant request took approximately 59.35 seconds, close to the configured 60-second timeout.
+
+Interpretation:
+
+Google Gemini returned a structured 504 deadline error. The backend caught the exception and returned its deterministic fallback successfully.
+
+The exact underlying cause of the provider deadline has not been established. It may involve provider-side capacity, processing delays, or other request-specific conditions. The current evidence does not justify attributing it to an incorrect API key or a broken Render deployment.
+
+## 6. Diagnostic improvement
+
+A diagnostic logging improvement was implemented in:
+
+`assistant/core/gemini_explainer.py`
+
+The updated handler captures:
+
+- Exception type
+- HTTP status
+- Provider status
+- Provider error message
+- Provider error details
+
+The logging also includes API-key redaction and limits the logged diagnostic fields to 1,000 characters.
+
+The existing deterministic fallback and retry behaviour were preserved.
+
+**Git evidence:**
+
+- Commit: `596019b`
+- Commit message: `Improve Gemini provider error diagnostics`
+- Branch: `feature/data-intelligence-page`
+- GitHub push: Successful
+- Render deployment: Live
+
+## 7. Final acceptance criteria
+
+| Acceptance criterion | Current status |
+|---|---|
+| Frontend loads | PASS |
+| Backend is deployed and available | PASS |
+| Assistant page loads | PASS |
+| Dashboard functions | PASS |
+| Charts and heatmap render | PASS |
+| City and pollutant filters work | PASS |
+| Deterministic supported answers work | PASS |
+| Approved evidence is retrieved | PASS |
+| Deterministic fallback works | PASS |
+| API handles Gemini failure without failing the request | PASS |
+| Gemini API key is configured | PASS |
+| Gemini-generated explanation is available | FAIL — provider 504 |
+| Gemini provider diagnostics are captured | PASS |
+| Automated test suite | PASS |
+
+## 8. Limitations and outstanding issues
+
+1. Gemini-generated explanations are not currently available because the provider returned HTTP 504 `DEADLINE_EXCEEDED`.
+2. An earlier test with Gemini 3.6 Flash returned HTTP 503 `UNAVAILABLE`.
+3. An earlier test with Gemini 2.5 Flash returned HTTP 404 `NOT_FOUND`.
+4. The exact cause of the live Gemini generation failures remains unresolved.
+5. The dataset is synthetic and sparse; results must not be represented as verified real-world measurements.
+6. The live Gemini generation feature requires a successful provider response and validation before it can receive final acceptance.
+
+## 9. Final UAT assessment
+
+**DETERMINISTIC GROUNDED ASSISTANT — FUNCTIONAL ACCEPTANCE PASSED**
+
+**OPTIONAL GEMINI EXPLANATION — NOT YET ACCEPTED**
+
+The Phase 3 Grounded Data Assistant is deployed and its deterministic functionality has been validated. The dashboard and assistant interface operate correctly, approved intelligence results are retrieved, and the fallback mechanism preserves API availability when Gemini fails.
+
+The optional LLM explanation component remains an outstanding issue. It must not be represented as successfully validated until a live Gemini request completes and its explanation passes the application's validation rules.
+
+**Overall assessment: PARTIAL ACCEPTANCE — DETERMINISTIC FUNCTIONALITY ACCEPTED; GEMINI INTEGRATION PENDING.**
+</file>
+
 <file path="frontend/app/data-intelligence/page.tsx">
 "use client";
 
@@ -26897,7 +26897,18 @@ def validate_gemini_explanation(
     if len(text) > 1800:
         errors.append("Gemini explanation exceeds the permitted length.")
 
-    if _contains_forbidden_claim(text):
+    matched_forbidden_patterns = [
+        pattern
+        for pattern in FORBIDDEN_CLAIM_PATTERNS
+        if re.search(pattern, text, flags=re.IGNORECASE)
+    ]
+
+    if matched_forbidden_patterns:
+        print(
+            "GEMINI_FORBIDDEN_PATTERN_CHECK:",
+            {"matched_patterns": matched_forbidden_patterns},
+            flush=True,
+        )
         errors.append("Explanation contains a prohibited claim category.")
     errors.extend(_comparison_consistency_errors(text, evidence_package))
 
@@ -26959,6 +26970,7 @@ def validate_gemini_explanation(
             "allowed_number_count": len(allowed_numbers),
             "generated_number_count": len(_numeric_tokens(text)),
             "unsupported_number_count": len(unsupported_numbers),
+            "unsupported_numbers": sorted(unsupported_numbers),
         },
         flush=True,
     )
