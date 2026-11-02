@@ -4,7 +4,7 @@
 
 Validate the Aether Pulse Air Quality Heatmap Assistant for supported questions, evidence grounding, safety boundaries, API behavior, browser end-to-end behavior, responsive layout, and optional Gemini-generated explanations.
 
-This report records the latest automated test results, Render deployment status, local Gemini connectivity test, and live Assistant validation evidence.
+This report records the latest automated test results, Render deployment evidence, Gemini connectivity and generation evidence, deterministic fallback behavior, and the distinction between locally tested and publicly deployed functionality.
 
 ## 2. Test Environment
 
@@ -21,12 +21,38 @@ This report records the latest automated test results, Render deployment status,
 - **Dataset type:** Synthetic, sparse sample; not verified real-world observations.
 - **Configured Gemini model:** `gemini-3.5-flash-lite`
 - **Gemini SDK:** `google-genai==2.31.0`
-- **Latest deployment status:** Live; deployment has been made successfully.
-- **Last updated:** 1 November 2026
+- **Assistant deployment:** Previously confirmed Live in Render.
+- **Latest verification update:** 2 November 2026
 
 ## 3. Automated Test Results
 
-### 3.1 Focused Gemini explainer tests
+### 3.1 Full Python test suite — latest run
+
+Command:
+
+```bash
+./.venv/Scripts/python.exe -m pytest tests -v
+```
+
+Latest result:
+
+```text
+62 passed, 0 failed
+```
+
+| Measure | Result |
+|---|---:|
+| Tests passed | 62 |
+| Tests failed | 0 |
+| Status | PASS |
+| Environment | Local Data Intelligence backend |
+| Gemini configuration | Temporarily disabled for this test run |
+
+The latest full test suite was executed locally against the Data Intelligence backend. Gemini was temporarily disabled in the local backend container to prevent external provider latency and retry delays from causing integration-test timeouts.
+
+The 62-test result does not include the separately executed Assistant Selenium end-to-end tests.
+
+### 3.2 Focused Gemini explainer tests — historical result
 
 Command:
 
@@ -34,7 +60,7 @@ Command:
 python -m pytest -q tests/assistant/test_gemini_explainer.py
 ```
 
-Recorded result after the qualitative-only prompt change:
+Previously recorded result:
 
 ```text
 ............... [100%]
@@ -46,69 +72,65 @@ Recorded result after the qualitative-only prompt change:
 | Tests passed | 15 |
 | Tests failed | 0 |
 | Execution time | 0.49 seconds |
-| Status | PASS |
+| Status | PASS — historical result |
 
-These tests were run after the qualitative-only prompt change. They remain the focused Gemini regression evidence.
+These tests were executed after the qualitative-only prompt change. They remain recorded Gemini regression evidence but were not part of the latest 62-test local run.
 
-### 3.2 Full test suite
-
-The latest full test suite was executed after correcting the Selenium test-runner compatibility issue.
+### 3.3 Assistant Selenium end-to-end tests — separate run
 
 Command:
 
 ```bash
-python -m pytest -q
+ASSISTANT_URL="https://poc32-phase3-frontend.onrender.com/assistant" HEADLESS=1 ./.venv/Scripts/python.exe selenium-test/test_assistant_e2e.py
 ```
 
-Latest result:
+Recorded result:
 
-```text
-.................................................................. [100%]
-66 passed in 23.86s
-```
+| Test | Result |
+|---|---|
+| Assistant page loads | PASS |
+| Supported comparison returns approved evidence | PASS |
+| Unsupported prediction is rejected without evidence | PASS |
+| Responsive layout at 1440, 768, 390 and 320 px | PASS |
 
-| Measure | Result |
-|---|---:|
-| Tests passed | 66 |
-| Tests failed | 0 |
-| Execution time | 23.86 seconds |
-| Status | PASS |
+**Result: 4 passed, 0 failed.**
 
-The full suite includes assistant functionality, API and regression coverage, and all four Selenium Assistant end-to-end tests.
+These four Selenium tests were executed separately against the public Render Assistant frontend. They must not be counted as part of the latest 62-test Python suite.
 
-### 3.3 Selenium test-runner correction
+The report is stored at:
 
-The Selenium test class in `selenium-test/test_assistant_e2e.py` contained a custom `run()` override that attempted to access `result.errors` and `result.failures`.
+`selenium-test/selenium_artifacts/Assistant_Test_Report.txt`
 
-Under pytest, the supplied object was a `TestCaseFunction`, which does not expose those attributes. The custom `run()` override was removed while retaining the test cases and reporting functionality.
+### 3.4 Selenium test-runner correction
 
-After the correction, the complete test suite passed:
+The Selenium test class in `selenium-test/test_assistant_e2e.py` previously contained a custom `run()` override that attempted to access `result.errors` and `result.failures`.
 
-**66 passed, 0 failed, in 23.86 seconds.**
+Under pytest, the supplied object was a `TestCaseFunction`, which does not expose those attributes. The custom override was removed while retaining the test cases and reporting functionality.
 
-The correction was committed as:
+The correction was previously committed as:
 
 - **Commit:** `6e06bfa`
 - **Commit message:** `Fix Selenium E2E test runner compatibility`
+
+The latest full Python suite and separate Selenium execution are recorded independently above.
 
 ## 4. Assistant Health and Deployment Verification
 
-### 4.1 Latest Render deployment
+### 4.1 Render deployment evidence
 
-The latest application deployment has been made successfully and is confirmed Live in Render.
+The Assistant backend was previously confirmed Live in Render.
 
-- **Commit:** `6e06bfa`
-- **Commit message:** `Fix Selenium E2E test runner compatibility`
-- **Branch:** `feature/data-intelligence-page`
 - **Service:** `poc32-phase3-intelligence-api`
-- **Deployment status:** Live
+- **Branch:** `feature/data-intelligence-page`
+- **Previously recorded deployment commit:** `9bac519c6059ae7da40db039d0059cbc589eb631`
+- **Deployment status:** Previously confirmed Live
 
 Evidence:
 
-- [Render service](https://dashboard.render.com/web/srv-db5du65ckfvc739s9msg)
-- [GitHub commit](https://github.com/parvathycr28/POC-32-AirQualityHeatMap-ParvathyCR-Phase3/commit/6e06bfa5041dcf4cb9b735bfa137a52f1acbb465)
+- [Render backend service](https://dashboard.render.com/web/srv-db5du65ckfvc739s9msg)
+- [Phase 3 GitHub repository](https://github.com/parvathycr28/POC-32-AirQualityHeatMap-ParvathyCR-Phase3)
 
-The latest deployment contains the Selenium E2E test-runner compatibility correction. The deployed commit is distinct from the earlier qualitative-only Gemini prompt commit `0555241`.
+The latest local test-container changes do not change the public Render deployment. The local Gemini-disabled configuration must not be interpreted as a change to Render's Gemini configuration.
 
 ### 4.2 Assistant health endpoint
 
@@ -126,31 +148,31 @@ Previously observed response:
 }
 ```
 
-| Check | Result |
+| Check | Previously observed result |
 |---|---|
 | Backend status | available |
 | Assistant mode | deterministic_plus_llm_explanation |
 | Gemini configured | true |
 | Health check | PASS |
 
-The health endpoint confirms backend availability and Gemini configuration. It does not independently prove that an explanation can be generated or validated; that is covered by the live request test below.
+The health endpoint confirms backend availability and Gemini configuration at the time of the recorded check. It does not independently prove that an explanation can be generated or validated; that is covered by the separately recorded live request.
 
 ## 5. Local Gemini Connectivity Test
 
 ### 5.1 Test purpose
 
-A direct SDK request was performed locally to verify Gemini connectivity independently of the Assistant API, prompt construction, and explanation-validation workflow.
+A direct SDK request was previously performed locally to verify Gemini connectivity independently of the Assistant API, prompt construction, and explanation-validation workflow.
 
-The test used the rotated API key loaded from the local `backend/.env` file. The key itself was not displayed or included in the test evidence.
+The recorded test used the local environment configuration. No API credential is reproduced in this report.
 
-### 5.2 Successful model test
+### 5.2 Successful model test — historical result
 
 - **Model:** `gemini-3.5-flash-lite`
 - **SDK:** `google-genai==2.31.0`
 - **Request timeout:** 60 seconds
 - **Request:** `Reply with exactly: Gemini connection successful`
 
-Result:
+Previously recorded result:
 
 ```text
 Testing model: gemini-3.5-flash-lite
@@ -164,9 +186,9 @@ RESPONSE: Gemini connection successful
 | API authentication | Successful |
 | Model generation | Successful |
 | Response received | Yes |
-| Status | PASS |
+| Status | PASS — historical result |
 
-This confirms that the rotated API key and `gemini-3.5-flash-lite` worked in the local environment during the test.
+This confirms that the local Gemini integration successfully generated a response during that earlier test. It is not evidence that Gemini was enabled during the latest 62-test local run.
 
 ### 5.3 Earlier model timeout
 
@@ -179,9 +201,7 @@ PROVIDER STATUS: DEADLINE_EXCEEDED
 ERROR: Deadline expired before operation could complete.
 ```
 
-The subsequent successful test with `gemini-3.5-flash-lite` demonstrates that the local Gemini integration can generate a response using the selected model.
-
-The earlier timeout is retained as historical diagnostic evidence and is not treated as the outcome of the successful model test.
+The subsequent successful test with `gemini-3.5-flash-lite` is retained as separate historical evidence.
 
 ## 6. Live Gemini Explanation UAT
 
@@ -193,7 +213,7 @@ Compare Delhi and Mumbai for NO2.
 
 ### 6.2 Deterministic answer
 
-The assistant returned the existing approved NO2 result records:
+The previously recorded public Assistant API response returned the approved NO2 result records:
 
 - Delhi: **52.8933 µg/m³**
 - Mumbai: **40.1067 µg/m³**
@@ -202,11 +222,13 @@ The deterministic response identified these as retrieved values and stated that 
 
 ### 6.3 Gemini explanation
 
-The deployed assistant returned:
+Previously recorded live explanation:
 
 > Delhi shows a higher nitrogen dioxide level compared to Mumbai within the supplied sample, and both cities record levels above the baseline. This is a synthetic descriptive comparison only and is not a verified real-world air-quality measurement. Conclusions are limited to the supplied descriptive sample.
 
 ### 6.4 Response metadata
+
+Previously recorded live response metadata:
 
 | Metadata field | Result |
 |---|---|
@@ -218,11 +240,11 @@ The deployed assistant returned:
 | Generated findings | No |
 | Source | `approved_intelligence_results` |
 
-**Result: PASS for the tested live request.**
+**Result: PASS for the previously tested live request.**
 
 The deterministic response retained the approved numerical measurements. Gemini supplied a qualitative explanation without introducing new numerical values or new findings.
 
-The user confirmed that the live Assistant returned a Gemini-generated explanation and that Render is configured to use `gemini-3.5-flash-lite`.
+This is historical live-request evidence, not a result from the latest local 62-test run.
 
 ### 6.5 Render logs from the successful Gemini request
 
@@ -254,7 +276,7 @@ GEMINI_VALIDATION: {
 INFO: POST /api/assistant/ask HTTP/1.1 200 OK
 ```
 
-| Numeric validation measure | Result |
+| Numeric validation measure | Recorded result |
 |---|---:|
 | Allowed numeric tokens | 17 |
 | Generated numeric tokens | 0 |
@@ -264,19 +286,21 @@ INFO: POST /api/assistant/ask HTTP/1.1 200 OK
 | Validation errors | None |
 | API response | HTTP 200 |
 
-**Result: PASS.**
+**Result: PASS for the recorded live request.**
 
-This confirms that the recorded successful explanation introduced no numeric tokens and passed the deployed validator.
+### 6.6 Baseline evidence verification
 
-### 6.6 Evidence-review note
+The generated explanation included the statement that both cities record levels above the baseline.
 
-The generated explanation includes the statement:
+The statement was independently checked against the approved NO2 intelligence results:
 
-> Both cities record levels above the baseline.
+- Delhi sampled mean: 52.8933
+- Mumbai sampled mean: 40.1067
+- NO2 baseline mean: 36.2075
 
-The live validator returned `valid: True`, but that result alone does not independently establish that the baseline comparison is supported by the approved evidence.
+Both sampled means are above the recorded NO2 baseline mean.
 
-This statement should be checked against the underlying approved evidence before treating it as a fully verified finding. The existing validation result is recorded accurately; no additional evidence claim is made.
+This comparison is limited to the approved synthetic dataset. The baseline is not a regulatory threshold or a health-risk limit.
 
 ## 7. Gemini Reliability and Validation History
 
@@ -284,11 +308,11 @@ This statement should be checked against the underlying approved evidence before
 
 Earlier attempts using other Gemini model configurations encountered provider errors, including:
 
-- `gemini-3.8-flash`: 503 UNAVAILABLE and a later 429 free-tier quota response; a subsequent direct test returned 504 DEADLINE_EXCEEDED.
+- `gemini-3.8-flash`: 503 UNAVAILABLE, a later 429 free-tier quota response, and a subsequent 504 DEADLINE_EXCEEDED.
 - `gemini-3.6-flash`: 503 UNAVAILABLE.
 - `gemini-2.5-flash`: 404 response.
 
-These are historical failures. They are not the result of the recorded successful local and live requests using `gemini-3.5-flash-lite`.
+These are historical failures and are not the outcome of the previously recorded successful requests using `gemini-3.5-flash-lite`.
 
 ### 7.2 Unsupported numeric output
 
@@ -300,7 +324,7 @@ The numeric validator rejected the explanation with:
 Explanation introduced numeric tokens not found in approved evidence or the question.
 ```
 
-This rejection was intentional. The unsupported value was not added to the approved numeric set, and the validator was not weakened.
+This rejection was intentional. The validator was not weakened to permit the unsupported value.
 
 ### 7.3 Forbidden-claim validation
 
@@ -312,7 +336,7 @@ Explanation contains a prohibited claim category.
 
 The forbidden-claim checks remain in place. They cover forecasting, prediction, causation, health-risk, regulatory-compliance, safe-limit, and disease-risk claim categories.
 
-Temporary diagnostic logging was used to investigate rejected generated sentences. The diagnostic code was reintroduced in commit `9cb5c2f` and is present in the deployed code history.
+Temporary diagnostic logging was used to investigate rejected generated sentences. The diagnostic code was reintroduced in commit `9cb5c2f` and is present in the recorded deployed code history.
 
 ### 7.4 Qualitative-only prompt improvement
 
@@ -331,40 +355,40 @@ The deterministic response continues to display approved numerical results.
 
 The numeric validator, forbidden-claim checks, and comparison-consistency checks were not removed or relaxed.
 
-**Recorded successful live result:** qualitative explanation generated, validation passed, zero generated numeric tokens, zero unsupported numeric tokens, and no deterministic fallback.
+**Previously recorded live result:** qualitative explanation generated, validation passed, zero generated numeric tokens, zero unsupported numeric tokens, and no deterministic fallback.
 
 ## 8. UAT Acceptance Matrix
 
 | ID | Test | Result | Evidence |
 |---|---|---|---|
-| UAT-01 | Full automated test suite | PASS — latest | 66 passed, 0 failed, 23.86 seconds. |
+| UAT-01 | Full automated Python test suite | PASS — latest local run | 62 passed, 0 failed. |
 | UAT-02 | Assistant page loads | PASS — previously recorded | Earlier Selenium report confirmed page load. |
 | UAT-03 | Supported Track A summary question | PASS — previously recorded | Earlier API response returned `ok`, summary intent, and approved evidence. |
 | UAT-04 | Dashboard route smoke test | PASS — previously recorded | HTTP 200 and non-empty HTML response. |
 | UAT-05 | Data Intelligence API smoke test | PASS — previously recorded | OpenAPI endpoint returned HTTP 200 and OpenAPI 3.1.0. |
 | UAT-06 | Data Intelligence page smoke test | PASS — previously recorded | HTTP 200 and non-empty HTML response. |
-| UAT-07 | Assistant health endpoint | PASS — previously recorded | Render health response reports available and Gemini configured. |
-| UAT-08 | Supported city comparison | PASS — successful live request evidence | Delhi and Mumbai NO2 comparison returned approved values and a validated qualitative explanation. |
-| UAT-09 | Unsupported prediction request | PASS — previously recorded | Earlier Selenium test confirmed unsupported status and zero evidence. |
+| UAT-07 | Assistant health endpoint | PASS — previously recorded | Render health response reported available and Gemini configured. |
+| UAT-08 | Supported city comparison | PASS — historical live request | Delhi and Mumbai NO2 comparison returned approved values and a validated qualitative explanation. |
+| UAT-09 | Unsupported prediction request | PASS — separate Selenium run | Unsupported request rejected without evidence. |
 | UAT-10 | Missing question handling | PASS — previously recorded | Earlier API test returned HTTP 422. |
-| UAT-11 | Evidence metadata and limitations | PASS — recorded live test | Response preserved the synthetic-data and descriptive-sample limitations. |
+| UAT-11 | Evidence metadata and limitations | PASS — recorded live test | Response preserved synthetic-data and descriptive-sample limitations. |
 | UAT-12 | Prompt injection and secret-disclosure handling | PASS — previously recorded | Earlier focused API tests passed. |
 | UAT-13 | Evidence coverage and validation | PASS — previously recorded | Earlier evidence coverage and grounding tests passed. |
-| UAT-14 | Responsive layout | PASS — previously recorded | Earlier Selenium report showed no horizontal overflow at 1440, 768, 390, and 320 px. |
-| UAT-15 | Selenium end-to-end suite | PASS — latest full suite | Four Selenium Assistant tests were included in the latest full suite; the full suite passed. |
-| UAT-16 | Gemini health/configuration | PASS — previously recorded | Health endpoint reports `gemini_configured: true`. |
-| UAT-17 | Gemini local generation | PASS — latest local test | `gemini-3.5-flash-lite` returned the expected response. |
-| UAT-18 | Gemini generation on Render | PASS — successful live request evidence | `FinishReason.STOP` using `gemini-3.5-flash-lite`. |
-| UAT-19 | Numeric output validation | PASS — successful live request evidence | 0 generated numeric tokens and 0 unsupported numeric tokens. |
-| UAT-20 | Forbidden-claim validation | PASS — tested explanation | Explanation passed the deployed validation pipeline with no errors. |
-| UAT-21 | Comparison-consistency validation | PASS — validator result; evidence review outstanding | Overall explanation validation returned `valid: True`; baseline wording still requires evidence review. |
-| UAT-22 | Gemini response metadata | PASS — successful live request evidence | LLM used, explanation validated, deterministic fallback not used, generated findings false. |
-| UAT-23 | Live API request | PASS — successful live request evidence | `POST /api/assistant/ask` returned HTTP 200. |
-| UAT-24 | Focused Gemini explainer tests | PASS — previously recorded | 15 passed, 0 failed, in 0.49 seconds. |
-| UAT-25 | Latest Render deployment | PASS — latest | Deployment has been made successfully and is confirmed Live. |
-| UAT-26 | Selenium test-runner compatibility | PASS — latest | Custom `run()` override removed; full pytest suite passes. |
+| UAT-14 | Responsive layout | PASS — separate Selenium run | No horizontal overflow at 1440, 768, 390, and 320 px. |
+| UAT-15 | Assistant Selenium end-to-end suite | PASS — separate run | 4 passed, 0 failed; not included in the 62-test Python suite. |
+| UAT-16 | Gemini health/configuration | PASS — previously recorded | Render health response reported `gemini_configured: true`. |
+| UAT-17 | Gemini local generation | PASS — historical test | Earlier direct SDK request returned the expected response. |
+| UAT-18 | Gemini generation on Render | PASS — historical live request | Recorded `FinishReason.STOP` using `gemini-3.5-flash-lite`. |
+| UAT-19 | Numeric output validation | PASS — historical live request | 0 generated numeric tokens and 0 unsupported numeric tokens. |
+| UAT-20 | Forbidden-claim validation | PASS — recorded explanation | Explanation passed the deployed validation pipeline with no errors. |
+| UAT-21 | Comparison-consistency validation | PASS — recorded validator and evidence review | Validator returned `valid: True`; approved NO2 results confirm both cities are above the recorded baseline. |
+| UAT-22 | Gemini response metadata | PASS — historical live request | LLM used, explanation validated, deterministic fallback not used, generated findings false. |
+| UAT-23 | Live API request | PASS — historical live request | `POST /api/assistant/ask` returned HTTP 200. |
+| UAT-24 | Focused Gemini explainer tests | PASS — historical run | 15 passed, 0 failed, in 0.49 seconds. |
+| UAT-25 | Render deployment | Previously confirmed Live | Historical Render deployment evidence. |
+| UAT-26 | Selenium test-runner compatibility | PASS — latest local suite | Custom `run()` override removed; latest full Python suite passed. |
 
-*Previously recorded tests are identified as such and are not presented as newly rerun in the latest deployment cycle.*
+*Previously recorded tests are identified as historical evidence and are not presented as newly rerun in the latest verification cycle.*
 
 ## 9. Known Limitations
 
@@ -373,38 +397,79 @@ The numeric validator, forbidden-claim checks, and comparison-consistency checks
 3. A successful live Gemini request does not guarantee that every future generated explanation will pass validation.
 4. Gemini explanations are optional. If generation or validation fails, the deterministic answer and approved evidence remain available.
 5. The qualitative-only prompt reduces numeric-generation risk, while the numeric validator remains active as an independent safeguard.
-6. The baseline-mean statement in the recorded successful explanation requires confirmation against the approved evidence.
-7. Earlier provider errors remain part of the historical diagnostic record; they are not the outcome of the successful live Gemini request.
-8. The latest full automated suite passed locally. The 66-test result is not a claim that 66 tests were executed by Render during deployment.
-9. The full live Gemini response and its corresponding diagnostic logs from the latest deployment smoke check were not separately supplied. The successful live response and diagnostic evidence are recorded based on the available test evidence and user confirmation.
+6. The recorded NO2 baseline comparison is supported by approved synthetic results; the baseline is not a regulatory or health threshold.
+7. Earlier provider errors remain part of the historical diagnostic record.
+8. The latest full Python test suite passed locally with Gemini temporarily disabled. The 62-test result does not demonstrate live Gemini generation.
+9. The four Assistant Selenium tests were run separately against the public Render frontend and are not included in the 62-test result.
+10. The public Data Intelligence deployment remains suspended. Data Intelligence UAT was performed locally, not against a live public Data Intelligence deployment.
+11. The previously exposed Gemini API key was revoked and replaced. The replacement remains in private local environment configuration and is not included in this report or repository evidence.
 
 ## 10. Overall Assessment
 
-**FUNCTIONAL ACCEPTANCE PASSED FOR THE TESTED GROUNDED ASSISTANT SCOPE.**
+**FUNCTIONAL ACCEPTANCE: PASS FOR THE TESTED GROUNDED ASSISTANT SCOPE.**
 
-**LOCAL GEMINI CONNECTIVITY TEST — PASS.**
+**LATEST LOCAL PYTHON TEST SUITE: PASS — 62 PASSED, 0 FAILED.**
 
-**LIVE GEMINI GENERATION TEST — PASS.**
+**LOCAL DETERMINISTIC ASSISTANT FALLBACK: PASS.**
 
-**LATEST FULL AUTOMATED TEST SUITE — PASS (66 PASSED, 0 FAILED).**
+**PUBLIC ASSISTANT SELENIUM: PASS — 4/4, EXECUTED SEPARATELY.**
 
-**LATEST RENDER DEPLOYMENT — SUCCESSFULLY MADE AND LIVE.**
+**FOCUSED GEMINI EXPLAINER TESTS: 15 PASSED, 0 FAILED — HISTORICAL RESULT.**
 
-The deployed assistant successfully returned the deterministic approved NO2 measurements and a qualitative Gemini explanation in the recorded live comparison. The explanation passed the deployed validation pipeline, introduced zero numeric tokens, and did not require deterministic fallback.
+**LOCAL GEMINI GENERATION: PREVIOUSLY VERIFIED.**
 
-The local direct SDK test also succeeded using `gemini-3.5-flash-lite`. The Render environment is confirmed to use the same model.
+**LIVE GEMINI GENERATION: PREVIOUSLY VERIFIED — NOT EXERCISED IN THE LATEST LOCAL TEST RUN.**
 
-The latest full local test suite completed with 66 passed and 0 failed, including all four Selenium Assistant end-to-end tests. The focused Gemini test suite remains at 15 passed and 0 failed.
+**RENDER ASSISTANT DEPLOYMENT: PREVIOUSLY CONFIRMED LIVE.**
 
-The baseline-mean wording remains subject to evidence review. The historical full-suite and Selenium results have been superseded by the latest 66-test full-suite result; the focused Gemini result remains 15 passed, 0 failed.
-  
-**Previous qualitative-only prompt commit:** `0555241` — Use qualitative-only Gemini explanations  
-**Deployment status:** Successfully deployed; Live  
-**Configured Gemini model:** `gemini-3.5-flash-lite`  
-**Local Gemini generation:** PASS  
-**Live Gemini generation:** PASS  
-**Recorded Gemini validation:** `valid: True`, zero generated numeric tokens, zero unsupported numeric tokens  
-**Latest full test suite:** 66 passed, 0 failed  
-**Focused Gemini tests:** 15 passed, 0 failed
+The latest local automated test run passed all 62 Python tests with Gemini disabled in the local test container. The deterministic fallback returned HTTP 200 and two approved evidence records for the supported Delhi–Mumbai NO2 comparison.
 
-**Overall assessment: ACCEPTED FOR THE TESTED FUNCTIONAL SCOPE — GROUNDED ASSISTANT, AUTOMATED TEST SUITE, AND LOCAL AND LIVE GEMINI GENERATION PASSED. DATASET AND CONTENT-GROUNDING LIMITATIONS REMAIN.**
+The public Assistant Selenium suite separately passed all four tests, covering page loading, supported comparison, unsupported prediction rejection, and responsive layout.
+
+Earlier local SDK and public live API tests successfully verified Gemini generation using `gemini-3.5-flash-lite`. Those results remain historical evidence and are not represented as part of the latest local 62-test run.
+
+The synthetic dataset, limited sampling, and content-grounding boundaries remain applicable.
+
+## 11. Latest Verification Update — 2026-11-02
+
+### Automated test suite
+
+- Full local Python test suite: **62 passed, 0 failed**.
+- The suite was run against the local Data Intelligence backend.
+- Gemini was temporarily disabled in this local test container to prevent external provider latency from causing integration-test timeouts.
+
+### Deterministic assistant fallback
+
+- Local `POST /api/assistant/ask`: HTTP 200.
+- Supported Delhi–Mumbai NO2 comparison returned two approved evidence records.
+- Data source: `approved_intelligence_results`.
+- Gemini attempted: false.
+- Deterministic fallback: true.
+- Generated findings: false.
+
+### Live assistant and Gemini evidence
+
+- The previously recorded public live API comparison returned HTTP 200.
+- The live Gemini explanation was validated successfully in the separately recorded deployment test.
+- The public Assistant Selenium suite separately passed all four tests, including supported comparison, unsupported prediction rejection, and responsive layout checks.
+- These live results are historical successful checks, not a claim that the latest local 62-test run exercised Gemini.
+
+### Environment and deployment boundary
+
+- The local backend container was recreated with Gemini disabled for deterministic automated testing.
+- The public Render assistant deployment was not changed by this local override.
+- The public Data Intelligence deployment remains suspended; Data Intelligence UAT was performed locally.
+- The previously exposed Gemini API key was revoked and replaced. The replacement remains private and is excluded from repository documentation and evidence.
+
+### Latest assessment
+
+**LOCAL AUTOMATED TESTS: PASS — 62/62.**
+
+**LOCAL DETERMINISTIC ASSISTANT FALLBACK: PASS.**
+
+**PUBLIC ASSISTANT SELENIUM: PASS — 4/4, SEPARATELY EXECUTED.**
+
+**LIVE GEMINI GENERATION: PREVIOUSLY VERIFIED — NOT EXERCISED IN THE LATEST LOCAL TEST RUN.**
+
+
+**LATEST STATUS: 62 PYTHON TESTS PASS; 4 SELENIUM TESTS PASS; LIVE GEMINI PREVIOUSLY VERIFIED.**

@@ -15,21 +15,45 @@ Defines the API connection between the Phase 3 Data Intelligence frontend and th
 
 ## 3. Response structure
 
-The response contains:
+The results endpoint returns:
 
-* `metadata`: data version, method version, result count, synthetic-data flag, quality status, and description.
-* `count`: number of returned results.
-* `results`: array of comparative intelligence records.
+metadata: data version, method version, count, validation status, synthetic-data flag, quality status, description, and freshness information.
 
-Each result can include an identifier, result type, group key, metric, value, unit, priority rank, finding, evidence, quality status, limitation, method and data versions, entity name, pollutant, synthetic-data flag, and optional period boundaries.
+count: number of returned results.
 
-Evidence items contain a factor and a value that may be a string, number, boolean, or null.
+results: array of comparative intelligence records.
 
-## 4. Frontend behavior
+Each result must contain the mandatory contract fields, including result_id, result_type, group_key, metric_name, result_value, priority_rank, finding, evidence, quality_status, limitation, method_version, data_version, and generated_at. Track A records also include entity and pollutant information.
 
-The page validates that the response is an object containing a `results` array. It displays a loading state, an error state with a Retry button, and filtered results when data is available.
+Evidence items must contain a non-empty factor and a value of type string, number, boolean, or null. Numeric evidence values must be finite.
 
-Filtering supports pollutant, city, and text search. Results are sorted by pollutant and priority rank.
+## 4. Frontend contract validation and behavior
+
+Before displaying approved intelligence, the frontend validates both the results response and the analytical summary.
+
+Validation includes:
+
+Required response objects, metadata, summary fields, and mandatory result fields.
+
+Expected data version phase3-v1.1 and method version track-a-comparative-v1.0.0.
+
+Analytical validation status PASS.
+
+Expected result count of 32 and consistency between API count, metadata count, summary count, and actual results length.
+
+Matching versions, generated timestamps, and approved-track metadata between results and summary.
+
+Synthetic-data flags and supported quality-status values.
+
+Valid numeric result values, positive integer priority ranks, and unique result IDs.
+
+Non-empty evidence arrays with valid evidence factors and supported evidence value types.
+
+Valid data-freshness metadata.
+
+Both API responses are fetched without caching. The frontend accepts the data only after both responses pass validation. If a request or validation fails, the results and summary are cleared and an error is displayed rather than rendering the invalid response as approved intelligence.
+
+The page provides loading and error states, a Retry action, and filtering by pollutant, city, and text search. Results are sorted by pollutant and priority rank.
 
 ## 5. CORS and local integration
 
@@ -43,4 +67,6 @@ The current dataset is synthetic, with `data_version` `phase3-v1.1`, `method_ver
 
 ## 7. Verification
 
-The endpoint was observed returning HTTP 200 and a response count of 32 during local testing. Re-run the endpoint and browser checks after relevant configuration or code changes.
+Frontend contract validation was inspected in frontend/app/data-intelligence/page.tsx. It includes version, result-count, metadata, mandatory-field, rank, duplicate-ID, evidence, and freshness checks. Both results and summary must pass validation before being stored for display.
+
+The endpoint previously returned HTTP 200 with 32 results during local testing. Re-run API, frontend, and browser checks after relevant code or configuration changes. Record the latest test execution and environment in the Phase 3 certification evidence.

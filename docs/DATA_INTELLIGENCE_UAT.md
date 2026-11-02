@@ -92,3 +92,54 @@ The feature is accepted for the local environment when:
 The Render Data Intelligence service was previously suspended. Public availability must not be considered verified until the deployed service is available and the public Data Intelligence page and its API endpoints have been tested successfully.
 
 **Overall local acceptance:** PASS, based on the recorded local test results.
+
+## 7. Final certification re-verification — 2 November 2026
+
+A fresh local verification was performed after regenerating the approved analytical outputs and rebuilding the Data Intelligence backend container.
+
+**Execution environment:**
+- Frontend: `http://localhost:3002/data-intelligence`
+- Results API: `http://localhost:8000/api/intelligence/results`
+- Backend container: `infocreon-data-intelligence-backend`
+- Data Intelligence public deployment: Suspended; public availability was not tested.
+- UAT mode: Local application and local API.
+
+**API verification:**
+- HTTP response: Successful
+- Data version: `phase3-v1.1`
+- Method version: `track-a-comparative-v1.0.0`
+- Top-level count: 32
+- Metadata count: 32
+- Actual results array length: 32
+- Validation result: `PASS`
+- Generated timestamp: `2026-11-02T10:45:28.724712+00:00`
+- Freshness status: `CURRENT`
+- Freshness age at verification: 1.13 hours
+
+The API uses `count` at the top level and `metadata.count`; `metadata.result_count` is not part of the response contract.
+
+**Latest frontend verification:**
+
+| Check | Actual result | Status |
+|---|---|---|
+| Page loads without an error | Passed | PASS |
+| All 32 analytical results displayed | 32 published results | PASS |
+| Data version | `phase3-v1.1` | PASS |
+| Method version | `track-a-comparative-v1.0.0` | PASS |
+| Freshness indicator | `CURRENT` | PASS |
+| Search, filters, and sorting | Passed during local verification | PASS |
+| Contract validation and approved-result display | Validation `PASS`; results displayed | PASS |
+
+The screenshot evidence confirms the published result count, eight-city coverage, four-pollutant coverage, conditional quality status, approved analytical track, versions, generation timestamp, current freshness, and synthetic-data decision limitations.
+
+**Container refresh:** The Data Intelligence backend image was rebuilt from the current repository outputs and its container was recreated. The container's bundled summary timestamp matches the regenerated local analytical summary.
+
+**Latest re-verification result:** 7/7 checks passed; no reported failures.
+
+## 8. Updated acceptance status
+
+**Local Data Intelligence certification re-verification:** PASS
+
+**Public Data Intelligence deployment:** Suspended and excluded from this local acceptance result. No public deployment availability or public UAT pass is claimed.
+
+**Overall local Data Intelligence acceptance:** PASS.

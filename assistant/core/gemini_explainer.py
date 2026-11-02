@@ -11,7 +11,7 @@ from google import genai
 from google.genai import errors, types
 
 
-MODEL_DEFAULT = "gemini-3.8-flash"
+MODEL_DEFAULT = "gemini-3.5-flash-lite"
 EXPLANATION_UNAVAILABLE = (
     "A Gemini explanation is unavailable. The deterministic answer and "
     "approved evidence remain available."

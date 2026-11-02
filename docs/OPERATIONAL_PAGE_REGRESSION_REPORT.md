@@ -38,3 +38,46 @@ The existing Air Quality dashboard remains functional, and the Data Intelligence
 * Confirmed failing checks: 0
 * Pending checks: 0
 * Overall status: PASS
+
+## 7. Final certification re-verification — 2 November 2026
+
+A fresh visual regression check was performed after the Data Intelligence backend refresh.
+
+**Test environment:**
+- Operational View: `http://localhost:3002`
+- Data Intelligence: `http://localhost:3002/data-intelligence`
+- Air Quality backend: `http://localhost:8003`
+- Data Intelligence backend: `http://localhost:8000`
+
+| ID | Check | Actual result | Status |
+|---|---|---|---|
+| REG-10 | Open the existing dashboard | Original Air Quality Heatmap dashboard loaded successfully | PASS |
+| REG-11 | Render the map and city markers | Map rendered and city markers were visible | PASS |
+| REG-12 | Load air-quality data and KPI cards | Air-quality data and existing KPI cards loaded successfully | PASS |
+| REG-13 | Navigate to Data Intelligence | Navigation to the Data Intelligence page worked successfully | PASS |
+
+**Latest re-verification result:** 4/4 checks passed; no reported failures.
+
+## 8. Updated acceptance status
+
+The latest local regression check confirms that the existing Operational View remains accessible and its map, city markers, air-quality data, KPI cards, and navigation continue to work after the Data Intelligence backend refresh.
+
+**Latest Operational View regression:** PASS
+**Public Data Intelligence deployment:** Suspended; not included in this local regression result.
+
+## 9. Latest API re-verification — 2 November 2026
+
+The containerized operational backend was rechecked during final build validation.
+
+| Endpoint | Latest result | Status |
+|---|---|---|
+| Operational root `/` | HTTP 200 | PASS |
+| Air-quality API `/api/air-quality?pollutant=pm25` | HTTP 200; GeoJSON returned | PASS |
+| Assistant health `/api/assistant/health` | HTTP 200 | PASS |
+| Population API `/api/population` | HTTP 502 | LIMITATION |
+
+The population request failed because the external WorldPop service returned PHP deprecation output instead of valid JSON, causing a JSON decoding error in the backend. This is an unresolved upstream dependency limitation.
+
+The earlier population lookup PASS is retained as a historical test result and is superseded by this latest API re-verification. The operational dashboard, map, air-quality data, KPI cards, and Data Intelligence navigation passed the latest local regression checks. Public Data Intelligence deployment remains suspended and was not tested.
+
+**Updated operational regression status:** PASS WITH KNOWN LIMITATION.

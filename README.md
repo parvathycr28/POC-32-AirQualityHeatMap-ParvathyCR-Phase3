@@ -83,3 +83,39 @@ WorldPop ─────────────┤
         ▼             ▼             ▼
        Map          Charts      Intelligence
                                   Sidebar
+
+---
+
+## Phase 3 — Data Intelligence
+
+Aether Pulse Phase 3 extends the Operational View with a canonical synthetic dataset, analytical processing, comparative intelligence, and an evidence-grounded Assistant.
+
+- Dataset version: `phase3-v1.1`
+- Canonical records: 96 across 8 cities and 4 pollutants.
+- Approved method: `track-a-comparative-v1.0.0`.
+- Comparative intelligence results: 32.
+- Predictive Intelligence is not approved for the current dataset.
+
+### Local services
+
+- Operational frontend: `http://localhost:3002`
+- Data Intelligence: `http://localhost:3002/data-intelligence`
+- Assistant: `http://localhost:3002/assistant`
+- Operational backend: port `8003`
+- Data Intelligence API: port `8000`
+
+Start services with `docker compose up -d --build` and inspect them with `docker compose ps`.
+
+### Validation
+
+See `docs/` and `final-evidence/` for data, analytical, API contract, operational, Assistant, automated test, Selenium, UAT, and deployment reports.
+
+### Known limitations
+
+- All Phase 3 published observations are controlled synthetic data, not verified real-world measurements.
+- WorldPop population lookup currently returns HTTP 502 due to an upstream response-format issue.
+- Public Data Intelligence deployment is suspended; local validation passed, but public validation was not performed.
+- The latest local Assistant Python tests used deterministic fallback with Gemini disabled. Live Gemini generation was verified separately.
+- No fresh Render redeployment is claimed.
+
+**Release status: PHASE 3 FINAL CHANGES REQUIRED — certification pending.**
