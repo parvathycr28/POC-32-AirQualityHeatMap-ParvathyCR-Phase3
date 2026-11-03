@@ -36,4 +36,7 @@ gemini-review.txt
 assistant_response.json
 repomix-output.xml
 repomix-phase3-final.md
-final-evidence/14-screenshots/
+final-evidence/14-screenshots/*
+!final-evidence/14-screenshots/assistant_e2e.png
+!final-evidence/14-screenshots/aether_pulse_e2e.png
+!final-evidence/14-screenshots/data-intelligence-local.png

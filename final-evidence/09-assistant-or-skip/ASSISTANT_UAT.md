@@ -402,7 +402,7 @@ The numeric validator, forbidden-claim checks, and comparison-consistency checks
 8. The latest full Python test suite passed locally with Gemini temporarily disabled. The 62-test result does not demonstrate live Gemini generation.
 9. The four Assistant Selenium tests were run separately against the public Render frontend and are not included in the 62-test result.
 10. The public Data Intelligence deployment remains suspended. Data Intelligence UAT was performed locally, not against a live public Data Intelligence deployment.
-11. A Gemini API credential was previously exposed in terminal output. It must be rotated, and the replacement must remain private and outside repository documentation. No credential is included in this report.
+11. The previously exposed Gemini API key was revoked and replaced. The replacement remains in private local environment configuration and is not included in this report or repository evidence.
 
 ## 10. Overall Assessment
 
@@ -459,7 +459,7 @@ The synthetic dataset, limited sampling, and content-grounding boundaries remain
 - The local backend container was recreated with Gemini disabled for deterministic automated testing.
 - The public Render assistant deployment was not changed by this local override.
 - The public Data Intelligence deployment remains suspended; Data Intelligence UAT was performed locally.
-- Gemini credentials must be rotated following the accidental exposure of a key in terminal output. No replacement credential is included in this repository documentation.
+- The previously exposed Gemini API key was revoked and replaced. The replacement remains private and is excluded from repository documentation and evidence.
 
 ### Latest assessment
 

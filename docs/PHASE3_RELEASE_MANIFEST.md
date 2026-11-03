@@ -7,9 +7,9 @@
 | Project | Aether Pulse — Air Quality Heatmap |
 | Project ID | PoC 32 |
 | Repository | https://github.com/parvathycr28/POC-32-AirQualityHeatMap-ParvathyCR-Phase3 |
-| Release branch | feature/data-intelligence-page |
+| Release branch | phase3-release-candidate |
 | Application version | 0.1.0 |
-| Current baseline commit | 9bac519c6059ae7da40db039d0059cbc589eb631 |
+| Current baseline commit | 225639eba5f53214765edd849efa9e8660bbbc67 |
 | Certified commit | PENDING — set after final release commit |
 | Certified tag | PENDING — phase3-v1.0.0 |
 
@@ -51,7 +51,8 @@
 | Assistant mode | Deterministic evidence grounding with optional Gemini explanation |
 | Gemini model | gemini-3.5-flash-lite |
 | Public Assistant validation | Previously validated on Render |
-| Latest Assistant Selenium result | 4/4 PASS |
+| Latest local Assistant Selenium result | 4/4 PASS |
+| Recorded public Assistant Selenium result | 4/4 PASS — separate Render run |
 | Latest local Python suite | 62 passed |
 | Local Gemini mode during latest suite | Disabled; deterministic fallback tested |
 | Credential handling | Replacement key stored privately; never include credentials in release artifacts |
@@ -62,16 +63,16 @@
 |---|---|
 | Canonical data validation | PASS — 96 rows, 20 columns |
 | Analytical validation | PASS — 24 checks |
-| Data Intelligence local UAT | PASS — 7/7 |
+| Data Intelligence local UAT | PASS — 7/7; separate fresh-clone browser validation PASS — 5/5 |
 | Operational regression | PASS — 4/4 |
 | Assistant Python tests | PASS — 62 tests |
 | Assistant Selenium | PASS — 4/4 |
-| Clean-clone validation | PENDING |
+| Clean-clone validation | PASS WITH DOCUMENTED LIMITATIONS |
 | Full application build | PASS — frontend build and Docker Compose image builds verified |
 | Assistant automated test report | PASS — 62 Assistant Python tests; see report for test scope |
 | Deployment validation report | PARTIAL — public Assistant validated; public Data Intelligence suspended; WorldPop limitation documented |
-| Evidence pack | IN PROGRESS — remaining clean-clone and final release evidence pending |
-| Final Repomix | PENDING |
+| Evidence pack | STRUCTURALLY COMPLETE — final content review pending |
+| Final Repomix | PASS — 190 files; no suspicious files detected; critical source files verified once |
 | Certified release tag | PENDING |
 
 ## 6. Limitations and release boundaries
@@ -81,6 +82,9 @@
 - Public Data Intelligence deployment is suspended. Its latest validation was performed locally.
 - Public Assistant validation and local deterministic-fallback validation are separate test contexts.
 - Gemini availability depends on private runtime configuration and external service availability.
+- The clean-clone OpenAQ integration used its fallback path because no OPENAQ_API_KEY was configured in that environment; live OpenAQ connectivity was not verified there.
+- The WorldPop population endpoint returned HTTP 502 during the latest operational regression because of an upstream response-format issue.
+- The final npm audit reports 16 moderate vulnerabilities, with zero high or critical findings. The remaining dependency-tree findings are documented; the forced breaking downgrade was not applied.
 
 ## 7. Final certification record
 

@@ -118,4 +118,4 @@ See `docs/` and `final-evidence/` for data, analytical, API contract, operationa
 - The latest local Assistant Python tests used deterministic fallback with Gemini disabled. Live Gemini generation was verified separately.
 - No fresh Render redeployment is claimed.
 
-**Release status: PHASE 3 FINAL CHANGES REQUIRED — certification pending.**
+**Release status: VALIDATION AND EVIDENCE COMPLETE — final Git commit and certification tag pending.**

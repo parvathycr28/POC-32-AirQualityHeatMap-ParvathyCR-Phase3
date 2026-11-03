@@ -73,7 +73,7 @@ The recorded latest run passed 62 tests with Gemini disabled locally. Live Gemin
 
 ## 7. Deployment and release status
 
-The Operational View and Assistant have public Render targets. Public Assistant Selenium passed 4/4 recorded checks. No fresh Render redeployment is claimed. Public Data Intelligence is not deployed or publicly validated. Phase 3 release certification remains pending until clean-clone validation, final evidence review, final Repomix generation, and certified tag creation are complete.
+The Operational View and Assistant have public Render targets. Public Assistant Selenium passed 4/4 recorded checks. No fresh Render redeployment is claimed. Public Data Intelligence deployment is suspended; its validation is local only. Fresh-clone validation has been completed with documented limitations. Final evidence review, final Repomix generation, release commit, and certified tag creation remain outstanding.
 
 ## 8. Evidence and reports
 
