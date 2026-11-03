@@ -34,6 +34,11 @@ APPROVED_LIMITATION_SENTENCES = {
         "real-world air-quality measurement, regulatory assessment, "
         "health-risk assessment, or prediction."
     ),
+    (
+        "this information is based on a synthetic descriptive comparison "
+        "only and is not a verified real-world air-quality measurement, "
+        "regulatory assessment, health-risk assessment, or prediction."
+    ),
 }
 
 NUMBER_PATTERN = re.compile(

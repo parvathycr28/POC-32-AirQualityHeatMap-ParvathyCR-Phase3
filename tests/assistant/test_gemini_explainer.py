@@ -47,6 +47,41 @@ def test_forbidden_prediction_claim_is_rejected(evidence_package):
     assert result["valid"] is False
     assert any("prohibited claim" in error for error in result["errors"])
 
+@pytest.mark.parametrize(
+    "disclaimer",
+    [
+        (
+            "This is a synthetic descriptive comparison only; not a verified "
+            "real-world air-quality measurement, regulatory assessment, "
+            "health-risk assessment, or prediction."
+        ),
+        (
+            "This information is based on a synthetic descriptive comparison "
+            "only and is not a verified real-world air-quality measurement, "
+            "regulatory assessment, health-risk assessment, or prediction."
+        ),
+    ],
+)
+def test_approved_synthetic_limitation_disclaimers_are_accepted(
+    evidence_package, disclaimer
+):
+    result = validate_gemini_explanation(
+        disclaimer,
+        evidence_package,
+    )
+
+    assert result["valid"] is True
+    assert result["errors"] == []
+
+
+def test_actual_health_risk_claim_is_rejected(evidence_package):
+    result = validate_gemini_explanation(
+        "This reading indicates a health-risk assessment for the city.",
+        evidence_package,
+    )
+
+    assert result["valid"] is False
+    assert any("prohibited claim" in error for error in result["errors"])
 
 def test_empty_explanation_is_rejected(evidence_package):
     result = validate_gemini_explanation("", evidence_package)
