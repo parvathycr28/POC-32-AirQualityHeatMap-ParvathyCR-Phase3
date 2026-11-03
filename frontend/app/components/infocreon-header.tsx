@@ -2,6 +2,7 @@
 
 import { Info, X } from "lucide-react";
 import { useState } from "react";
+import PrimaryNavigation from "./primary-navigation";
 
 export default function InfocreonHeader() {
   const [open, setOpen] = useState(false);
@@ -31,15 +32,21 @@ export default function InfocreonHeader() {
           </p>
         </div>
 
-        {/* INFO BUTTON */}
-        <button
-          type="button"
-          aria-label="Open project information"
-          onClick={() => setOpen(true)}
-          className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-300 transition hover:border-[#38BDF8] hover:text-[#38BDF8]"
-        >
-          <Info size={16} />
-        </button>
+        {/* NAVIGATION AND INFO */}
+        <div className="pointer-events-auto flex items-center gap-3">
+          <div className="hidden lg:block">
+            <PrimaryNavigation current="map" />
+          </div>
+
+          <button
+            type="button"
+            aria-label="Open project information"
+            onClick={() => setOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-300 transition hover:border-[#38BDF8] hover:text-[#38BDF8]"
+          >
+            <Info size={16} />
+          </button>
+        </div>
       </header>
 
       {/* METADATA MODAL */}

@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import PrimaryNavigation from "../components/primary-navigation";
 
 type EvidenceItem = {
   factor: string;
@@ -580,17 +581,9 @@ export default function DataIntelligencePage() {
     <main className="min-h-screen bg-[#030712] px-4 py-8 text-slate-100 sm:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="border-b border-slate-800 pb-6">
-          <nav
-            aria-label="Primary navigation"
-            className="mb-5"
-          >
-            <Link
-              href="/"
-              className="text-sm text-sky-300 hover:text-sky-200"
-            >
-              ← Operational View
-            </Link>
-          </nav>
+          <div className="mb-5">
+            <PrimaryNavigation current="intelligence" />
+          </div>
 
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-400">
             INFOCREON / AETHER PULSE
