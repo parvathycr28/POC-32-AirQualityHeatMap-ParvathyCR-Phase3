@@ -28,6 +28,13 @@ FORBIDDEN_CLAIM_PATTERNS = (
     r"\bsafe[\s-]+limit\b",
     r"\bdisease[\s-]+risk\b",
 )
+APPROVED_LIMITATION_SENTENCES = {
+    (
+        "this is a synthetic descriptive comparison only; not a verified "
+        "real-world air-quality measurement, regulatory assessment, "
+        "health-risk assessment, or prediction."
+    ),
+}
 
 NUMBER_PATTERN = re.compile(
     r"(?<![A-Za-z0-9_])[-+]?"
@@ -55,10 +62,27 @@ def _unavailable(
     }
 
 
+def _remove_approved_limitation_sentences(text: str) -> str:
+    """Exclude only exact, approved limitation sentences from claim checks."""
+    remaining_sentences = []
+
+    for sentence in re.split(r"(?<=[.!?])\s+", text.strip()):
+        normalized = re.sub(r"\s+", " ", sentence).strip().casefold()
+
+        if normalized in APPROVED_LIMITATION_SENTENCES:
+            continue
+
+        remaining_sentences.append(sentence)
+
+    return " ".join(remaining_sentences)
+
+
 def _contains_forbidden_claim(text: str) -> bool:
-    """Reject unsupported claims while allowing explicit limitation statements."""
+    """Reject prohibited claims while allowing approved limitation wording."""
+    claim_text = _remove_approved_limitation_sentences(text)
+
     return any(
-        re.search(pattern, text, flags=re.IGNORECASE)
+        re.search(pattern, claim_text, flags=re.IGNORECASE)
         for pattern in FORBIDDEN_CLAIM_PATTERNS
     )
 
@@ -167,10 +191,12 @@ def validate_gemini_explanation(
     if len(text) > 1800:
         errors.append("Gemini explanation exceeds the permitted length.")
 
+    claim_check_text = _remove_approved_limitation_sentences(text)
+
     matched_forbidden_patterns = [
         pattern
         for pattern in FORBIDDEN_CLAIM_PATTERNS
-        if re.search(pattern, text, flags=re.IGNORECASE)
+        if re.search(pattern, claim_check_text, flags=re.IGNORECASE)
     ]
 
     if matched_forbidden_patterns:
@@ -182,7 +208,9 @@ def validate_gemini_explanation(
 
         matched_forbidden_sentences = [
             sentence.strip()
-            for sentence in re.split(r"(?<=[.!?])\s+", text.strip())
+            for sentence in re.split(
+                r"(?<=[.!?])\s+", claim_check_text.strip()
+            )
             if any(
                 re.search(pattern, sentence, flags=re.IGNORECASE)
                 for pattern in matched_forbidden_patterns
@@ -326,10 +354,17 @@ causation, or prediction.
 Do not invent result IDs, values, versions, timestamps, or quality statuses.
 
 Clearly state the applicable dataset limitation using the supplied
-quality limitations or evidence descriptions. When the evidence identifies
-the data as synthetic, explicitly say it is synthetic and is not verified
-real-world air-quality measurement. Mention that conclusions are limited
-to the supplied descriptive sample when supported by the evidence.
+quality limitations or evidence descriptions.
+
+When the evidence identifies the data as synthetic, use this exact
+sentence:
+
+"This is a synthetic descriptive comparison only; not a verified
+real-world air-quality measurement, regulatory assessment,
+health-risk assessment, or prediction."
+
+Mention that conclusions are limited to the supplied descriptive
+sample when supported by the evidence.
 Do not omit or contradict the supplied limitations.
 
 Do not include any numeric values in the explanation.
