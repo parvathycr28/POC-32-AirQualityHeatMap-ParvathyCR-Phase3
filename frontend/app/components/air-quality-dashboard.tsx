@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Activity,
   Download,
   Layers,
   MapPin,
@@ -445,24 +444,6 @@ export default function AirQualityDashboard() {
 
       <header className="border-b border-[#1F2937] bg-[#07111B]">
         <div className="flex min-h-[80px] flex-col gap-4 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
-
-          {/* BRAND */}
-
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#38BDF8]/40 bg-[#38BDF8]/5">
-              <Activity className="h-7 w-7 text-[#38BDF8]" />
-            </div>
-
-            <div>
-              <h1 className="text-xl font-bold tracking-wide">
-                REAL RAILS
-              </h1>
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Intelligence Library
-              </p>
-            </div>
-          </div>
 
           {/* TITLE */}
 

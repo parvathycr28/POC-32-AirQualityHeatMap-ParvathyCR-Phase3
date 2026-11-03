@@ -9,7 +9,7 @@ export default function InfocreonHeader() {
 
   return (
     <>
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-[1000] flex items-center justify-between border-b border-white/10 bg-[#06131b]/75 px-6 py-4 backdrop-blur-md">
+      <header className="pointer-events-none relative z-[1000] flex w-full items-center justify-between border-b border-white/10 bg-[#06131b]/75 px-6 py-4 backdrop-blur-md">
         {/* BRAND */}
         <div className="pointer-events-auto">
           <div className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#38BDF8]">
