@@ -22,7 +22,7 @@ def classify_question(question: str):
         r"(show|get|explain|retrieve)?\s*"
         r"(the\s+)?evidence\s+"
         r"(for\s+)?(result\s+)?"
-        r"(RES-[A-Za-z0-9_-]+)",
+        r"(RES-[A-Za-z0-9_-]+)[.!?]?",
         text,
         flags=re.IGNORECASE,
     )

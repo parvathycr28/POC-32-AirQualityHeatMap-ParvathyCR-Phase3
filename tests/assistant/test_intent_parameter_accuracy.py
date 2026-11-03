@@ -71,6 +71,21 @@ from assistant.core.intent_router import classify_question
             {"result_id": "RES-AB_12"},
         ),
         (
+            "Show evidence for result RES-0001.",
+            "result_evidence",
+            {"result_id": "RES-0001"},
+        ),
+        (
+            "Show evidence for result RES-0001!",
+            "result_evidence",
+            {"result_id": "RES-0001"},
+        ),
+        (
+            "Show evidence for result RES-0001?",
+            "result_evidence",
+            {"result_id": "RES-0001"},
+        ),
+        (
             "Summarize the approved intelligence results.",
             "summary",
             {},
