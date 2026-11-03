@@ -27,6 +27,31 @@ from assistant.core.intent_router import classify_question
             "methodology",
             {},
         ),
+                (
+            "Explain the method, data version, and limitations",
+            "methodology",
+            {},
+        ),
+        (
+            "Explain the method, data version, and limitations.",
+            "methodology",
+            {},
+        ),
+        (
+            "Describe the methodology and dataset version",
+            "methodology",
+            {},
+        ),
+        (
+            "Explain the method version and quality status",
+            "methodology",
+            {},
+        ),
+        (
+            "What is the methodology and its limitations?",
+            "methodology",
+            {},
+        ),
         (
             "Which city has the highest sampled mean for NO2?",
             "highest_city_mean",

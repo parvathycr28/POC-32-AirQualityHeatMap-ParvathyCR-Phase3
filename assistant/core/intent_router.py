@@ -36,24 +36,40 @@ def classify_question(question: str):
         }
 
     # 2. Methodology and limitations
-
     methodology_patterns = [
         r"(explain|describe|summarize|outline)\s+"
-        r"(the\s+)?(method|methodology)\s+"
-        r"(and\s+)?(the\s+)?limitations",
-        r"(explain|describe|summarize|outline)\s+"
-        r"(the\s+)?limitations",
-        r"(explain|describe|summarize|outline)\s+"
-        r"(the\s+)?(method|methodology)",
-        r"what\s+are\s+(the\s+)?"
-        r"(methodological\s+)?limitations\??",
-        r"what\s+(is|are)\s+the\s+"
-        r"(method|methodology|limitations)",
-        r"tell\s+me\s+about\s+(the\s+)?"
-        r"(method|methodology|limitations)",
-        r"what\s+are\s+(the\s+)?method\s+and\s+limitations\??",
-    ]
+        r"(the\s+)?(method|methodology)\s*"
+        r"(,\s*)?"
+        r"((and\s+)?(the\s+)?"
+        r"(data\s+version|dataset\s+version|method\s+version|"
+        r"quality\s+status|limitations)\s*"
+        r"(,\s*)?)*"
+        r"[.!?]?",
 
+        r"(explain|describe|summarize|outline)\s+"
+        r"(the\s+)?limitations[.!?]?",
+
+        r"(explain|describe|summarize|outline)\s+"
+        r"(the\s+)?(data\s+version|dataset\s+version|"
+        r"method\s+version|quality\s+status)[.!?]?",
+
+        r"what\s+are\s+(the\s+)?"
+        r"(methodological\s+)?limitations[.!?]?",
+
+        r"what\s+(is|are)\s+the\s+"
+        r"(method|methodology|limitations)[.!?]?",
+
+        r"tell\s+me\s+about\s+(the\s+)?"
+        r"(method|methodology|limitations)[.!?]?",
+
+        r"what\s+are\s+(the\s+)?method\s+and\s+limitations[.!?]?",
+        r"(explain|describe|summarize|outline)\s+"
+        r"(the\s+)?(method|methodology)\s+version\s+"
+        r"(and\s+)?(the\s+)?quality\s+status[.!?]?",
+
+        r"what\s+is\s+(the\s+)?(method|methodology)\s+"
+        r"and\s+its\s+limitations[.!?]?",
+    ]
 
     if any(
         re.fullmatch(pattern, text, flags=re.IGNORECASE)
