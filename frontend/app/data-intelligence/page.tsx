@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import PrimaryNavigation from "../components/primary-navigation";
+import Link from "next/link";
 
 type EvidenceItem = {
   factor: string;
@@ -917,6 +918,14 @@ export default function DataIntelligencePage() {
                   <p className="mt-4 text-sm leading-6 text-slate-300">
                     {result.finding}
                   </p>
+                  <div className="mt-4">
+                    <Link
+                      href={`/assistant?resultId=${encodeURIComponent(result.result_id)}`}
+                      className="inline-flex items-center rounded-lg border border-sky-500/40 bg-sky-500/10 px-4 py-2.5 text-sm font-semibold text-sky-300 transition hover:border-sky-400 hover:bg-sky-500/20"
+                    >
+                      Ask Assistant about this finding
+                    </Link>
+                  </div>
 
                   <details className="mt-5 border-t border-slate-800 pt-4">
                     <summary className="cursor-pointer text-sm font-medium text-sky-300">

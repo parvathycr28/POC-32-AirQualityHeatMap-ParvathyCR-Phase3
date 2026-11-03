@@ -1,7 +1,8 @@
 
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   askAssistant,
   AssistantResponse,
@@ -15,8 +16,17 @@ const SUGGESTIONS = [
   "Explain the method, data version, and limitations",
 ];
 
-export default function AssistantPage() {
-  const [question, setQuestion] = useState("");
+function AssistantContent() {
+  const searchParams = useSearchParams();
+
+  const [question, setQuestion] = useState(() => {
+    const resultId = searchParams.get("resultId");
+
+    return resultId && /^[A-Za-z0-9_-]{1,100}$/.test(resultId)
+      ? `Show evidence for result ${resultId}.`
+      : "";
+  });
+
   const [result, setResult] = useState<AssistantResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -307,5 +317,18 @@ export default function AssistantPage() {
         regulatory assessment, or prediction.
       </footer>
     </main>
+  );
+}
+export default function AssistantPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#030712] px-4 py-8 text-slate-300">
+          Loading assistant...
+        </main>
+      }
+    >
+      <AssistantContent />
+    </Suspense>
   );
 }
