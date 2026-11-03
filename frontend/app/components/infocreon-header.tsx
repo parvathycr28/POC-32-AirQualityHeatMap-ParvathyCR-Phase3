@@ -9,9 +9,10 @@ export default function InfocreonHeader() {
 
   return (
     <>
-      <header className="pointer-events-none relative z-[1000] flex w-full items-center justify-between border-b border-white/10 bg-[#06131b]/75 px-6 py-4 backdrop-blur-md">
+
+      <header className="pointer-events-none relative z-[1000] flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-white/10 bg-[#06131b]/75 px-4 py-3 backdrop-blur-md sm:px-6 sm:py-4">
         {/* BRAND */}
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto min-w-0">
           <div className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#38BDF8]">
             INFOCREON INTERNSHIP POC-32
           </div>
@@ -28,16 +29,12 @@ export default function InfocreonHeader() {
           </h1>
 
           <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-slate-400">
-            Data & Intelligence
+            Data &amp; Intelligence
           </p>
         </div>
 
-        {/* NAVIGATION AND INFO */}
-        <div className="pointer-events-auto flex items-center gap-3">
-          <div className="hidden lg:block">
-            <PrimaryNavigation current="map" />
-          </div>
-
+        {/* PROJECT INFORMATION */}
+        <div className="pointer-events-auto order-2 flex shrink-0 items-center gap-3">
           <button
             type="button"
             aria-label="Open project information"
@@ -47,7 +44,13 @@ export default function InfocreonHeader() {
             <Info size={16} />
           </button>
         </div>
+
+        {/* RESPONSIVE NAVIGATION */}
+        <div className="pointer-events-auto order-3 w-full lg:order-none lg:w-auto">
+          <PrimaryNavigation current="map" />
+        </div>
       </header>
+
 
       {/* METADATA MODAL */}
       {open && (
