@@ -9,8 +9,8 @@
 |Repository|https://github.com/parvathycr28/POC-32-AirQualityHeatMap-ParvathyCR-Phase3|
 |Release branch|phase3-release-candidate|
 |Application version|0.1.0|
-|Current baseline commit|225639eba5f53214765edd849efa9e8660bbbc67|
-|Certified commit|c32d277db7c80388af96ff0ae5d36ef3b0b1e867|
+|Current baseline commit|ba37b75406b50ab92f62c5d5ad1f87fab13c0deb|
+|Certified commit|0a051fef8ecb2636261b1e951b22c793d3f91500|
 |Certified tag|phase3-v1.0.0|
 
 ## 2\. Data and analytical versions
@@ -40,9 +40,16 @@
 |Intelligence API|/api/intelligence/results|
 |Assistant API|/api/assistant/ask|
 |Assistant health|/api/assistant/health|
-|Frontend deployment|https://poc32-phase3-frontend.onrender.com|
-|Backend deployment|https://poc32-phase3-intelligence-api.onrender.com|
-|Data Intelligence validation mode|Local validation; public deployment suspended|
+|Production frontend|https://poc32-phase3-frontend.onrender.com|
+|Production backend|https://poc32-phase3-intelligence-api.onrender.com|
+|Preview frontend|https://poc32-phase3-frontend-preview.onrender.com|
+|Production frontend branch|phase3-release-candidate|
+|Production frontend commit|ba37b75406b50ab92f62c5d5ad1f87fab13c0deb|
+|Preview frontend branch|feature/data-intelligence-page|
+|Preview frontend commit|28b9ac796a84304ed8dfd183090bd39035d31461|
+|Backend deployment branch|feature/data-intelligence-page|
+|Backend deployed commit|f401c625db9d75d61591cf0ffff2af1e978231c6|
+|Data Intelligence validation mode|Local, preview, and production verification completed|
 
 ## 4\. Assistant configuration
 
@@ -70,27 +77,30 @@
 |Clean-clone validation|PASS WITH DOCUMENTED LIMITATIONS|
 |Full application build|PASS — frontend build and Docker Compose image builds verified|
 |Assistant automated test report|PASS — 62 Assistant Python tests; see report for test scope|
-|Deployment validation report|PARTIAL — public Assistant validated; public Data Intelligence suspended; WorldPop limitation documented|
-|Evidence pack|STRUCTURALLY COMPLETE — final content review pending|
-|Final Repomix|PASS — 190 files; no suspicious files detected; critical source files verified once|
+|Deployment validation report|PASS WITH DOCUMENTED LIMITATIONS — public Assistant, preview Data Intelligence, and production Data Intelligence verified for their recorded scopes|
+|Data Intelligence deployment Selenium|PASS — 26/26 preview and production checks|
+|Evidence pack|REVIEWED — deployment reports, Selenium script, and preview/production screenshots checked; historical evidence and documented limitations preserved|
+|Final Repomix|GENERATED AND VERIFIED — `repomix-phase3-final.md`, 4 November 2026|
 |Certified release tag|phase3-v1.0.0|
 
 ## 6\. Limitations and release boundaries
 
 * The canonical dataset is controlled synthetic data, not live air-quality measurements.
 * Results are descriptive and comparative; they are not predictions, regulatory assessments, or health-risk determinations.
-* Public Data Intelligence deployment is suspended. Its latest validation was performed locally.
+* Preview and production Data Intelligence deployments passed 26/26 dedicated Selenium end-to-end checks on 4 November 2026; screenshots are saved under `selenium-test/selenium_artifacts/data_intelligence/`.
+* Deployment verification does not constitute full security, performance, or real-world data-quality certification.
 * Public Assistant validation and local deterministic-fallback validation are separate test contexts.
 * Gemini availability depends on private runtime configuration and external service availability.
 * The clean-clone OpenAQ integration used its fallback path because no OPENAQ\_API\_KEY was configured in that environment; live OpenAQ connectivity was not verified there.
 * The WorldPop population endpoint returned HTTP 502 during the latest operational regression because of an upstream response-format issue.
 * The final npm audit reports 16 moderate vulnerabilities, with zero high or critical findings. The remaining dependency-tree findings are documented; the forced breaking downgrade was not applied.
 
-## 7\. Final certification record
+## 7. Original certification record
 
-* Certification date: PENDING
-* Final certified commit: c32d277db7c80388af96ff0ae5d36ef3b0b1e867
-* Final certified tag: phase3-v1.0.0
-* Final result: PENDING
+* Original certification date: Not restated in this deployment update
+* Certified commit: 0a051fef8ecb2636261b1e951b22c793d3f91500
+* Certified tag: phase3-v1.0.0
+* Tag status: Preserved; not rewritten or replaced
+* Post-certification deployment merge: ba37b75406b50ab92f62c5d5ad1f87fab13c0deb
 
-This manifest is a working release record. It does not certify Phase 3 until all mandatory guide validations, reports, evidence, final commit, and tag have been completed.
+This manifest records the original certification baseline separately from subsequent deployment updates. The post-certification merge does not replace the original certified commit or tag.

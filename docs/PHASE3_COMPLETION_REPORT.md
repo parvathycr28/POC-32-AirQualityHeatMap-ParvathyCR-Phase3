@@ -17,20 +17,23 @@ Aether Pulse — Air Quality Heatmap | Real Rails Data & Intelligence | PoC 32.
 - Completed fresh-clone Assistant Selenium validation: 4/4 passed.
 - Completed fresh-clone local Data Intelligence browser validation: 5/5 checks passed.
 - Prepared the clean-clone validation report and supporting evidence.
+- Merged the approved Data Intelligence feature branch into `phase3-release-candidate` using merge commit `ba37b75406b50ab92f62c5d5ad1f87fab13c0deb`.
+- Deployed and manually verified the Data Intelligence preview and production pages, including all four pollutant charts, city and pollutant filters, and result-specific Assistant handoff.
+- Verified preview backend CORS, Python compilation, and the backend test suite (77/77 passed).
 
 ## Outstanding limitations
 
 - Data is controlled synthetic data and does not represent verified real-world measurements.
 - Predictive Intelligence is not approved for the current dataset.
-- The WorldPop population endpoint currently returns HTTP 502 due to an upstream response-format issue.
+- The WorldPop population endpoint has returned HTTP 502 due to an upstream response-format issue; this remains an unresolved limitation.
 - Live OpenAQ connectivity was not verified in the fresh clone because an OpenAQ API key was not configured; the fallback data path was used.
-- Public Data Intelligence deployment is suspended; only local Data Intelligence validation is claimed.
 - Latest Assistant Python tests used deterministic fallback with Gemini disabled; live Gemini generation was verified separately in an earlier test.
 - npm audit reported 16 moderate vulnerabilities and zero high or critical vulnerabilities.
-- No fresh Render redeployment is claimed.
+- Preview and production Data Intelligence deployments passed the dedicated Selenium end-to-end test (26/26 checks); screenshots are saved under `selenium-test/selenium_artifacts/data_intelligence/`.
+- Deployment verification does not constitute full security, performance, or real-world data-quality certification.
 
 ## Completion assessment
 
-The Phase 3 data foundation, analytical pipeline, local Data Intelligence implementation, Assistant, and fresh-clone technical validations have passed for their documented scopes. The clean-clone validation report has been prepared. Final documentation and evidence review, final Repomix generation, final release commit, and certified Git tag creation remain outstanding.
+The Phase 3 data foundation, analytical pipeline, Operational View, Data Intelligence implementation, Assistant, and fresh-clone technical validations have passed for their documented scopes. The approved Data Intelligence feature branch has been merged into the release branch. Preview and production deployment checks passed for the recorded functional scope, including all 26 dedicated Selenium end-to-end checks, subject to the documented limitations.
 
-**Current decision: RELEASE CERTIFICATION PENDING — documented limitations remain.**
+Final documentation and evidence review, final Repomix generation, and the final documentation release commit and push remain outstanding. The original certification tag and certified commit remain unchanged.

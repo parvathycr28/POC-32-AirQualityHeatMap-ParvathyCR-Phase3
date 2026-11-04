@@ -2,31 +2,239 @@ INFOCREON POC-32 - SELENIUM E2E TEST REPORT
 ====================================================
 Operational dashboard: https://poc-32-airqualityheatmap-frontend.onrender.com
 Local Data Intelligence page: http://localhost:3000/data-intelligence
-Executed: 2026-10-11T03:00:10
+Executed: 2026-11-04T15:16:11
 
 [PASS] Operational URL opens
        Opened https://poc-32-airqualityheatmap-frontend.onrender.com/
 [PASS] Main dashboard loads
        REAL RAILS and Air Quality Heatmap are visible.
-[PASS] Core visualization appears
-       Leaflet map content is rendered.
-[PASS] Operational API communication
-       Successful API response: https://poc-32-airqualityheatmap-backend.onrender.com/api/air-quality?pollutant=PM2.5
-[PASS] Operational data is loaded
-       At least one city data card is rendered.
-[PASS] Pollutant filter interaction
-       Changed pollutant from PM2.5 to PM10.
-[PASS] Operational intelligence panel
-       Panel opened and closed successfully.
-[PASS] Local Data Intelligence page
-       Page loaded: http://localhost:3000/data-intelligence
-[PASS] Local Data Intelligence API
-       API returned HTTP 200.
-[PASS] Operational responsive check
-       Dashboard rendered at 390x844 without horizontal overflow.
-[PASS] Screenshot captured
-       Saved to C:\Users\ACER\Documents\POC-32-AirQualityHeatmap-ParvathyCR1\POC-32-AirQualityHeatMap-ParvathyCR-Phase3\selenium-test\selenium_artifacts\aether_pulse_e2e.png
+[FAIL] Core visualization appears
+       Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: chrome=156.0.8078.80); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d3126d3]
+	(No symbol) [0x7ff78d307b2f]
+	(No symbol) [0x7ff78d318859]
+	(No symbol) [0x7ff78d341fe6]
+	(No symbol) [0x7ff78d34639f]
+	(No symbol) [0x7ff78d32b969]
+	(No symbol) [0x7ff78d32cca3]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78d4ad1d4]
+	(No symbol) [0x7ff78d4ad364]
+	(No symbol) [0x7ff78d49644c]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
 
-Result: PASS
-Passed: 11/11
+[FAIL] Operational API communication
+       Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+[FAIL] Operational data is loaded
+       Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+[FAIL] Pollutant filter interaction
+       Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+[FAIL] Operational intelligence panel
+       Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+[FAIL] Local Data Intelligence page
+       http://localhost:3000/data-intelligence: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+[FAIL] Local Data Intelligence API
+       Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+[FAIL] Operational responsive check
+       Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+[FAIL] Screenshot captured
+       Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	(No symbol) [0x7ff78d59be65]
+	(No symbol) [0x7ff78d4a35f0]
+	(No symbol) [0x7ff78d891dad]
+	(No symbol) [0x7ff78d32b753]
+	(No symbol) [0x7ff78d33d972]
+	(No symbol) [0x7ff78d33b813]
+	(No symbol) [0x7ff78d33b37c]
+	(No symbol) [0x7ff78d2fd64b]
+	(No symbol) [0x7ff78d2fd822]
+	(No symbol) [0x7ff78d2fda35]
+	(No symbol) [0x7ff78da15af1]
+	(No symbol) [0x7ff78da367f7]
+	(No symbol) [0x7ff78da2ce20]
+	(No symbol) [0x7ff78d6bff8e]
+	(No symbol) [0x7ff78d4b2865]
+	(No symbol) [0x7ff78dacc483]
+	(No symbol) [0x7ff78d2fc6b4]
+	(No symbol) [0x7ff78da794af]
+	(No symbol) [0x7ffce11fdda7]
+	(No symbol) [0x7ffce347ee4c]
+
+
+Result: FAIL
+Passed: 2/11
 Screenshot: C:\Users\ACER\Documents\POC-32-AirQualityHeatmap-ParvathyCR1\POC-32-AirQualityHeatMap-ParvathyCR-Phase3\selenium-test\selenium_artifacts\aether_pulse_e2e.png

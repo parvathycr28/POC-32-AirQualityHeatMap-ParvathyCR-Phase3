@@ -40,3 +40,4 @@ final-evidence/14-screenshots/*
 !final-evidence/14-screenshots/assistant_e2e.png
 !final-evidence/14-screenshots/aether_pulse_e2e.png
 !final-evidence/14-screenshots/data-intelligence-local.png
+.venv-phase3-selenium/

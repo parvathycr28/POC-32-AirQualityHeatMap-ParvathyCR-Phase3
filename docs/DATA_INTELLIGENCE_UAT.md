@@ -9,7 +9,7 @@ Verify that the Phase 3 Data Intelligence page displays approved comparative int
 **Project:** Aether Pulse — Air Quality Heatmap
 **Phase:** Phase 3 — Data Science and Decision Intelligence
 **Feature branch:** `feature/data-intelligence-page`
-**Target integration branch:** `main`
+**Release branch:** phase3-release-candidate
 
 ### Local application URLs
 
@@ -87,9 +87,7 @@ The feature is accepted for the local environment when:
 * Local summary API: HTTP 200
 * Local page rendering: PASS
 
-**Public deployment status:** Separate verification required.
-
-The Render Data Intelligence service was previously suspended. Public availability must not be considered verified until the deployed service is available and the public Data Intelligence page and its API endpoints have been tested successfully.
+**Public deployment status:** PASS — separately verified on 4 November 2026. The feature preview and the production Data Intelligence page were tested after the feature branch was merged into `phase3-release-candidate`. See Section 9 for deployment details and verification results.
 
 **Overall local acceptance:** PASS, based on the recorded local test results.
 
@@ -140,6 +138,51 @@ The screenshot evidence confirms the published result count, eight-city coverage
 
 **Local Data Intelligence certification re-verification:** PASS
 
-**Public Data Intelligence deployment:** Suspended and excluded from this local acceptance result. No public deployment availability or public UAT pass is claimed.
+**Public Data Intelligence deployment:** PASS — feature preview and production deployment verified on 4 November 2026, including 26/26 dedicated Selenium end-to-end checks. The original certification record and tag remain unchanged. See Section 9 for deployment SHAs and verification details.
 
-**Overall local Data Intelligence acceptance:** PASS.
+**Overall Data Intelligence acceptance:** PASS for the recorded local, preview, and production checks.
+
+## 9. Preview and production deployment verification — 4 November 2026
+
+The Data Intelligence feature was first deployed to a separate Render preview service and verified before being merged into the release branch. Following successful preview verification, the feature branch was merged into `phase3-release-candidate` using a normal `--no-ff` merge.
+
+**Deployment details:**
+
+| Item | Verified value |
+|---|---|
+| Feature branch | `feature/data-intelligence-page` |
+| Release branch | `phase3-release-candidate` |
+| Merge commit | `ba37b75406b50ab92f62c5d5ad1f87fab13c0deb` |
+| Preview frontend | `https://poc32-phase3-frontend-preview.onrender.com/data-intelligence` |
+| Production frontend | `https://poc32-phase3-frontend.onrender.com/data-intelligence` |
+| Production frontend commit | `ba37b75406b50ab92f62c5d5ad1f87fab13c0deb` |
+| Production backend commit | `f401c625db9d75d61591cf0ffff2af1e978231c6` |
+| Backend API | `https://poc32-phase3-intelligence-api.onrender.com` |
+
+**Preview and production functional verification:**
+
+| Check | Actual result | Status |
+|---|---|---|
+| Preview Data Intelligence page | Opened successfully | PASS |
+| Production Data Intelligence page | Opened successfully after release deployment | PASS |
+| NO2 city comparison | All 8 cities displayed | PASS |
+| O3 city comparison | All 8 cities displayed | PASS |
+| PM10 city comparison | All 8 cities displayed | PASS |
+| PM2.5 city comparison | All 8 cities displayed | PASS |
+| Pollutant filter | Worked as expected | PASS |
+| City filter | Worked as expected | PASS |
+| Result-specific Assistant handoff | Worked and supporting evidence was retrieved | PASS |
+| Preview backend CORS preflight | HTTP 200; preview origin allowed | PASS |
+| Backend Python compilation | Successful | PASS |
+| Backend automated test suite | 77 tests passed | PASS |
+| Dedicated preview and production Selenium E2E | 26/26 checks passed | PASS |
+
+**Release history preservation:**
+
+The original certification tag `phase3-v1.0.0` continues to point to the original certified commit `0a051fef8ecb2636261b1e951b22c793d3f91500`. The feature branch was merged without rewriting the original commit or tag.
+
+**Verification scope and limitations:**
+
+This record covers the reported preview and production page checks, chart coverage, filters, Assistant handoff, the dedicated Selenium end-to-end test (26/26 checks), CORS verification, compilation, and automated backend tests. Selenium screenshots are saved under `selenium-test/selenium_artifacts/data_intelligence/`. It does not claim a new full application regression, security, performance, or independent data-quality certification. The approved synthetic dataset and Track A methodology remain unchanged.
+
+**Final deployment result:** Preview and production verification PASS, including 26/26 dedicated Selenium end-to-end checks, with documented limitations.

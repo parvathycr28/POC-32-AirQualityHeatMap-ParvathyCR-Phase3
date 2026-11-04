@@ -74,10 +74,9 @@ The endpoint previously returned HTTP 200 with 32 results during local testing. 
 
 ## Final Phase 3 Data Intelligence Validation
 
-The local Data Intelligence API returned 32 results with the expected data version phase3-v1.1 and method version track-a-comparative-v1.0.0. The response count, metadata count, required fields, summary, result metadata, and individual result records were checked against the strict frontend contract. The latest local Data Intelligence UAT passed 7/7 checks. The frontend displays results only after the results and summary payloads pass validation. Public Data Intelligence deployment is suspended; public Data Intelligence validation was not performed. Dataset values are controlled synthetic data and are not real-world measurements or predictive outputs.
+The local Data Intelligence API returned 32 results with the expected data version `phase3-v1.1` and method version `track-a-comparative-v1.0.0`. The response count, metadata count, required fields, summary, result metadata, and individual result records were checked against the strict frontend contract. The latest local Data Intelligence UAT passed 7/7 checks. The frontend displays results only after the results and summary payloads pass validation. The feature preview and production Data Intelligence page were subsequently deployed and functionally verified on 4 November 2026. Dataset values remain controlled synthetic data and are not real-world measurements or predictive outputs.
 
-**Final status:** PASS FOR LOCAL VALIDATED SCOPE; PUBLIC DEPLOYMENT NOT TESTED.
-
+**Final status:** PASS FOR LOCAL VALIDATED SCOPE AND VERIFIED PREVIEW/PRODUCTION DEPLOYMENTS.
 
 ## Latest Re-verification — 2 November 2026
 
@@ -91,4 +90,53 @@ Environment: Local Docker Compose. Frontend: http://localhost:3002/data-intellig
 - Browser validation: 7/7 checks passed.
 - Evidence: latest-results-response.json, latest-summary-response.json, frontend-response-headers.txt.
 
-**Latest local Data Intelligence re-verification: PASS.** Public Data Intelligence deployment remains suspended and was not tested.
+**Latest local Data Intelligence re-verification: PASS.** This 2 November record remains a historical local Docker Compose verification. Subsequent preview and production deployment verification was completed on 4 November 2026; see the deployment verification section below.
+
+## Deployment Verification — 4 November 2026
+
+The Data Intelligence frontend enhancement was first deployed to a separate Render preview service. After successful preview testing, the feature branch was merged into `phase3-release-candidate` using a normal merge commit and deployed to the production frontend service.
+
+### Deployment details
+
+| Item | Verified value |
+|---|---|
+| Feature branch | `feature/data-intelligence-page` |
+| Release branch | `phase3-release-candidate` |
+| Merge commit | `ba37b75406b50ab92f62c5d5ad1f87fab13c0deb` |
+| Preview frontend | `https://poc32-phase3-frontend-preview.onrender.com/data-intelligence` |
+| Production frontend | `https://poc32-phase3-frontend.onrender.com/data-intelligence` |
+| Production frontend commit | `ba37b75406b50ab92f62c5d5ad1f87fab13c0deb` |
+| Backend API | `https://poc32-phase3-intelligence-api.onrender.com` |
+| Backend deployed commit | `f401c625db9d75d61591cf0ffff2af1e978231c6` |
+| Backend deployment branch | `feature/data-intelligence-page` |
+
+### Contract and integration verification
+
+- The preview backend CORS preflight request returned HTTP 200 and explicitly allowed the preview frontend origin.
+- Backend Python compilation completed successfully.
+- The backend automated test suite passed: 77 tests.
+- The preview and production Data Intelligence pages opened successfully.
+- All four pollutant comparison charts displayed eight cities each.
+- Pollutant and city filters worked as expected.
+- Result-specific Assistant handoff worked and supporting evidence was retrieved.
+- Dedicated preview and production Selenium end-to-end test: 26/26 checks passed.
+
+### Approved data and methodology
+
+The deployment continues to use the approved output:
+- Data version: `phase3-v1.1`
+- Method version: `track-a-comparative-v1.0.0`
+- Published results: 32
+- City coverage: 8
+- Pollutant coverage: 4
+- Dataset: controlled synthetic air-quality data
+
+No new analytical track, predictive model, or dataset expansion was introduced by the chart enhancement.
+
+### Certification preservation and limitations
+
+The original certification tag `phase3-v1.0.0` remains attached to commit `0a051fef8ecb2636261b1e951b22c793d3f91500`. The merge did not rewrite the original certification commit or tag.
+
+This deployment verification records the manual checks, dedicated Selenium end-to-end test (26/26 checks passed), and backend checks listed above. Selenium screenshots are saved under `selenium-test/selenium_artifacts/data_intelligence/`. This does not constitute a full application regression or a new independent security, performance, or data-quality certification.
+
+**Deployment verification result:** PASS for the recorded preview and production checks, including 26/26 dedicated Selenium checks, with documented limitations.

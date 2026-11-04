@@ -67,13 +67,13 @@ The recorded latest run passed 62 tests with Gemini disabled locally. Live Gemin
 - Dataset version: `phase3-v1.1`; all published observations are controlled synthetic data.
 - Approved method: `track-a-comparative-v1.0.0`; 32 comparative results.
 - Predictive Intelligence is not approved for this dataset.
-- WorldPop population lookup currently returns HTTP 502 due to an upstream response-format issue.
-- Public Data Intelligence deployment is suspended; use the locally validated page for demonstrations.
+- WorldPop population lookup has previously returned HTTP 502 due to an upstream response-format issue; resolution is not confirmed.
+- The Data Intelligence page is deployed to both preview and production Render targets and has passed the documented manual and dedicated Selenium checks.
 - Do not describe synthetic values as live measurements or use them for health, regulatory, or operational decisions.
 
 ## 7. Deployment and release status
 
-The Operational View and Assistant have public Render targets. Public Assistant Selenium passed 4/4 recorded checks. No fresh Render redeployment is claimed. Public Data Intelligence deployment is suspended; its validation is local only. Fresh-clone validation has been completed with documented limitations. Final evidence review, final Repomix generation, release commit, and certified tag creation remain outstanding.
+The Operational View and Assistant retain their public Render targets. Public Assistant Selenium validation passed 4/4 recorded checks. The Data Intelligence page is deployed to preview and production; dedicated Selenium end-to-end validation passed 26/26 checks across both environments. Backend validation passed 77 tests, and the preview backend CORS preflight returned HTTP 200. Deployment details, commit SHAs, screenshots, and known limitations are recorded in `docs/DEPLOYMENT_VALIDATION_REPORT.md` and `docs/POST_CERTIFICATION_DEPLOYMENT_VERIFICATION.md`. The original certification tag `phase3-v1.0.0` remains unchanged; subsequent deployment updates are recorded separately.
 
 ## 8. Evidence and reports
 

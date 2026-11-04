@@ -9,7 +9,7 @@ Verify that the Phase 3 Data Intelligence page displays approved comparative int
 **Project:** Aether Pulse — Air Quality Heatmap
 **Phase:** Phase 3 — Data Science and Decision Intelligence
 **Feature branch:** `feature/data-intelligence-page`
-**Target integration branch:** `main`
+**Release branch:** `phase3-release-candidate`
 
 ### Local application URLs
 
@@ -74,7 +74,7 @@ The feature is accepted for the local environment when:
 9. The existing Operational dashboard, map, and data retrieval remain operational.
 10. Analytical validation and export verification pass for the approved output.
 
-## 6. Final result
+## 6. Final local UAT result
 
 **Local Data Intelligence UAT:** PASS
 
@@ -87,11 +87,9 @@ The feature is accepted for the local environment when:
 * Local summary API: HTTP 200
 * Local page rendering: PASS
 
-**Public deployment status:** Separate verification required.
-
-The Render Data Intelligence service was previously suspended. Public availability must not be considered verified until the deployed service is available and the public Data Intelligence page and its API endpoints have been tested successfully.
-
 **Overall local acceptance:** PASS, based on the recorded local test results.
+
+Public preview and production deployment verification is recorded separately in Section 10.
 
 ## 7. Final certification re-verification — 2 November 2026
 
@@ -140,34 +138,69 @@ The screenshot evidence confirms the published result count, eight-city coverage
 
 **Local Data Intelligence certification re-verification:** PASS
 
-**Public Data Intelligence deployment:** Suspended and excluded from this local acceptance result. No public deployment availability or public UAT pass is claimed.
+**Preview Data Intelligence deployment:** PASS for the recorded manual browser, functional, and dedicated Selenium checks (26/26) on 4 November 2026.
 
-**Overall local Data Intelligence acceptance:** PASS.
+**Production Data Intelligence deployment:** PASS for the recorded manual browser, functional, and dedicated Selenium checks (26/26) on 4 November 2026.
+
+**Overall Data Intelligence acceptance:** PASS FOR THE RECORDED LOCAL, PREVIEW, AND PRODUCTION TEST SCOPES, WITH DOCUMENTED LIMITATIONS.
 
 ## 9. Consolidated Phase 3 acceptance — 2 November 2026
 
 | Validation area | Latest result | Scope |
 |---|---|---|
 | Operational View regression | 4/4 PASS | Local |
-| Data Intelligence UAT | 7/7 PASS | Local |
+| Data Intelligence UAT | 7/7 PASS | Local re-verification |
 | Assistant Python tests | 62/62 PASS | Local; Gemini disabled |
 | Assistant Selenium | 4/4 PASS | Public Render Assistant |
 | Canonical data validation | PASS | Local |
 | Analytical validation | 24/24 PASS | Local |
-| Public Data Intelligence | NOT TESTED | Deployment suspended |
+| Public Data Intelligence | Not tested at this date | Deployment verification followed on 4 November |
 
 ### Known limitations
 
 - Dataset is controlled synthetic data, not verified real-world observations.
 - Predictive Intelligence is not approved for the current dataset.
-- WorldPop population API currently returns HTTP 502 due to an upstream response-format issue.
-- Public Data Intelligence deployment is suspended; its UAT was performed locally.
+- WorldPop population API returned HTTP 502 due to an upstream response-format issue.
 - Latest local Assistant Python tests used deterministic fallback. Live Gemini generation was verified in an earlier separate test.
+- The 2 November consolidated acceptance did not include public Data Intelligence deployment testing. The later 4 November preview and production deployment verification included a dedicated Selenium run that passed 26/26 checks.
 
 ### Final assessment
 
 Local Operational View, Data Intelligence, analytical validation, and Assistant checks passed within their recorded scopes. Public Assistant Selenium also passed separately.
 
-**Overall Phase 3 UAT: ACCEPTED FOR THE VERIFIED TESTED SCOPE, WITH DOCUMENTED LIMITATIONS.**
+**Overall Phase 3 UAT on 2 November: ACCEPTED FOR THE VERIFIED TESTED SCOPE, WITH DOCUMENTED LIMITATIONS.**
 
-This is not final release certification. Remaining handover-guide requirements must still be completed.
+This is not a claim of full security, performance, or real-world data-quality certification. The later deployment verification is documented separately in Section 10.
+
+## 10. Preview and production deployment UAT — 4 November 2026
+
+Following the approved feature-branch merge, the Data Intelligence page was manually verified in preview and production.
+
+| Verification item | Actual result | Status |
+|---|---|---|
+| Preview Data Intelligence page | Opened successfully | PASS |
+| Production Data Intelligence page | Opened successfully | PASS |
+| NO2 chart | Eight cities displayed | PASS |
+| O3 chart | Eight cities displayed | PASS |
+| PM10 chart | Eight cities displayed | PASS |
+| PM2.5 chart | Eight cities displayed | PASS |
+| Pollutant filter | Worked as expected | PASS |
+| City filter | Worked as expected | PASS |
+| Result-specific Assistant handoff | Returned supporting evidence | PASS |
+| Dedicated preview and production Selenium E2E | 26/26 checks passed | PASS |
+
+**Production frontend commit:** `ba37b75406b50ab92f62c5d5ad1f87fab13c0deb`
+
+**Preview frontend commit:** `28b9ac796a84304ed8dfd183090bd39035d31461`
+
+**Backend deployed commit:** `f401c625db9d75d61591cf0ffff2af1e978231c6`
+
+The preview backend CORS preflight returned HTTP 200. Backend Python compilation passed, and the backend automated test suite passed 77/77 tests.
+
+The manual browser checks were supplemented by a dedicated Selenium end-to-end test covering the preview and production Data Intelligence deployments. All 26 checks passed. Dedicated Selenium screenshots are saved under `selenium-test/selenium_artifacts/data_intelligence/`.
+
+The approved data version remains `phase3-v1.1`, the method version remains `track-a-comparative-v1.0.0`, and the approved output remains 32 comparative results across eight cities and four pollutants.
+
+The controlled synthetic dataset does not establish real-world measurement accuracy, regulatory compliance, health-risk assessment, or predictive capability.
+
+**Preview and production Data Intelligence deployment UAT:** PASS FOR THE RECORDED FUNCTIONAL SCOPE, WITH DOCUMENTED LIMITATIONS.

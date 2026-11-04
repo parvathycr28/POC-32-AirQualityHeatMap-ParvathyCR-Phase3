@@ -63,7 +63,8 @@ A fresh visual regression check was performed after the Data Intelligence backen
 The latest local regression check confirms that the existing Operational View remains accessible and its map, city markers, air-quality data, KPI cards, and navigation continue to work after the Data Intelligence backend refresh.
 
 **Latest Operational View regression:** PASS
-**Public Data Intelligence deployment:** Suspended; not included in this local regression result.
+
+The public Data Intelligence deployment was suspended during the earlier 2 November verification stage. It was subsequently deployed and verified in preview and production on 4 November 2026. See Section 10 for the later deployment checks.
 
 ## 9. Latest API re-verification — 2 November 2026
 
@@ -78,6 +79,35 @@ The containerized operational backend was rechecked during final build validatio
 
 The population request failed because the external WorldPop service returned PHP deprecation output instead of valid JSON, causing a JSON decoding error in the backend. This is an unresolved upstream dependency limitation.
 
-The earlier population lookup PASS is retained as a historical test result and is superseded by this latest API re-verification. The operational dashboard, map, air-quality data, KPI cards, and Data Intelligence navigation passed the latest local regression checks. Public Data Intelligence deployment remains suspended and was not tested.
+The earlier population lookup PASS is retained as a historical test result and is superseded by this latest API re-verification. The operational dashboard, map, air-quality data, KPI cards, and Data Intelligence navigation passed the latest local regression checks.
+
+The public Data Intelligence deployment status was subsequently updated following the preview and production verification on 4 November 2026, documented in Section 10.
 
 **Updated operational regression status:** PASS WITH KNOWN LIMITATION.
+
+## 10. Data Intelligence preview and production verification — 4 November 2026
+
+The Data Intelligence page was manually verified in both preview and production after the approved feature branch was merged into the release branch. A dedicated Selenium end-to-end test was also run against the preview and production deployments.
+
+| Check | Actual result | Status |
+|---|---|---|
+| Preview Data Intelligence page | Opened successfully | PASS |
+| Production Data Intelligence page | Opened successfully | PASS |
+| NO2 comparison chart | Eight cities displayed | PASS |
+| O3 comparison chart | Eight cities displayed | PASS |
+| PM10 comparison chart | Eight cities displayed | PASS |
+| PM2.5 comparison chart | Eight cities displayed | PASS |
+| Pollutant filter | Worked as expected | PASS |
+| City filter | Worked as expected | PASS |
+| Result-specific Assistant handoff | Returned supporting evidence | PASS |
+| Dedicated preview and production Selenium E2E | 26/26 checks passed | PASS |
+
+**Production frontend commit:** `ba37b75406b50ab92f62c5d5ad1f87fab13c0deb`
+
+**Backend deployed commit:** `f401c625db9d75d61591cf0ffff2af1e978231c6`
+
+The manual browser checks were supplemented by the dedicated Selenium end-to-end test, which passed all 26 checks. The Selenium test covers the Data Intelligence deployment flow; it does not replace the separate Operational View regression checks. These results do not constitute a full application regression, security, performance, or real-world data-quality certification.
+
+Dedicated Selenium screenshots are saved under `selenium-test/selenium_artifacts/data_intelligence/`.
+
+**Data Intelligence deployment verification:** PASS WITH DOCUMENTED LIMITATIONS.
