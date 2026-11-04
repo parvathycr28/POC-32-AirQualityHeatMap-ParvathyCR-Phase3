@@ -576,7 +576,25 @@ export default function DataIntelligencePage() {
           a.priority_rank - b.priority_rank
       );
   }, [allResults, pollutant, city, search]);
+  const comparisonGroups = useMemo(() => {
+    const selectedPollutants =
+      pollutant === "all"
+        ? pollutants
+        : [pollutant];
 
+    return selectedPollutants.map((selectedPollutant) => ({
+      pollutant: selectedPollutant,
+      results: allResults
+        .filter(
+          (result) =>
+            result.pollutant === selectedPollutant
+        )
+        .sort(
+          (a, b) =>
+            a.priority_rank - b.priority_rank
+        ),
+    }));
+  }, [allResults, pollutant, pollutants]);
   return (
     <main className="min-h-screen bg-[#030712] px-4 py-8 text-slate-100 sm:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -871,7 +889,139 @@ export default function DataIntelligencePage() {
                 {allResults.length} results
               </p>
             </section>
+            <section className="space-y-5">
+              <div>
+                <h2 className="text-xl font-semibold text-sky-400">
+                  City Comparison
+                </h2>
 
+                <p className="mt-1 text-sm text-slate-400">
+                  Comparison of approved sampled mean values
+                  across the eight cities.
+                </p>
+              </div>
+
+              {comparisonGroups.map((group) => (
+                <article
+                  key={group.pollutant}
+                  className="rounded-xl border border-slate-800 bg-[#0B1117] p-5 sm:p-6"
+                >
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="text-base font-semibold text-slate-100">
+                      {pollutantNames[group.pollutant] ??
+                        group.pollutant}
+                    </h3>
+
+                    <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs text-sky-300">
+                      8 cities
+                    </span>
+                  </div>
+
+                  {group.results.length === 0 ? (
+                    <p className="text-sm text-slate-400">
+                      No comparison data is available.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {group.results.map((result, index) => {
+                        const cityColors = [
+                          "#38BDF8",
+                          "#818CF8",
+                          "#34D399",
+                          "#FBBF24",
+                          "#F472B6",
+                          "#2DD4BF",
+                          "#A78BFA",
+                          "#FB923C",
+                        ];
+
+                        const maximumValue = Math.max(
+                          ...group.results.map(
+                            (item) => item.result_value
+                          ),
+                          0
+                        );
+
+                        const barWidth =
+                          maximumValue > 0
+                            ? Math.max(
+                                2,
+                                (result.result_value /
+                                  maximumValue) *
+                                  100
+                              )
+                            : 0;
+
+                        return (
+                          <div
+                            key={result.result_id}
+                            className="grid grid-cols-1 gap-2 sm:grid-cols-[125px_1fr_105px] sm:items-center sm:gap-4"
+                          >
+                            <div className="flex items-center justify-between gap-2 sm:block">
+                              <span
+                                className="text-sm font-medium"
+                                style={{
+                                  color:
+                                    cityColors[index %
+                                      cityColors.length],
+                                }}
+                              >
+                                {result.entity_name}
+                              </span>
+
+                              <span className="text-xs text-slate-500 sm:hidden">
+                                Rank {result.priority_rank}
+                              </span>
+                            </div>
+
+                            <div className="h-3 overflow-hidden rounded-full bg-slate-800">
+                              <div
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${barWidth}%`,
+                                  backgroundColor:
+                                    cityColors[index %
+                                      cityColors.length],
+                                }}
+                                role="img"
+                                aria-label={`${result.entity_name}: ${result.result_value.toFixed(2)} ${result.result_unit ?? result.metric_unit ?? ""}`}
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between gap-3 text-sm sm:justify-end">
+                              <span className="font-semibold tabular-nums text-slate-100">
+                                {result.result_value.toFixed(2)}
+                              </span>
+
+                              <span className="text-xs text-slate-500">
+                                Rank {result.priority_rank}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-3 text-xs text-slate-500">
+                    <span>
+                      Unit: µg/m³
+                    </span>
+
+                    <span>
+                      Based on 3 sampled observations per city
+                    </span>
+                  </div>
+                </article>
+              ))}
+
+              <p className="text-xs leading-5 text-amber-300">
+                Synthetic descriptive comparison only. These
+                values are not verified real-world air-quality
+                measurements, regulatory assessments, health-risk
+                assessments, or predictions.
+              </p>
+            </section>
             <section className="space-y-4">
               {filteredResults.map((result) => (
                 <article
