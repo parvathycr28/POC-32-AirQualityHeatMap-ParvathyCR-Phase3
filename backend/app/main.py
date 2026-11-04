@@ -25,6 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         FRONTEND_URL,
+        "https://poc32-phase3-frontend-preview.onrender.com",
         "http://localhost:3002",
         "http://127.0.0.1:3002",
     ],
